@@ -4,6 +4,25 @@ import tkinter as tk
 from tkinter import filedialog, messagebox
 import matplotlib.pyplot as plt
 
+def plotCSVData(file_path: str):
+    # Read the CSV file into a DataFrame
+    df = pd.read_csv(file_path)
+    
+    # Check if the required columns are present
+    if not {'XR', 'YR', 'TSS'}.issubset(df.columns):
+        print("CSV file does not contain the required columns: 'XR', 'YR', 'TSS'")
+        return
+    
+    # Create a scatter plot
+    plt.figure(figsize=(10, 6))
+    scatter = plt.scatter(df['XR'], df['YR'], c=df['TSS'], cmap='viridis', marker='o')
+    plt.colorbar(scatter, label='TSS')
+    plt.xlabel('XR')
+    plt.ylabel('YR')
+    plt.title('Scatter plot of XR, YR, and TSS')
+    plt.grid(True)
+    plt.show()
+
 def plotCSVCoils(file_path: str, xr_col: str, yr_col: str, tss1_col: str, tss2_col: str, tss3_col: str):
     # Read the CSV file into a DataFrame
     df = pd.read_csv(file_path)
@@ -22,7 +41,7 @@ def plotCSVCoils(file_path: str, xr_col: str, yr_col: str, tss1_col: str, tss2_c
         plt.ylabel(yr_col)
         plt.title(f'Scatter plot of {xr_col}, {yr_col}, and {tss}')
         plt.grid(True)
-        plt.show()
+    plt.show()
 
 def processFiles(folder_path, xr_col, yr_col, tss1_col, tss2_col, tss3_col, output_file):
     # Initialize an empty list to store DataFrames
@@ -83,6 +102,19 @@ def process():
     processFiles(folder_path, xr_col, yr_col, tss1_col, tss2_col, tss3_col, output_file)
     messagebox.showinfo("Success", f"Data has been merged and saved to {output_file}")
 
+def show_plot():
+    file_path = filedialog.askopenfilename(title="Select a CSV file", filetypes=(("CSV files", "*.csv"), ("All files", "*.*")))
+    if not file_path:
+        return
+
+    xr_col = xr_entry.get()
+    yr_col = yr_entry.get()
+    tss1_col = tss1_entry.get()
+    tss2_col = tss2_entry.get()
+    tss3_col = tss3_entry.get()
+
+    plotCSVCoils(file_path, xr_col, yr_col, tss1_col, tss2_col, tss3_col)
+
 # Create the main window
 root = tk.Tk()
 root.title("CSV Processor")
@@ -128,6 +160,7 @@ output_entry.grid(row=6, column=1, padx=10, pady=5)
 output_entry.insert(0, "combined.csv")  # Default value
 
 tk.Button(root, text="Process Files", command=process, font=font).grid(row=7, column=0, columnspan=3, pady=10)
+tk.Button(root, text="Show Plot", command=show_plot, font=font).grid(row=8, column=0, columnspan=3, pady=10)
 
 # Run the main loop
 root.mainloop()
