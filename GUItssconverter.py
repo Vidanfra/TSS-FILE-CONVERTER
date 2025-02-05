@@ -1,64 +1,11 @@
-import pandas as pd
+import pandas as pd #pip install pandas
 import os
 import tkinter as tk
 from tkinter import filedialog, messagebox
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt #pip install matplotlib
 import numpy as np
 
-
-def plotCSVData(file_path: str):
-    # Read the CSV file into a DataFrame
-    df = pd.read_csv(file_path)
-    
-    # Check if the required columns are present
-    if not {'XR', 'YR', 'TSS'}.issubset(df.columns):
-        print("CSV file does not contain the required columns: 'XR', 'YR', 'TSS'")
-        return
-    
-    # Create a scatter plot
-    plt.figure(figsize=(10, 6))
-    scatter = plt.scatter(df['XR'], df['YR'], c=df['TSS'], cmap='viridis', marker='o')
-    plt.colorbar(scatter, label='TSS')
-    plt.xlabel('XR')
-    plt.ylabel('YR')
-    plt.title('Scatter plot of XR, YR, and TSS')
-    plt.grid(True)
-    plt.show()
-
-def plotCSVCoils(file_path: str, xr_col: str, yr_col: str, tss1_col: str, tss2_col: str, tss3_col: str):
-    # Read the CSV file into a DataFrame
-    df = pd.read_csv(file_path)
-    
-    # Check if the required columns are present
-    if not {xr_col, yr_col, tss1_col, tss2_col, tss3_col}.issubset(df.columns):
-        print(f"CSV file does not contain the required columns: {xr_col}, {yr_col}, {tss1_col}, {tss2_col}, {tss3_col}")
-        return
-    
-    # Create scatter plots for each TSS coil
-    for tss in [tss1_col, tss2_col, tss3_col]:
-        plt.figure(figsize=(10, 6))
-        scatter = plt.scatter(df[xr_col], df[yr_col], c=df[tss], cmap='viridis', marker='o')
-        plt.colorbar(scatter, label=tss)
-        plt.xlabel(xr_col)
-        plt.ylabel(yr_col)
-        plt.title(f'Scatter plot of {xr_col}, {yr_col}, and {tss}')
-        plt.grid(True)
-    plt.show()
-
-def show_plot():
-    file_path = filedialog.askopenfilename(title="Select a CSV file", filetypes=(("CSV files", "*.csv"), ("All files", "*.*")))
-    if not file_path:
-        return
-
-    xr_col = xr_entry.get()
-    yr_col = yr_entry.get()
-    tss1_col = tss1_entry.get()
-    tss2_col = tss2_entry.get()
-    tss3_col = tss3_entry.get()
-
-    plotCSVCoils(file_path, xr_col, yr_col, tss1_col, tss2_col, tss3_col)
-
-def processMap(folder_path, xr_col, yr_col, tss1_col, tss2_col, tss3_col, heading_col, stbd_offset, port_offset):
+def plotMap(folder_path, xr_col, yr_col, tss1_col, tss2_col, tss3_col, heading_col, stbd_offset, port_offset):
     # Initialize an empty list to store DataFrames
     dataframes = []
     missing_headers_files = []
@@ -210,7 +157,7 @@ def show_map():
         messagebox.showerror("Error", "Some fields are required")
         return
 
-    processMap(folder_path, xr_col, yr_col, tss1_col, tss2_col, tss3_col, heading_col, stbd_offset, port_offset)
+    plotMap(folder_path, xr_col, yr_col, tss1_col, tss2_col, tss3_col, heading_col, stbd_offset, port_offset)
 
 def process():
     folder_path = folder_entry.get()
@@ -288,7 +235,7 @@ port_offset_entry.insert(0, "-0.421")  # Default value
 tk.Label(root, text="Output File Name:", font=font).grid(row=8, column=0, padx=10, pady=5, sticky=tk.W)
 output_entry = tk.Entry(root, width=50, font=font)
 output_entry.grid(row=8, column=1, padx=10, pady=5)
-output_entry.insert(0, "combined.csv")  # Default value
+output_entry.insert(0, "combined.txt")  # Default value
 
 tk.Button(root, text="Process Files", command=process, font=font).grid(row=9, column=0, columnspan=3, pady=10)
 tk.Button(root, text="Show Map", command=show_map, font=font).grid(row=9, column=1, columnspan=3, pady=10)
