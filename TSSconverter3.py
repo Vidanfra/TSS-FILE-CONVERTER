@@ -103,7 +103,71 @@ def plotMap(folder_path, xr_col, yr_col, tss1_col, tss2_col, tss3_col, stbd_offs
     plt.title(f'Scatter plot of XR, YR, and TSS coils - Heading: {heading_avg:.2f} degrees')
     plt.grid(True)
     plt.show()
+    
+def plotCoils(folder_path, xr_col, yr_col, tss1_col, tss2_col, tss3_col, stbd_offset, port_offset):
+    # Initialize an empty list to store DataFrames
+    dataframes = []
+    missing_headers_files = []
 
+    # Ensure stbd_offset and port_offset are numeric
+    try:
+        stbd_offset = float(stbd_offset)
+        port_offset = float(port_offset)
+    except ValueError:
+        messagebox.showerror("Error", "stbd_offset and port_offset must be numeric values")
+        return
+    try:
+        xr_col = int(xr_col)
+        yr_col = int(yr_col)
+        tss1_col = int(tss1_col)
+        tss2_col = int(tss2_col)
+        tss3_col = int(tss3_col)
+    except ValueError:
+        messagebox.showerror("Error", "Columns numbers must be integer numeric values")
+        return
+
+    # Loop through all files in the folder
+    for filename in os.listdir(folder_path):
+        if filename.endswith('.ptr'):
+            # Construct the full file path
+            file_path = os.path.join(folder_path, filename)
+            
+            # Read the CSV file
+            df = pd.read_csv(file_path, delimiter=';', header=None)
+
+            if df is None:
+                messagebox.showerror("Error", "Missing folder path. Select it using the Browse button")
+                return
+            # Extract the required columns by their index positions
+            xr = df.iloc[:, xr_col]
+            yr = df.iloc[:, yr_col]
+            tss1 = df.iloc[:, tss1_col]
+            tss2 = df.iloc[:, tss2_col]
+            tss3 = df.iloc[:, tss3_col]
+
+            # Create a DataFrame with the extracted columns
+            df_extracted = pd.DataFrame({
+                'xr': xr,
+                'yr': yr,
+                'tss1': tss1,
+                'tss2': tss2,
+                'tss3': tss3,
+            })
+            
+            plt.figure(figsize=(10, 6))
+            coils_plot = plt.plot(df_extracted['tss1'], color='r', label='TSS1')
+            coils_plot = plt.plot(df_extracted['tss2'], color='b', label='TSS2')
+            coils_plot = plt.plot(df_extracted['tss3'], color='g', label='TSS3')
+            plt.xlabel("Time")
+            plt.ylabel("TSS values [uV]")
+            plt.title(f'TSS values for each coil - {filename}')
+            plt.legend()
+            plt.grid(True)    
+    plt.show() 
+    if missing_headers_files:
+        messagebox.showerror("Error", f"The following files are missing the required headers: {', '.join(missing_headers_files)}")
+        return
+    
 def processFiles(folder_path, xr_col, yr_col, tss1_col, tss2_col, tss3_col, stbd_offset, port_offset, output_file):
     # Initialize an empty list to store DataFrames
     dataframes = []
@@ -259,6 +323,7 @@ def select_folder():
 
 def show_map():
     folder_path = folder_entry.get()
+    print("Folder path: " + folder_path)
     if not folder_path:
         messagebox.showerror("Error", "Missing folder path. Select it using the Browse button")
     xr_col = xr_entry.get()
@@ -274,9 +339,29 @@ def show_map():
         return
 
     plotMap(folder_path, xr_col, yr_col, tss1_col, tss2_col, tss3_col, stbd_offset, port_offset)
+    
+def show_coils():
+    folder_path = folder_entry.get()
+    print("Folder path: " + folder_path)
+    if not folder_path:
+        messagebox.showerror("Error", "Missing folder path. Select it using the Browse button")
+    xr_col = xr_entry.get()
+    yr_col = yr_entry.get()
+    tss1_col = tss1_entry.get()
+    tss2_col = tss2_entry.get()
+    tss3_col = tss3_entry.get()
+    stbd_offset = stbd_offset_entry.get()
+    port_offset = port_offset_entry.get()
+
+    if not folder_path or not xr_col or not yr_col or not tss1_col or not tss2_col or not tss3_col or not stbd_offset or not port_offset:
+        messagebox.showerror("Error", "Some fields are required")
+        return
+
+    plotCoils(folder_path, xr_col, yr_col, tss1_col, tss2_col, tss3_col, stbd_offset, port_offset)
 
 def process():
     folder_path = folder_entry.get()
+    print("Folder path: " + folder_path)
     if not folder_path:
         messagebox.showerror("Error", "Missing folder path. Select it using the Browse button")
     xr_col = xr_entry.get()
@@ -367,6 +452,7 @@ heading_label.grid(row=9, column=0, padx=10, pady=5, sticky=tk.W)
 
 tk.Button(root, text="Process Files", command=lambda: [process(), update_heading(global_heading_avg)], font=font_bold).grid(row=10, column=0, columnspan=3, pady=10, sticky=tk.W)
 tk.Button(root, text="Show Map", command=lambda: [show_map(), update_heading(global_heading_avg)], font=font_bold).grid(row=10, column=1, columnspan=3, pady=10, sticky=tk.W)
+tk.Button(root, text="Show Coils", command=lambda: show_coils(), font=font_bold).grid(row=10, column=2, columnspan=3, pady=10, sticky=tk.W)
 
 # Run the main loop
 root.mainloop()
