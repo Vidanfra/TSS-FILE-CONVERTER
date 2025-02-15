@@ -158,7 +158,7 @@ def plotCoils(folder_path, xr_col, yr_col, tss1_col, tss2_col, tss3_col, stbd_of
             coils_plot = plt.plot(df_extracted['tss1'], color='r', label='TSS1')
             coils_plot = plt.plot(df_extracted['tss2'], color='b', label='TSS2')
             coils_plot = plt.plot(df_extracted['tss3'], color='g', label='TSS3')
-            plt.xlabel("Time")
+            plt.xlabel("Time [sec]")
             plt.ylabel("TSS values [uV]")
             plt.title(f'TSS values for each coil - {filename}')
             plt.legend()
