@@ -154,7 +154,7 @@ def plotCoils(folder_path, xr_col, yr_col, tss1_col, tss2_col, tss3_col, stbd_of
                 'tss3': tss3,
             })
             
-            plt.figure(figsize=(10, 6))
+            plt.figure(num=filename,figsize=(10, 6))
             coils_plot = plt.plot(df_extracted['tss1'], color='r', label='TSS1')
             coils_plot = plt.plot(df_extracted['tss2'], color='b', label='TSS2')
             coils_plot = plt.plot(df_extracted['tss3'], color='g', label='TSS3')
