@@ -224,23 +224,41 @@ def processFiles(folder_path, xr_col, yr_col, tss1_col, tss2_col, tss3_col, stbd
             max_tss2 = tss2.max()
             max_tss3 = tss3.max()
             max_tss = max(max_tss1, max_tss2, max_tss3)
-
-            if max_tss == max_tss1:
-                coil = 1
-                max_index = tss1.idxmax()
-            elif max_tss == max_tss2:
-                coil = 2
-                max_index = tss2.idxmax()
+            
+            min_tss1 = tss1.min()
+            min_tss2 = tss2.min()
+            min_tss3 = tss3.min()
+            min_tss = min(min_tss1, min_tss2, min_tss3)
+            
+            if(abs(max_tss) > abs(min_tss)):
+                abs_max_tss = max_tss
+                if max_tss == max_tss1:
+                    coil = 1
+                    max_index = tss1.idxmax()
+                elif max_tss == max_tss2:
+                    coil = 2
+                    max_index = tss2.idxmax()
+                else:
+                    coil = 3
+                    max_index = tss3.idxmax()
             else:
-                coil = 3
-                max_index = tss3.idxmax()
+                abs_max_tss = min_tss
+                if min_tss == min_tss1:
+                    coil = 1
+                    max_index = tss1.idxmin()
+                elif min_tss == min_tss2:
+                    coil = 2
+                    max_index = tss2.idxmin()
+                else:
+                    coil = 3
+                    max_index = tss3.idxmin()
 
             easting = xr[max_index]
             northing = yr[max_index]
 
             coil_peaks.append({
                 'PTR file': filename,
-                'TSS peak value': max_tss,
+                'TSS peak value': abs_max_tss,
                 'TSS coil': coil,
                 'Easting': easting,
                 'Northing': northing
