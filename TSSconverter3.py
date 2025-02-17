@@ -80,12 +80,12 @@ def plotMap(folder_path, xr_col, yr_col, tss1_col, tss2_col, tss3_col, stbd_offs
     polar_angle = np.radians(heading_avg) 
     
     # Calculate XR and YR for TSS1
-    xr1_col = combined_df['xr'] + stbd_offset * np.sin(polar_angle + np.pi/2)
-    yr1_col = combined_df['yr'] + stbd_offset * np.cos(polar_angle + np.pi/2)
+    xr1_col = combined_df['xr'] + port_offset * np.sin(polar_angle - np.pi/2)
+    yr1_col = combined_df['yr'] + port_offset * np.cos(polar_angle - np.pi/2)
     
     # Calculate XR and YR for TSS3
-    xr3_col = combined_df['xr'] + port_offset * np.sin(polar_angle + np.pi/2)
-    yr3_col = combined_df['yr'] + port_offset * np.cos(polar_angle + np.pi/2)
+    xr3_col = combined_df['xr'] + stbd_offset * np.sin(polar_angle - np.pi/2)
+    yr3_col = combined_df['yr'] + stbd_offset * np.cos(polar_angle - np.pi/2)
     
     #print("TEST: head: ", combined_df[heading_col][10], "polar_angle: ", np.degrees(polar_angle[10]), "angle1: ", np.degrees(polar_angle[10] + np.pi/2), "angle3: ", np.degrees(polar_angle[10] - np.pi/2))
     #print("PORT OFFSET: , ", port_offset, "STBD OFFSET: , ", stbd_offset)
@@ -288,12 +288,12 @@ def processFiles(folder_path, xr_col, yr_col, tss1_col, tss2_col, tss3_col, stbd
     polar_angle = np.radians(heading_avg)
     
     # Calculate XR and YR for TSS1
-    xr1_col = combined_df['xr'] + stbd_offset * np.sin(polar_angle + np.pi/2)
-    yr1_col = combined_df['yr'] + stbd_offset * np.cos(polar_angle + np.pi/2)
+    xr1_col = combined_df['xr'] + port_offset * np.sin(polar_angle - np.pi/2)
+    yr1_col = combined_df['yr'] + port_offset * np.cos(polar_angle - np.pi/2)
     
     # Calculate XR and YR for TSS3
-    xr3_col = combined_df['xr'] + port_offset * np.sin(polar_angle + np.pi/2)
-    yr3_col = combined_df['yr'] + port_offset * np.cos(polar_angle + np.pi/2)
+    xr3_col = combined_df['xr'] + stbd_offset * np.sin(polar_angle - np.pi/2)
+    yr3_col = combined_df['yr'] + stbd_offset * np.cos(polar_angle - np.pi/2)
 
     # Create new DataFrames for each coil
     df_tss1 = pd.DataFrame({'xr': xr1_col, 'yr': yr1_col, 'TSS': combined_df['tss1']})
@@ -434,20 +434,20 @@ yr_entry = tk.Entry(root, width=20, font=font)
 yr_entry.grid(row=2, column=1, padx=10, pady=5, sticky=tk.W)
 yr_entry.insert(0, "3")  # Default value
 
-tk.Label(root, text="Coil 1 Column:", font=font).grid(row=3, column=0, padx=10, pady=5, sticky=tk.W)
+tk.Label(root, text="Coil 1 (port) Column:", font=font).grid(row=3, column=0, padx=10, pady=5, sticky=tk.W)
 tss1_entry = tk.Entry(root, width=20, font=font)
 tss1_entry.grid(row=3, column=1, padx=10, pady=5, sticky=tk.W)
-tss1_entry.insert(0, "12")  # Default value
+tss1_entry.insert(0, "10")  # Default value
 
-tk.Label(root, text="Coil 2 Column:", font=font).grid(row=4, column=0, padx=10, pady=5, sticky=tk.W)
+tk.Label(root, text="Coil 2 (center) Column:", font=font).grid(row=4, column=0, padx=10, pady=5, sticky=tk.W)
 tss2_entry = tk.Entry(root, width=20, font=font)
 tss2_entry.grid(row=4, column=1, padx=10, pady=5, sticky=tk.W)
 tss2_entry.insert(0, "11")  # Default value
 
-tk.Label(root, text="Coil 3 Column:", font=font).grid(row=5, column=0, padx=10, pady=5, sticky=tk.W)
+tk.Label(root, text="Coil 3 (starbord) Column:", font=font).grid(row=5, column=0, padx=10, pady=5, sticky=tk.W)
 tss3_entry = tk.Entry(root, width=20, font=font)
 tss3_entry.grid(row=5, column=1, padx=10, pady=5, sticky=tk.W)
-tss3_entry.insert(0, "10")  # Default value
+tss3_entry.insert(0, "12")  # Default value
 
 tk.Label(root, text="Starbord Offset:", font=font).grid(row=6, column=0, padx=10, pady=5, sticky=tk.W)
 stbd_offset_entry = tk.Entry(root, width=20, font=font)
