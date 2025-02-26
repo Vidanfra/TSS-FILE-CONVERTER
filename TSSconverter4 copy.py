@@ -178,144 +178,21 @@ def plotCoils(folder_path, xr_col, yr_col, tss1_col, tss2_col, tss3_col, stbd_of
         messagebox.showerror("Error", f"The following files are missing the required headers: {', '.join(missing_headers_files)}")
         return
     
-def processFiles(folder_path, xr_col, yr_col, tss1_col, tss2_col, tss3_col, stbd_offset, port_offset, output_file):
-    # Initialize an empty list to store DataFrames
-    dataframes = []
-    missing_headers_files = []
-    coil_peaks = []
+def processFiles(folder_path, tss1_col, tss2_col, tss3_col,output_file):
+    # Extract the data from the PTR and Navigation files in the selected folder
+    coil1_df, coil2_df, coil3_df = extractData(folder_path, tss1_col, tss2_col, tss3_col)
 
-    # Ensure stbd_offset and port_offset are numeric
-    try:
-        stbd_offset = float(stbd_offset)
-        port_offset = float(port_offset)
-    except ValueError:
-        messagebox.showerror("Error", "stbd_offset and port_offset must be numeric values")
-        return
-    try:
-        xr_col = int(xr_col)
-        yr_col = int(yr_col)
-        tss1_col = int(tss1_col)
-        tss2_col = int(tss2_col)
-        tss3_col = int(tss3_col)
-    except ValueError:
-        messagebox.showerror("Error", "Columns numbers must be integer numeric values")
-        return
-
-    # Loop through all files in the folder
-    for filename in os.listdir(folder_path):
-        if filename.endswith('.ptr'):
-            # Construct the full file path
-            file_path = os.path.join(folder_path, filename)
-            
-            # Read the CSV file
-            df = pd.read_csv(file_path, delimiter=';', header=None)
-
-            # Extract the required columns by their index positions
-            xr = df.iloc[:, xr_col]
-            yr = df.iloc[:, yr_col]
-            tss1 = df.iloc[:, tss1_col]
-            tss2 = df.iloc[:, tss2_col]
-            tss3 = df.iloc[:, tss3_col]
-
-            # Create a DataFrame with the extracted columns
-            df_extracted = pd.DataFrame({
-                'xr': xr,
-                'yr': yr,
-                'tss1': tss1,
-                'tss2': tss2,
-                'tss3': tss3,
-            })
-
-            # Append the extracted DataFrame to the list
-            dataframes.append(df_extracted)
-
-            # Find the highest TSS value and corresponding coil and coordinates
-            max_tss1 = tss1.max()
-            max_tss2 = tss2.max()
-            max_tss3 = tss3.max()
-            max_tss = max(max_tss1, max_tss2, max_tss3)
-            
-            min_tss1 = tss1.min()
-            min_tss2 = tss2.min()
-            min_tss3 = tss3.min()
-            min_tss = min(min_tss1, min_tss2, min_tss3)
-            
-            if(abs(max_tss) > abs(min_tss)):
-                abs_max_tss = max_tss
-                if max_tss == max_tss1:
-                    coil = 1
-                    max_index = tss1.idxmax()
-                elif max_tss == max_tss2:
-                    coil = 2
-                    max_index = tss2.idxmax()
-                else:
-                    coil = 3
-                    max_index = tss3.idxmax()
-            else:
-                abs_max_tss = min_tss
-                if min_tss == min_tss1:
-                    coil = 1
-                    max_index = tss1.idxmin()
-                elif min_tss == min_tss2:
-                    coil = 2
-                    max_index = tss2.idxmin()
-                else:
-                    coil = 3
-                    max_index = tss3.idxmin()
-
-            easting = xr[max_index]
-            northing = yr[max_index]
-
-            coil_peaks.append({
-                'PTR file': filename,
-                'TSS peak value': abs_max_tss,
-                'TSS coil': coil,
-                'Easting': easting,
-                'Northing': northing
-            })
-            
+    # Find the absolute maximum TSS value for each coil and its corresponding position
+    coil_peaks = getCoilPeaks(coil1_df, coil2_df, coil3_df)  
     print("Coil peak values:")
     print(coil_peaks)
-    
-    if missing_headers_files:
-        messagebox.showerror("Error", f"The following files are missing the required headers: {', '.join(missing_headers_files)}")
-        return
 
-    # Concatenate all DataFrames into one
-    try:
-        combined_df = pd.concat(dataframes, ignore_index=True)
-    except ValueError:
-        messagebox.showerror("Error", "Missing folder path. Select it using the Browse button")
-        return
-
-    # Calculate XR and YR for TSS2
-    xr2_col = combined_df['xr']
-    yr2_col = combined_df['yr']
-    
-    # Calculate the average heading angle
-    heading_avg = calculate_heading(xr2_col, yr2_col)
-    update_heading(heading_avg)
-    polar_angle = np.radians(heading_avg)
-    
-    # Calculate XR and YR for TSS1
-    xr1_col = combined_df['xr'] + port_offset * np.sin(polar_angle - np.pi/2)
-    yr1_col = combined_df['yr'] + port_offset * np.cos(polar_angle - np.pi/2)
-    
-    # Calculate XR and YR for TSS3
-    xr3_col = combined_df['xr'] + stbd_offset * np.sin(polar_angle - np.pi/2)
-    yr3_col = combined_df['yr'] + stbd_offset * np.cos(polar_angle - np.pi/2)
-
-    # Create new DataFrames for each coil
-    df_tss1 = pd.DataFrame({'xr': xr1_col, 'yr': yr1_col, 'TSS': combined_df['tss1']})
-    df_tss2 = pd.DataFrame({'xr': xr2_col, 'yr': yr2_col, 'TSS': combined_df['tss2']})
-    df_tss3 = pd.DataFrame({'xr': xr3_col, 'yr': yr3_col, 'TSS': combined_df['tss3']})
-    
-    # Concatenate the DataFrames vertically
-    new_df = pd.concat([df_tss1, df_tss2, df_tss3], ignore_index=True) 
+    # Merge the DataFrames into a single DataFrame
+    merged_df = mergeData(coil1_df, coil2_df, coil3_df)
 
     # Save the merged DataFrame to a new CSV file
     output_file_path = os.path.join(folder_path, output_file)
-    new_df.to_csv(output_file_path, index=False)
+    merged_df.to_csv(output_file_path, index=False)
     
     # Save the coil peaks to a new CSV file
     if '.csv' in output_file:
@@ -330,8 +207,54 @@ def processFiles(folder_path, xr_col, yr_col, tss1_col, tss2_col, tss3_col, stbd
         writer.writerow(["PTR file", "TSS peak value", "TSS coil", "Easting", "Northing"])
         for peak in coil_peaks:
             writer.writerow([peak['PTR file'], peak['TSS peak value'], peak['TSS coil'], peak['Easting'], peak['Northing']])
-    
-    return heading_avg
+
+def getCoilPeaks(coil1_df, coil2_df, coil3_df):
+    coil_peaks = []
+    for df in [coil1_df, coil2_df, coil3_df]:
+        max_tss1 = df['TSS1'].max()
+        max_tss2 = df['TSS2'].max()
+        max_tss3 = df['TSS3'].max()
+        max_tss = max(max_tss1, max_tss2, max_tss3)
+        
+        min_tss1 = df['TSS1'].min()
+        min_tss2 = df['TSS2'].min()
+        min_tss3 = df['TSS3'].min()
+        min_tss = min(min_tss1, min_tss2, min_tss3)
+        
+        if(abs(max_tss) > abs(min_tss)):
+            abs_max_tss = max_tss
+            if max_tss == max_tss1:
+                coil = 1
+                max_index = df['TSS1'].idxmax()
+            elif max_tss == max_tss2:
+                coil = 2
+                max_index = df['TSS2'].idxmax()
+            else:
+                coil = 3
+                max_index = df['TSS3'].idxmax()
+        else:
+            abs_max_tss = min_tss
+            if min_tss == min_tss1:
+                coil = 1
+                max_index = df['TSS1'].idxmin()
+            elif min_tss == min_tss2:
+                coil = 2
+                max_index = df['TSS2'].idxmin()
+            else:
+                coil = 3
+                max_index = df['TSS3'].idxmin()
+
+        easting = df['Easting'][max_index]
+        northing = df['Northing'][max_index]
+
+        coil_peaks.append({
+            'TSS peak value': abs_max_tss,
+            'TSS coil': coil,
+            'Easting': easting,
+            'Northing': northing
+        })
+        
+    return coil_peaks
 
 def extractData2(folder_path, tss1_col, tss2_col, tss3_col):
     # Initialize an empty list to store DataFrames
