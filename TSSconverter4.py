@@ -26,6 +26,20 @@ def convert_to_datetime(time_str, format_str='%H%M%S%f'):
 def read_csv_file(file_path, delimiter):
     return pd.read_csv(file_path, delimiter=delimiter)
 
+def get_target_path(folder_path):
+    # Normalize path for cross-platform compatibility
+    folder_path = os.path.normpath(folder_path)
+
+    # Split path into parts
+    path_parts = folder_path.split(os.sep)
+
+    # Find the index of the first part containing "As"
+    for i, part in enumerate(path_parts):
+        if "As" in part:
+            return os.sep.join(path_parts[i-1:])  # Extract from the previous folder onwards
+
+    return folder_path  # Return full path if "As" is not found
+
 def getCoilPeaks(merged_df):
     coil_peaks = []
     for line in merged_df['Filename'].unique():
@@ -240,20 +254,6 @@ def mergeData(merged_coil1_df, merged_coil2_df, merged_coil3_df):
 
     return interleaved_df
 
-def get_target_path(folder_path):
-    # Normalize path for cross-platform compatibility
-    folder_path = os.path.normpath(folder_path)
-
-    # Split path into parts
-    path_parts = folder_path.split(os.sep)
-
-    # Find the index of the first part containing "As"
-    for i, part in enumerate(path_parts):
-        if "As" in part:
-            return os.sep.join(path_parts[i-1:])  # Extract from the previous folder onwards
-
-    return folder_path  # Return full path if "As" is not found
-
 def plotMaps(folder_path, tss1_col, tss2_col, tss3_col):
     # Extract the data from the PTR and Navigation files in the selected folder
     coil1_df, coil2_df, coil3_df = extractData(folder_path, tss1_col, tss2_col, tss3_col)
@@ -267,12 +267,13 @@ def plotMaps(folder_path, tss1_col, tss2_col, tss3_col):
     norm_tss = mcolors.BoundaryNorm(bounds_tss, cmap_tss.N)
 
     # Create scatter plots for TSS values
-    plt.figure(num= target_path + " Magnetic", figsize=(10, 6))
+    plt.figure(num= target_path + " Magnetic", figsize=(7, 6))
     scatter = plt.scatter(merged_df['Easting'], merged_df['Northing'], c=merged_df['TSS'], cmap=cmap_tss, norm=norm_tss, marker='o')
     plt.colorbar(scatter, label="TSS [uV]", boundaries=bounds_tss, ticks=[-500, -25, 0, 25, 50, 75, 500, 10000])
     plt.xlabel("Easting [m]")
     plt.ylabel("Northing [m]")
     plt.title(f'Heatmap of TSS Magnetic Values')
+    plt.gca().set_aspect('equal', adjustable='box')  # Set aspect ratio to 1:1
     plt.grid(True)
 
     # Create a custom Altitude colormap
@@ -281,12 +282,13 @@ def plotMaps(folder_path, tss1_col, tss2_col, tss3_col):
     norm_alt = mcolors.BoundaryNorm(bounds_alt, cmap_alt.N)
 
     # Create scatter plots for flying altitude
-    plt.figure(num=target_path + " Altitude", figsize=(10, 6))
+    plt.figure(num=target_path + " Altitude", figsize=(7, 6))
     scatter = plt.scatter(merged_df['Easting'], merged_df['Northing'], c=merged_df['Alt'], cmap=cmap_alt, norm=norm_alt, marker='o')
     plt.colorbar(scatter, label="Altitude [m]", boundaries=bounds_alt, ticks=[-0.5, -0.25, 0, 0.25, 0.5, 0.75, 1])
     plt.xlabel("Easting [m]")
     plt.ylabel("Northing [m]")
     plt.title(f'Heatmap of TSS Flying Altitude')
+    plt.gca().set_aspect('equal', adjustable='box')  # Set aspect ratio to 1:1
     plt.grid(True)
 
     plt.show()
