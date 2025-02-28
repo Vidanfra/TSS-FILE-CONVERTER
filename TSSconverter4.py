@@ -131,7 +131,7 @@ def extractData(folder_path, tss1_col, tss2_col, tss3_col):
             only_name = filename.split('.')[0]
             if not (only_name + '_Coil_1.csv') or not (only_name + '_Coil_2.csv') or not (only_name + '_Coil_3.csv') in os.listdir(folder_path):
                 continue # Skip this iteration if any of the navigation required files is missing
-            df = read_csv_file(file_path, ';')
+            df = pd.read_csv(file_path, delimiter=';', header=None)
             date = df.iloc[:, DATE_COLUMN_POS]
             time = df.iloc[:, TIME_COLUMN_POS]
             easting = df.iloc[:, EAST_COLUMN_POS]
@@ -184,11 +184,21 @@ def extractData(folder_path, tss1_col, tss2_col, tss3_col):
     nav_coil2_df = pd.concat(nav_coil2_dataframe, ignore_index=True)
     nav_coil3_df = pd.concat(nav_coil3_dataframe, ignore_index=True)
 
+    # Ensure the Time PTR column is formatted correctly
+    ptr_df['Time PTR'] = ptr_df['Time PTR'].astype(str).str.zfill(9)  # Ensure the time string is 9 chars
+    ptr_df['Time PTR'] = ptr_df['Time PTR'].str[:6] + '.' + ptr_df['Time PTR'].str[6:]  # Insert decimal before ms
+
     # Convert the Time columns to datetime objects
-    ptr_df['Time PTR'] = pd.to_datetime(ptr_df['Date PTR'] + ' ' + ptr_df['Time PTR'].astype(str), format='%d.%m.%Y %H%M%S%f')
+    ptr_df['Time PTR'] = pd.to_datetime(ptr_df['Date PTR'] + ' ' + ptr_df['Time PTR'], format='%d.%m.%Y %H%M%S.%f')
     nav_coil1_df['Time'] = pd.to_datetime(nav_coil1_df['Date'] + ' ' + nav_coil1_df['Time'], format='%d/%m/%Y %H:%M:%S.%f')
     nav_coil2_df['Time'] = pd.to_datetime(nav_coil2_df['Date'] + ' ' + nav_coil2_df['Time'], format='%d/%m/%Y %H:%M:%S.%f')
     nav_coil3_df['Time'] = pd.to_datetime(nav_coil3_df['Date'] + ' ' + nav_coil3_df['Time'], format='%d/%m/%Y %H:%M:%S.%f')
+
+    # Ensure both DataFrames are sorted by the key columns
+    ptr_df = ptr_df.sort_values(by='Time PTR')
+    nav_coil1_df = nav_coil1_df.sort_values(by='Time')
+    nav_coil2_df = nav_coil2_df.sort_values(by='Time')
+    nav_coil3_df = nav_coil3_df.sort_values(by='Time')
 
     # Merge the DataFrames based on the closest time in the navigation data to the PTR data
     merged_coil1_df = pd.merge_asof(ptr_df, nav_coil1_df, left_on='Time PTR', right_on='Time', direction='nearest')
@@ -258,7 +268,11 @@ def plotMaps(folder_path, tss1_col, tss2_col, tss3_col):
     # Extract the data from the PTR and Navigation files in the selected folder
     coil1_df, coil2_df, coil3_df = extractData(folder_path, tss1_col, tss2_col, tss3_col)
     merged_df = mergeData(coil1_df, coil2_df, coil3_df)
+
+    print("Merged DataFrame:")
+    print(merged_df[merged_df['Filename'] == merged_df['Filename'][0]])
     
+    # Get the target path for the output files
     target_path = get_target_path(folder_path)
 
     # Create a custom TSS colormap
