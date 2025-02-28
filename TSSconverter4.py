@@ -412,7 +412,7 @@ print("TSS Converter running...")
 
 # Create the main window
 root = tk.Tk()
-root.title("TSS Converter")
+root.title("TSS Converter 4")
 
 # Set the font size
 font = ("Helvetica", 14)
@@ -436,7 +436,7 @@ tk.Button(root, text="Browse", command=select_folder, font=font_bold).grid(row=0
 tk.Label(root, text="Coil 1 (port) Column PTR file:", font=font).grid(row=3, column=0, padx=10, pady=5, sticky=tk.W)
 tss1_entry = tk.Entry(root, width=20, font=font)
 tss1_entry.grid(row=3, column=1, padx=10, pady=5, sticky=tk.W)
-tss1_entry.insert(0, "10")  # Default value
+tss1_entry.insert(0, "12")  # Default value
 
 tk.Label(root, text="Coil 2 (center) Column PTR file:", font=font).grid(row=4, column=0, padx=10, pady=5, sticky=tk.W)
 tss2_entry = tk.Entry(root, width=20, font=font)
@@ -446,7 +446,7 @@ tss2_entry.insert(0, "11")  # Default value
 tk.Label(root, text="Coil 3 (starbord) Column PTR file:", font=font).grid(row=5, column=0, padx=10, pady=5, sticky=tk.W)
 tss3_entry = tk.Entry(root, width=20, font=font)
 tss3_entry.grid(row=5, column=1, padx=10, pady=5, sticky=tk.W)
-tss3_entry.insert(0, "12")  # Default value
+tss3_entry.insert(0, "10")  # Default value
 
 tk.Label(root, text="Output File Name:", font=font).grid(row=8, column=0, padx=10, pady=5, sticky=tk.W)
 output_entry = tk.Entry(root, width=50, font=font)
