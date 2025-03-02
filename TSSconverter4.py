@@ -1,15 +1,13 @@
 import pandas as pd #pip install pandas
 import os
 import tkinter as tk
-from tkinter import filedialog, messagebox, StringVar
+from tkinter import filedialog, messagebox
 import matplotlib.pyplot as plt #pip install matplotlib
 import matplotlib.colors as mcolors
 import numpy as np
 import csv
 from datetime import datetime
-
-# Global variable to display ROV Heading
-global_heading_avg = 0.0  # Initialize with a default value
+import scipy.stats as st #pip install scipy
 
 # Maximum time difference in seconds
 MAX_TIME_DIFF_SEC = 0.15
@@ -111,6 +109,13 @@ def calculateHeading(merged_df):
         heading_error_avg = heading_avg - course_avg
         line_direction = round(heading_avg / 5) * 5  # Round to nearest 5 degrees
 
+        # Compute circular standard deviation (in radians) and then convert to degrees.
+        heading_std_rad = st.circstd(np.radians(heading_deg), high=2*np.pi, low=0)
+        heading_std = np.degrees(heading_std_rad)
+
+        course_std_rad = st.circstd(np.radians(course), high=2*np.pi, low=0)
+        course_std = np.degrees(course_std_rad)
+
         # Store values in a dictionary
         attitude_list.append({
             'Filename': line,
@@ -118,8 +123,8 @@ def calculateHeading(merged_df):
             'Heading Avg': heading_avg,
             'Course Avg': course_avg,
             'Heading Error Avg': heading_error_avg,
-            'Heading Std': heading_deg.std(),
-            'Course Std': course.std(),
+            'Heading Std': heading_std,
+            'Course Std': course_std,
             'Heading Error Std': heading_error.std(),
             'Heading': heading_deg.tolist(),
             'Course': course.tolist(),
@@ -362,7 +367,7 @@ def plotMaps(folder_path, tss1_col, tss2_col, tss3_col):
     plt.xlabel("Easting [m]")
     plt.ylabel("Northing [m]")
     plt.suptitle(f"Heatmap of TSS Magnetic Values")
-    plt.title(f"Survey Direction: {attitude_df['Survey Direction'].iloc[0]:.0f} º - Avg Heading vs Course Error: {attitude_df['Global Heading Error Avg'].iloc[0]:.2f} º")
+    plt.title(f"Survey Direction: {attitude_df['Survey Direction'].iloc[0]:.0f} º")
     plt.gca().set_aspect('equal', adjustable='box')  # Set aspect ratio to 1:1
     plt.grid(True)
 
@@ -378,7 +383,7 @@ def plotMaps(folder_path, tss1_col, tss2_col, tss3_col):
     plt.xlabel("Easting [m]")
     plt.ylabel("Northing [m]")
     plt.suptitle(f'Heatmap of TSS Flying Altitude')
-    plt.title(f"Survey Direction: {attitude_df['Survey Direction'].iloc[0]:.0f} º - Avg Heading vs Course Error: {attitude_df['Global Heading Error Avg'].iloc[0]:.2f} º")
+    plt.title(f"Survey Direction: {attitude_df['Survey Direction'].iloc[0]:.0f} º")
     plt.gca().set_aspect('equal', adjustable='box')  # Set aspect ratio to 1:1
     plt.grid(True)
 
@@ -452,6 +457,8 @@ def plotHeading(folder_path, tss1_col, tss2_col, tss3_col):
     headings_err = headings_err.dropna()  # Drop NaN values
     headings_err = pd.concat([headings_err, headings_err, headings_err], axis=0).sort_index(kind='merge')
     headings_err = headings_err.abs()  # Take the absolute value
+    # Normalize the error to be between 0 and 90 degrees (for color scaling, not in the table)
+    headings_err = np.where(headings_err > 90, np.abs(180 - headings_err), headings_err)
 
     # Scatter plot with color scale
     fig, ax = plt.subplots(num= target_path + " Heading Error", figsize=(7, 6))
@@ -459,7 +466,7 @@ def plotHeading(folder_path, tss1_col, tss2_col, tss3_col):
 
     # Add colorbar
     cbar = plt.colorbar(scatter, ax=ax)
-    cbar.set_label("Heading Error (°)", fontsize=12)
+    cbar.set_label("Abs Heading Error (°)", fontsize=12)
 
     ax.set_xlabel("Easting [m]")
     ax.set_ylabel("Northing [m]")
