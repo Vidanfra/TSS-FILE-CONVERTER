@@ -466,13 +466,29 @@ def plotHeading(folder_path, tss1_col, tss2_col, tss3_col):
 
     # Add colorbar
     cbar = plt.colorbar(scatter, ax=ax)
-    cbar.set_label("Abs Heading Error (°)", fontsize=12)
+    cbar.set_label("Abs Heading Error [0º, 90º]", fontsize=12)
 
     ax.set_xlabel("Easting [m]")
     ax.set_ylabel("Northing [m]")
     ax.set_aspect('equal', adjustable='box')  # Set aspect ratio to 1:1
     ax.set_title("Scatter Plot of Heading Error")
     ax.grid(True, linestyle='--', alpha=0.6)
+
+     # 🔹 Add arrows for each line
+    for line in merged_df['Filename'].unique():
+        df_line = merged_df[merged_df['Filename'] == line].copy()
+        
+        if len(df_line) < 2:
+            continue  # Skip if not enough points
+
+        # Get first two points
+        x1, y1 = df_line.iloc[1][['Easting', 'Northing']]
+        x2, y2 = df_line.iloc[len(df_line)-2][['Easting', 'Northing']]
+        dx = x2 - x1
+        dy = y2 - y1 
+
+        # Draw arrow at the first point
+        ax.arrow(x1, y1, dx, dy, head_width=0.5, head_length=0.5, fc='black', ec='black')
 
     # Select the columns to display
     columns_to_display = [
