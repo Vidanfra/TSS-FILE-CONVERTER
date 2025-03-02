@@ -20,6 +20,9 @@ TIME_COLUMN_POS = 1
 EAST_COLUMN_POS = 2
 NORTH_COLUMN_POS = 3
 
+# Maximum angle error for heading and course in degrees
+MAX_ANGLE_ERROR = 20
+
 def convert_to_datetime(time_str, format_str='%H%M%S%f'):
     return datetime.strptime(str(time_str), format_str)
 
@@ -65,6 +68,78 @@ def getCoilPeaks(merged_df):
         })
         
     return coil_peaks
+
+def circular_mean(angles):
+    """Computes the circular mean of angles in degrees."""
+    angles_rad = np.radians(angles)
+    mean_x = np.mean(np.cos(angles_rad))
+    mean_y = np.mean(np.sin(angles_rad))
+    mean_angle = np.degrees(np.arctan2(mean_y, mean_x)) % 360  # Ensure 0-360 range
+    return mean_angle
+
+def calculateHeading(merged_df):
+    attitude_list = []  # Use a list to store dictionaries
+
+    # Loop through unique filenames
+    for line in merged_df['Filename'].unique():
+        df = merged_df[merged_df['Filename'] == line].copy()  # Copy to avoid SettingWithCopyWarning
+        
+        if len(df) < 2:
+            continue  # If only one row, we cannot calculate diff()
+
+        # Filter the data for Coil 2
+        df_coil2 = df[df['Coil'] == 2]
+
+        # Compute differences for course calculation
+        easting_diff = df_coil2['Easting'].diff()
+        northing_diff = df_coil2['Northing'].diff()
+
+        # Compute course angle (in degrees) referenced to North:
+        # Using arctan2(easting_diff, northing_diff) returns the bearing with North as 0°.
+        course = (np.degrees(np.arctan2(easting_diff, northing_diff)) + 360) % 360
+        course = course.bfill()  # Handle NaN in first row
+
+        # Convert gyro heading to degrees (assumed already as compass North values)
+        heading_deg = df['Gyro'] % 360  # Ensure within 0-360
+
+        # Compute heading error (ensure result is between -180 and 180)
+        heading_error = (heading_deg - course + 180) % 360 - 180
+
+        # Use circular mean for headings and courses
+        heading_avg = circular_mean(heading_deg)
+        course_avg = circular_mean(course)
+        heading_error_avg = heading_avg - course_avg
+        line_direction = round(heading_avg / 5) * 5  # Round to nearest 5 degrees
+
+        # Store values in a dictionary
+        attitude_list.append({
+            'Filename': line,
+            'Line Direction': line_direction,
+            'Heading Avg': heading_avg,
+            'Course Avg': course_avg,
+            'Heading Error Avg': heading_error_avg,
+            'Heading Std': heading_deg.std(),
+            'Course Std': course.std(),
+            'Heading Error Std': heading_error.std(),
+            'Heading': heading_deg.tolist(),
+            'Course': course.tolist(),
+            'Heading Error': heading_error.tolist(),     
+        })
+
+
+    # Convert list of dictionaries to a DataFrame
+    attitude_df = pd.DataFrame(attitude_list)
+
+    if not attitude_df.empty:
+        # Get the most frequent survey direction
+        survey_direction = attitude_df['Line Direction'].mode()
+        attitude_df['Survey Direction'] = survey_direction[0] if not survey_direction.empty else np.nan
+
+        # Calculate global averages using circular mean
+        attitude_df['Global Heading Avg'] = circular_mean(attitude_df['Heading Avg'])
+        attitude_df['Global Heading Error Avg'] = attitude_df['Heading Error Avg'].mean()
+
+    return attitude_df
 
 def extractData(folder_path, tss1_col, tss2_col, tss3_col):
     ptr_dataframe = []
@@ -269,9 +344,9 @@ def plotMaps(folder_path, tss1_col, tss2_col, tss3_col):
     coil1_df, coil2_df, coil3_df = extractData(folder_path, tss1_col, tss2_col, tss3_col)
     merged_df = mergeData(coil1_df, coil2_df, coil3_df)
 
-    print("Merged DataFrame:")
-    print(merged_df[merged_df['Filename'] == merged_df['Filename'][0]])
-    
+    # Calculate the average heading for each line
+    attitude_df = calculateHeading(merged_df)
+
     # Get the target path for the output files
     target_path = get_target_path(folder_path)
 
@@ -286,7 +361,8 @@ def plotMaps(folder_path, tss1_col, tss2_col, tss3_col):
     plt.colorbar(scatter, label="TSS [uV]", boundaries=bounds_tss, ticks=[-500, -25, 0, 25, 50, 75, 500, 10000])
     plt.xlabel("Easting [m]")
     plt.ylabel("Northing [m]")
-    plt.title(f'Heatmap of TSS Magnetic Values')
+    plt.suptitle(f"Heatmap of TSS Magnetic Values")
+    plt.title(f"Survey Direction: {attitude_df['Survey Direction'].iloc[0]:.0f} º - Avg Heading vs Course Error: {attitude_df['Global Heading Error Avg'].iloc[0]:.2f} º")
     plt.gca().set_aspect('equal', adjustable='box')  # Set aspect ratio to 1:1
     plt.grid(True)
 
@@ -301,7 +377,8 @@ def plotMaps(folder_path, tss1_col, tss2_col, tss3_col):
     plt.colorbar(scatter, label="Altitude [m]", boundaries=bounds_alt, ticks=[-0.5, -0.25, 0, 0.25, 0.5, 0.75, 1])
     plt.xlabel("Easting [m]")
     plt.ylabel("Northing [m]")
-    plt.title(f'Heatmap of TSS Flying Altitude')
+    plt.suptitle(f'Heatmap of TSS Flying Altitude')
+    plt.title(f"Survey Direction: {attitude_df['Survey Direction'].iloc[0]:.0f} º - Avg Heading vs Course Error: {attitude_df['Global Heading Error Avg'].iloc[0]:.2f} º")
     plt.gca().set_aspect('equal', adjustable='box')  # Set aspect ratio to 1:1
     plt.grid(True)
 
@@ -355,7 +432,99 @@ def plotCoils(folder_path, tss1_col, tss2_col, tss3_col):
         plt.legend()
         plt.grid(True)    
     plt.show() 
-    
+
+def plotHeading(folder_path, tss1_col, tss2_col, tss3_col):
+    # Extract the data from the PTR and Navigation files in the selected folder
+    coil1_df, coil2_df, coil3_df = extractData(folder_path, tss1_col, tss2_col, tss3_col)
+
+    # Merge the DataFrames into a single DataFrame
+    merged_df = mergeData(coil1_df, coil2_df, coil3_df)
+
+    # Calculate the average heading for each line
+    attitude_df = calculateHeading(merged_df)
+
+    # Get the target path for the output files
+    target_path = get_target_path(folder_path)
+
+    # Scatter plot with color scale
+    headings_err = np.concatenate(attitude_df['Heading Error'].values)  # Flatten the list of lists into a 1D NumPy array
+    headings_err = pd.Series(headings_err)  # Convert back to a pandas Series for NaN handling
+    headings_err = headings_err.dropna()  # Drop NaN values
+    headings_err = pd.concat([headings_err, headings_err, headings_err], axis=0).sort_index(kind='merge')
+    headings_err = headings_err.abs()  # Take the absolute value
+
+    # Scatter plot with color scale
+    fig, ax = plt.subplots(num= target_path + " Heading Error", figsize=(7, 6))
+    scatter = ax.scatter(merged_df['Easting'], merged_df['Northing'], c= headings_err, cmap='coolwarm', vmin=0, vmax= MAX_ANGLE_ERROR, edgecolors='k')
+
+    # Add colorbar
+    cbar = plt.colorbar(scatter, ax=ax)
+    cbar.set_label("Heading Error (°)", fontsize=12)
+
+    ax.set_xlabel("Easting [m]")
+    ax.set_ylabel("Northing [m]")
+    ax.set_aspect('equal', adjustable='box')  # Set aspect ratio to 1:1
+    ax.set_title("Scatter Plot of Heading Error")
+    ax.grid(True, linestyle='--', alpha=0.6)
+
+    # Select the columns to display
+    columns_to_display = [
+        "Filename", 
+        "Line Direction",
+        "Heading Avg", 
+        "Course Avg", 
+        "Heading Error Avg", 
+        "Heading Std", 
+        "Course Std"
+    ]
+    table_data = attitude_df[columns_to_display].copy()
+
+    # Round numerical values for better readability
+    for col in columns_to_display[1:]:
+        table_data[col] = table_data[col].round(2)
+
+    # Define function for color scaling
+    def get_color(value, max_error_angle = MAX_ANGLE_ERROR):
+        """Returns a color based on the value (white near 0, red near ±X)."""
+        abs_val = min(abs(value), max_error_angle) 
+        red_intensity = int((abs_val / max_error_angle) * 255)
+        red = 255
+        green = 255 - red_intensity
+        blue = 255 - red_intensity
+        return f"#{red:02X}{green:02X}{blue:02X}"
+
+    # Create figure
+    num_rows = len(table_data)
+    fig, ax = plt.subplots(num= target_path + " Heading Stats",figsize=(10, num_rows * 0.5 + 2))
+    ax.axis('off')  # Hide the axes
+    ax.axis('tight')
+
+    # Create table
+    table = ax.table(
+        cellText=table_data.values,
+        colLabels=table_data.columns,
+        loc='center',
+        cellLoc='center',
+        cellColours=[["white"] * len(columns_to_display) for _ in range(num_rows)]  # Default colors
+    )
+
+    # Apply color formatting to specific columns
+    color_cols = ["Heading Error Avg", "Heading Std", "Course Std"]
+    for row_idx, row in table_data.iterrows():
+        for col_idx, col in enumerate(columns_to_display):
+            if col in color_cols:
+                cell = table[row_idx + 1, col_idx]  # Row +1 because index 0 is for headers
+                cell.set_facecolor(get_color(row[col]))
+
+    table.auto_set_font_size(False)
+    table.set_fontsize(10)
+    table.scale(1, 1.5)  # Adjust table scaling
+
+    plt.title("Heading and Course Statistics per Line [º]")
+
+    # Show plot
+    plt.show()
+
 def processFiles(folder_path, tss1_col, tss2_col, tss3_col, output_file):
     # Extract the data from the PTR and Navigation files in the selected folder
     coil1_df, coil2_df, coil3_df = extractData(folder_path, tss1_col, tss2_col, tss3_col)
@@ -391,11 +560,29 @@ def select_folder():
     folder_entry.delete(0, tk.END)
     folder_entry.insert(0, folder_path)
 
+def show_heading():
+    folder_path = folder_entry.get()
+    print("Folder path: " + folder_path)
+    if not folder_path:
+        messagebox.showerror("Error", "Missing folder path. Select it using the Browse button")
+        return
+    
+    tss1_col = tss1_entry.get()
+    tss2_col = tss2_entry.get()
+    tss3_col = tss3_entry.get()
+
+    if not folder_path or not tss1_col or not tss2_col or not tss3_col:
+        messagebox.showerror("Error", "Some fields are required")
+        return
+    
+    plotHeading(folder_path, tss1_col, tss2_col, tss3_col)
+
 def show_maps():
     folder_path = folder_entry.get()
     print("Folder path: " + folder_path)
     if not folder_path:
         messagebox.showerror("Error", "Missing folder path. Select it using the Browse button")
+        return
 
     tss1_col = tss1_entry.get()
     tss2_col = tss2_entry.get()
@@ -450,14 +637,6 @@ root.title("TSS Converter 4")
 font = ("Helvetica", 14)
 font_bold = ("Helvetica", 14, "bold")
 
-# Define a StringVar to hold the heading value
-heading_var = StringVar()
-heading_var.set(f"ROV Heading: {global_heading_avg:.2f} degrees")
-
-# Function to update the heading value
-def update_heading(new_heading):
-    heading_var.set(f"ROV Heading: {new_heading:.2f} degrees")
-
 # Create and place the widgets
 tk.Label(root, text="Select Folder:", font=font).grid(row=0, column=0, padx=10, pady=5, sticky=tk.W)
 folder_entry = tk.Entry(root, width=50, font=font)
@@ -485,13 +664,11 @@ output_entry = tk.Entry(root, width=50, font=font)
 output_entry.grid(row=8, column=1, padx=10, pady=5, sticky=tk.W)
 output_entry.insert(0, "BOSSE_XXX_A.txt")  # Default value
 
-# Label to display the heading value
-heading_label = tk.Label(root, textvariable=heading_var, font=font_bold)
-heading_label.grid(row=9, column=0, padx=10, pady=5, sticky=tk.W)
-
-tk.Button(root, text="Process Files", command=lambda: [process(), update_heading(global_heading_avg)], font=font_bold).grid(row=10, column=0, columnspan=3, pady=10, sticky=tk.W)
-tk.Button(root, text="Show Map", command=lambda: [show_maps(), update_heading(global_heading_avg)], font=font_bold).grid(row=10, column=1, columnspan=3, pady=10, sticky=tk.W)
+tk.Button(root, text="Heading QC", command=lambda: show_heading(), font=font_bold).grid(row=9, column=0, columnspan=3, pady=10, sticky=tk.W)
+tk.Button(root, text="Process Files", command=lambda: process(), font=font_bold).grid(row=10, column=0, columnspan=3, pady=10, sticky=tk.W)
+tk.Button(root, text="Show Map", command=lambda: show_maps(), font=font_bold).grid(row=10, column=1, columnspan=3, pady=10, sticky=tk.W)
 tk.Button(root, text="Show Coils", command=lambda: show_coils(), font=font_bold).grid(row=10, column=2, columnspan=3, pady=10, sticky=tk.W)
+
 
 # Run the main loop
 root.mainloop()
