@@ -654,7 +654,7 @@ print("TSS Converter running...")
 
 # Create the main window
 root = tk.Tk()
-root.title("TSS Converter 4")
+root.title("TSS Converter 4 (beta)")
 
 # Set the font size
 font = ("Helvetica", 14)

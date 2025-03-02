@@ -8,5 +8,5 @@ IF %ERRORLEVEL% NEQ 0 (
 )
 
 echo "Creating executable file from python script..."
-pyinstaller --onefile TSSconverter3.py
+pyinstaller --onefile TSSconverter4.py
 echo "Executable file created successfully!"
