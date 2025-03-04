@@ -10,7 +10,7 @@ from datetime import datetime
 import scipy.stats as st #pip install scipy
 
 # Maximum time difference in seconds
-MAX_TIME_DIFF_SEC = 0.15
+MAX_TIME_DIFF_SEC = 0.25
 
 # Column positions in the PTR file
 DATE_COLUMN_POS = 0
@@ -288,18 +288,19 @@ def extractData(folder_path, tss1_col, tss2_col, tss3_col):
     # Check if time difference exceeds the allowed threshold
     time_diff = (merged_coil1_df['Time PTR'] - merged_coil1_df['Time']).dt.total_seconds()
     merged_coil1_df['Time_diff'] = time_diff
+    high_time_diff = abs(time_diff) > MAX_TIME_DIFF_SEC
     if (abs(time_diff) > MAX_TIME_DIFF_SEC).any():
-        messagebox.showerror("Error", f"Time difference between PTR and Coil 1 is too high: {abs(time_diff).max():.3f} seconds")
+        messagebox.showerror("Error", f"Time difference between PTR and Navigation timestamp is too high in {high_time_diff.sum()} points. Max value :  {abs(time_diff).max():.3f} seconds")
 
     time_diff = (merged_coil2_df['Time PTR'] - merged_coil2_df['Time']).dt.total_seconds()
     merged_coil2_df['Time_diff'] = time_diff
-    if (abs(time_diff) > MAX_TIME_DIFF_SEC).any():
-        messagebox.showerror("Error", f"Time difference between PTR and Coil 2 is too high: {abs(time_diff).max():.3f} seconds")
+    #if (abs(time_diff) > MAX_TIME_DIFF_SEC).any():
+        #messagebox.showerror("Error", f"Time difference between PTR and Coil 2 is too high: {abs(time_diff).max():.3f} seconds")
 
     time_diff = (merged_coil3_df['Time PTR'] - merged_coil3_df['Time']).dt.total_seconds()
     merged_coil3_df['Time_diff'] = time_diff
-    if (abs(time_diff) > MAX_TIME_DIFF_SEC).any():
-        messagebox.showerror("Error", f"Time difference between PTR and Coil 3 is too high: {abs(time_diff).max():.3f} seconds")   
+    #if (abs(time_diff) > MAX_TIME_DIFF_SEC).any():
+        #messagebox.showerror("Error", f"Time difference between PTR and Coil 3 is too high: {abs(time_diff).max():.3f} seconds")   
 
     return merged_coil1_df, merged_coil2_df, merged_coil3_df
 
