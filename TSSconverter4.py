@@ -17,6 +17,9 @@ DATE_COLUMN_POS = 0
 TIME_COLUMN_POS = 1
 EAST_COLUMN_POS = 2
 NORTH_COLUMN_POS = 3
+COLUMN_COIL_1_DEFAULT = 10
+COLUMN_COIL_2_DEFAULT = 11
+COLUMN_COIL_3_DEFAULT = 12
 
 # Maximum angle error for heading and course in degrees
 MAX_ANGLE_ERROR = 20
@@ -222,10 +225,10 @@ def extractData(folder_path, tss1_col, tss2_col, tss3_col):
 
             df_extracted = pd.DataFrame({
                 'Filename': filename,
-                'Date PTR': date,
-                'Time PTR': time,
-                'Easting PTR': easting,
-                'Northing PTR': northing,
+                'Date_PTR': date,
+                'Time_PTR': time,
+                'Easting_PTR': easting,
+                'Northing_PTR': northing,
                 'TSS1': tss1,
                 'TSS2': tss2,
                 'TSS3': tss3,
@@ -265,39 +268,39 @@ def extractData(folder_path, tss1_col, tss2_col, tss3_col):
     nav_coil3_df = pd.concat(nav_coil3_dataframe, ignore_index=True)
 
     # Ensure the Time PTR column is formatted correctly
-    ptr_df['Time PTR'] = ptr_df['Time PTR'].astype(str).str.zfill(9)  # Ensure the time string is 9 chars
-    ptr_df['Time PTR'] = ptr_df['Time PTR'].str[:6] + '.' + ptr_df['Time PTR'].str[6:]  # Insert decimal before ms
+    ptr_df['Time_PTR'] = ptr_df['Time_PTR'].astype(str).str.zfill(9)  # Ensure the time string is 9 chars
+    ptr_df['Time_PTR'] = ptr_df['Time_PTR'].str[:6] + '.' + ptr_df['Time_PTR'].str[6:]  # Insert decimal before ms
 
     # Convert the Time columns to datetime objects
-    ptr_df['Time PTR'] = pd.to_datetime(ptr_df['Date PTR'] + ' ' + ptr_df['Time PTR'], format='%d.%m.%Y %H%M%S.%f')
+    ptr_df['Time_PTR'] = pd.to_datetime(ptr_df['Date_PTR'] + ' ' + ptr_df['Time_PTR'], format='%d.%m.%Y %H%M%S.%f')
     nav_coil1_df['Time'] = pd.to_datetime(nav_coil1_df['Date'] + ' ' + nav_coil1_df['Time'], format='%d/%m/%Y %H:%M:%S.%f')
     nav_coil2_df['Time'] = pd.to_datetime(nav_coil2_df['Date'] + ' ' + nav_coil2_df['Time'], format='%d/%m/%Y %H:%M:%S.%f')
     nav_coil3_df['Time'] = pd.to_datetime(nav_coil3_df['Date'] + ' ' + nav_coil3_df['Time'], format='%d/%m/%Y %H:%M:%S.%f')
 
     # Ensure both DataFrames are sorted by the key columns
-    ptr_df = ptr_df.sort_values(by='Time PTR')
+    ptr_df = ptr_df.sort_values(by='Time_PTR')
     nav_coil1_df = nav_coil1_df.sort_values(by='Time')
     nav_coil2_df = nav_coil2_df.sort_values(by='Time')
     nav_coil3_df = nav_coil3_df.sort_values(by='Time')
 
     # Merge the DataFrames based on the closest time in the navigation data to the PTR data
-    merged_coil1_df = pd.merge_asof(ptr_df, nav_coil1_df, left_on='Time PTR', right_on='Time', direction='nearest')
-    merged_coil2_df = pd.merge_asof(ptr_df, nav_coil2_df, left_on='Time PTR', right_on='Time', direction='nearest')
-    merged_coil3_df = pd.merge_asof(ptr_df, nav_coil3_df, left_on='Time PTR', right_on='Time', direction='nearest')
+    merged_coil1_df = pd.merge_asof(ptr_df, nav_coil1_df, left_on='Time_PTR', right_on='Time', direction='nearest')
+    merged_coil2_df = pd.merge_asof(ptr_df, nav_coil2_df, left_on='Time_PTR', right_on='Time', direction='nearest')
+    merged_coil3_df = pd.merge_asof(ptr_df, nav_coil3_df, left_on='Time_PTR', right_on='Time', direction='nearest')
 
     # Check if time difference exceeds the allowed threshold
-    time_diff = (merged_coil1_df['Time PTR'] - merged_coil1_df['Time']).dt.total_seconds()
+    time_diff = (merged_coil1_df['Time_PTR'] - merged_coil1_df['Time']).dt.total_seconds()
     merged_coil1_df['Time_diff'] = time_diff
     high_time_diff = abs(time_diff) > MAX_TIME_DIFF_SEC
     if (abs(time_diff) > MAX_TIME_DIFF_SEC).any():
         messagebox.showerror("Error", f"Time difference between PTR and Navigation timestamp is too high in {high_time_diff.sum()} points. Max value :  {abs(time_diff).max():.3f} seconds")
 
-    time_diff = (merged_coil2_df['Time PTR'] - merged_coil2_df['Time']).dt.total_seconds()
+    time_diff = (merged_coil2_df['Time_PTR'] - merged_coil2_df['Time']).dt.total_seconds()
     merged_coil2_df['Time_diff'] = time_diff
     #if (abs(time_diff) > MAX_TIME_DIFF_SEC).any():
         #messagebox.showerror("Error", f"Time difference between PTR and Coil 2 is too high: {abs(time_diff).max():.3f} seconds")
 
-    time_diff = (merged_coil3_df['Time PTR'] - merged_coil3_df['Time']).dt.total_seconds()
+    time_diff = (merged_coil3_df['Time_PTR'] - merged_coil3_df['Time']).dt.total_seconds()
     merged_coil3_df['Time_diff'] = time_diff
     #if (abs(time_diff) > MAX_TIME_DIFF_SEC).any():
         #messagebox.showerror("Error", f"Time difference between PTR and Coil 3 is too high: {abs(time_diff).max():.3f} seconds")   
@@ -311,7 +314,7 @@ def mergeData(merged_coil1_df, merged_coil2_df, merged_coil3_df):
     del merged_coil1_df['TSS1']
     del merged_coil1_df['TSS2']
     del merged_coil1_df['TSS3']
-    del merged_coil1_df['Date PTR']
+    del merged_coil1_df['Date_PTR']
     del merged_coil1_df['Date']
 
     merged_coil2_df['TSS']  = merged_coil2_df['TSS2']
@@ -319,7 +322,7 @@ def mergeData(merged_coil1_df, merged_coil2_df, merged_coil3_df):
     del merged_coil2_df['TSS1']
     del merged_coil2_df['TSS2']
     del merged_coil2_df['TSS3']
-    del merged_coil2_df['Date PTR']
+    del merged_coil2_df['Date_PTR']
     del merged_coil2_df['Date']
 
     merged_coil3_df['TSS']  = merged_coil3_df['TSS3']
@@ -327,7 +330,7 @@ def mergeData(merged_coil1_df, merged_coil2_df, merged_coil3_df):
     del merged_coil3_df['TSS1']
     del merged_coil3_df['TSS2']
     del merged_coil3_df['TSS3']
-    del merged_coil3_df['Date PTR']
+    del merged_coil3_df['Date_PTR']
     del merged_coil3_df['Date']
 
     # Ensure all dataframes have the same index length (if not, trim to the smallest length)
@@ -671,17 +674,17 @@ tk.Button(root, text="Browse", command=select_folder, font=font_bold).grid(row=0
 tk.Label(root, text="Coil 1 (port) Column PTR file:", font=font).grid(row=3, column=0, padx=10, pady=5, sticky=tk.W)
 tss1_entry = tk.Entry(root, width=20, font=font)
 tss1_entry.grid(row=3, column=1, padx=10, pady=5, sticky=tk.W)
-tss1_entry.insert(0, "12")  # Default value
+tss1_entry.insert(0, COLUMN_COIL_1_DEFAULT)  # Default value
 
 tk.Label(root, text="Coil 2 (center) Column PTR file:", font=font).grid(row=4, column=0, padx=10, pady=5, sticky=tk.W)
 tss2_entry = tk.Entry(root, width=20, font=font)
 tss2_entry.grid(row=4, column=1, padx=10, pady=5, sticky=tk.W)
-tss2_entry.insert(0, "11")  # Default value
+tss2_entry.insert(0, COLUMN_COIL_2_DEFAULT)  # Default value
 
 tk.Label(root, text="Coil 3 (starbord) Column PTR file:", font=font).grid(row=5, column=0, padx=10, pady=5, sticky=tk.W)
 tss3_entry = tk.Entry(root, width=20, font=font)
 tss3_entry.grid(row=5, column=1, padx=10, pady=5, sticky=tk.W)
-tss3_entry.insert(0, "10")  # Default value
+tss3_entry.insert(0, COLUMN_COIL_3_DEFAULT)  # Default value
 
 tk.Label(root, text="Output File Name:", font=font).grid(row=8, column=0, padx=10, pady=5, sticky=tk.W)
 output_entry = tk.Entry(root, width=50, font=font)
