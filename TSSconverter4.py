@@ -284,9 +284,9 @@ def extractData(folder_path, tss1_col, tss2_col, tss3_col):
     nav_coil3_df = nav_coil3_df.sort_values(by='Time')
 
     # Merge the DataFrames based on the closest time in the navigation data to the PTR data
-    merged_coil1_df = pd.merge_asof(ptr_df, nav_coil1_df, left_on='Time_PTR', right_on='Time', direction='nearest')
+    merged_coil1_df = pd.merge_asof(ptr_df, nav_coil3_df, left_on='Time_PTR', right_on='Time', direction='nearest') # Switched COIL 1 and COIL 3
     merged_coil2_df = pd.merge_asof(ptr_df, nav_coil2_df, left_on='Time_PTR', right_on='Time', direction='nearest')
-    merged_coil3_df = pd.merge_asof(ptr_df, nav_coil3_df, left_on='Time_PTR', right_on='Time', direction='nearest')
+    merged_coil3_df = pd.merge_asof(ptr_df, nav_coil1_df, left_on='Time_PTR', right_on='Time', direction='nearest') # Switched COIL 3 and COIL 1
 
     # Check if time difference exceeds the allowed threshold
     time_diff = (merged_coil1_df['Time_PTR'] - merged_coil1_df['Time']).dt.total_seconds()
