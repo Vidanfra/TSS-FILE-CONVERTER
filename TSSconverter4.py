@@ -8,6 +8,10 @@ import numpy as np
 import csv
 from datetime import datetime
 import scipy.stats as st #pip install scipy
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Maximum time difference in seconds
 MAX_TIME_DIFF_SEC = 0.25
@@ -25,10 +29,18 @@ COLUMN_COIL_3_DEFAULT = 12
 MAX_ANGLE_ERROR = 20
 
 def convert_to_datetime(time_str, format_str='%H%M%S%f'):
-    return datetime.strptime(str(time_str), format_str)
+    try:
+        return datetime.strptime(str(time_str), format_str)
+    except ValueError as e:
+        logging.error(f"Invalid time format: {time_str}. Error: {e}")
+        return None
 
-def read_csv_file(file_path, delimiter):
-    return pd.read_csv(file_path, delimiter=delimiter)
+def read_csv_file(file_path, delimiter=','):
+    try:
+        return pd.read_csv(file_path, delimiter=delimiter)
+    except Exception as e:
+        logging.error(f"Error reading CSV file {file_path}: {e}")
+        return pd.DataFrame()
 
 def get_target_path(folder_path):
     # Normalize path for cross-platform compatibility
@@ -46,19 +58,24 @@ def get_target_path(folder_path):
 
 def getCoilPeaks(merged_df):
     coil_peaks = []
+    
+    if 'Filename' not in merged_df or 'TSS' not in merged_df:
+        logging.error("Missing required columns in DataFrame")
+        return coil_peaks
+    
     for line in merged_df['Filename'].unique():
         df = merged_df[merged_df['Filename'] == line]
+        
+        if df.empty:
+            continue
+        
         max_index = df['TSS'].idxmax()
         min_index = df['TSS'].idxmin()
-
-        if abs(df['TSS'][max_index]) > abs(df['TSS'][min_index]):
-            abs_max_tss = df['TSS'][max_index]
-        else:
-            abs_max_tss = df['TSS'][min_index]
-    
-        coil = df['Coil'][max_index]
-        easting = df['Easting'][max_index]
-        northing = df['Northing'][max_index]
+        
+        abs_max_tss = df.loc[max_index, 'TSS'] if abs(df.loc[max_index, 'TSS']) > abs(df.loc[min_index, 'TSS']) else df.loc[min_index, 'TSS']
+        coil = df.loc[max_index, 'Coil']
+        easting = df.loc[max_index, 'Easting']
+        northing = df.loc[max_index, 'Northing']
 
         coil_peaks.append({
             'PTR file': line,
@@ -71,7 +88,7 @@ def getCoilPeaks(merged_df):
     return coil_peaks
 
 def circular_mean(angles):
-    """Computes the circular mean of angles in degrees."""
+    # Computes the circular mean of angles in degrees
     angles_rad = np.radians(angles)
     mean_x = np.mean(np.cos(angles_rad))
     mean_y = np.mean(np.sin(angles_rad))
@@ -79,6 +96,10 @@ def circular_mean(angles):
     return mean_angle
 
 def calculateHeading(merged_df):
+    if merged_df.empty or not {'Filename', 'Coil', 'Easting', 'Northing', 'Gyro'}.issubset(merged_df.columns):
+        logging.error("Missing required columns in DataFrame")
+        return pd.DataFrame()
+    
     attitude_list = []  # Use a list to store dictionaries
 
     # Loop through unique filenames
@@ -90,6 +111,8 @@ def calculateHeading(merged_df):
 
         # Filter the data for Coil 2
         df_coil2 = df[df['Coil'] == 2]
+        if df_coil2.empty:
+            continue
 
         # Compute differences for course calculation
         easting_diff = df_coil2['Easting'].diff()
@@ -155,22 +178,25 @@ def extractData(folder_path, tss1_col, tss2_col, tss3_col):
     nav_coil2_dataframe = []
     nav_coil3_dataframe = []
 
-    # Ensure the columns positions are numeric
+    # Validate column numbers
     try:
         tss1_col = int(tss1_col)
         tss2_col = int(tss2_col)
         tss3_col = int(tss3_col)
     except ValueError:
+        logging.error("Columns numbers must be integer numeric values")
         messagebox.showerror("Error", "Columns numbers must be integer numeric values")
         return
 
     # Check if the folder exists
     if not os.path.exists(folder_path):
+        logging.error(f"Folder {folder_path} does not exist")
         messagebox.showerror("Error", f"Folder {folder_path} does not exist")
         return
 
     # Check if the folder is empty
     if not os.listdir(folder_path):
+        logging.error(f"Folder {folder_path} is empty")
         messagebox.showerror("Error", f"Folder {folder_path} is empty")
         return
 
@@ -204,37 +230,44 @@ def extractData(folder_path, tss1_col, tss2_col, tss3_col):
     
     # Show all errors in a single message box at the end
     if error_messages:
+        logging.error("\n".join(error_messages))
         messagebox.showerror("Error", "\n".join(error_messages))
+    
+    # Get all files in the folder (store in a set for efficient lookup)
+    existing_files = set(os.listdir(folder_path))
 
     # Loop through all files in the folder and extract the required data
-    for filename in os.listdir(folder_path):
+    for filename in  existing_files:
         file_path = os.path.join(folder_path, filename)
 
         if filename.endswith('.ptr'):           
             only_name = filename.split('.')[0]
-            if not (only_name + '_Coil_1.csv') or not (only_name + '_Coil_2.csv') or not (only_name + '_Coil_3.csv') in os.listdir(folder_path):
-                continue # Skip this iteration if any of the navigation required files is missing
-            df = pd.read_csv(file_path, delimiter=';', header=None)
-            date = df.iloc[:, DATE_COLUMN_POS]
-            time = df.iloc[:, TIME_COLUMN_POS]
-            easting = df.iloc[:, EAST_COLUMN_POS]
-            northing = df.iloc[:, NORTH_COLUMN_POS]
-            tss1 = df.iloc[:, tss1_col]
-            tss2 = df.iloc[:, tss2_col]
-            tss3 = df.iloc[:, tss3_col]
+             # Check if all required files exist
+            required_files = {f"{only_name}_Coil_1.csv", f"{only_name}_Coil_2.csv", f"{only_name}_Coil_3.csv"}
 
-            df_extracted = pd.DataFrame({
-                'Filename': filename,
-                'Date_PTR': date,
-                'Time_PTR': time,
-                'Easting_PTR': easting,
-                'Northing_PTR': northing,
-                'TSS1': tss1,
-                'TSS2': tss2,
-                'TSS3': tss3,
-            })
-
-            ptr_dataframe.append(df_extracted)
+            if not required_files.issubset(existing_files):
+                logging.warning(f"Skipping PTR file {filename} due to missing navigation files")
+                continue  # Skip this iteration if any required navigation file is missing
+            try:
+                df = pd.read_csv(file_path, delimiter=';', header=None)
+            except Exception as e:
+                logging.error(f"Error reading PTR file {file_path}: {e}")
+                continue
+            try:
+                df_extracted = pd.DataFrame({
+                    'Filename': filename,
+                    'Date_PTR': df.iloc[:, DATE_COLUMN_POS],
+                    'Time_PTR': df.iloc[:, TIME_COLUMN_POS],
+                    'Easting_PTR': df.iloc[:, EAST_COLUMN_POS],
+                    'Northing_PTR': df.iloc[:, NORTH_COLUMN_POS],
+                    'TSS1': df.iloc[:, tss1_col],
+                    'TSS2': df.iloc[:, tss2_col],
+                    'TSS3': df.iloc[:, tss3_col],
+                })
+                ptr_dataframe.append(df_extracted)
+            except IndexError:
+                logging.error(f"Invalid column index in {filename}")
+                continue
 
         if filename.endswith('_Coil_1.csv'):
             only_name = filename.split('_')[0]
@@ -256,12 +289,15 @@ def extractData(folder_path, tss1_col, tss2_col, tss3_col):
 
     # Check if any PTR or Navigation files were found
     if not ptr_dataframe:
-        messagebox.showerror("Error", "No PTR files found in the folder")
+        logging.error("No PTR files extracted")
+        #messagebox.showerror("Error", "No PTR files extracted")
         return
     if not nav_coil1_dataframe or not nav_coil2_dataframe or not nav_coil3_dataframe:
-        messagebox.showerror("Error", "No Navigation files found in the folder")
+        logging.error("No Navigation files extracted")
+        #messagebox.showerror("Error", "No Navigation files extracted")
         return
     
+    # Concatenate data
     ptr_df = pd.concat(ptr_dataframe, ignore_index=True)
     nav_coil1_df = pd.concat(nav_coil1_dataframe, ignore_index=True)
     nav_coil2_df = pd.concat(nav_coil2_dataframe, ignore_index=True)
@@ -282,7 +318,7 @@ def extractData(folder_path, tss1_col, tss2_col, tss3_col):
     nav_coil1_df = nav_coil1_df.sort_values(by='Time')
     nav_coil2_df = nav_coil2_df.sort_values(by='Time')
     nav_coil3_df = nav_coil3_df.sort_values(by='Time')
-
+    
     # Merge the DataFrames based on the closest time in the navigation data to the PTR data
     merged_coil1_df = pd.merge_asof(ptr_df, nav_coil3_df, left_on='Time_PTR', right_on='Time', direction='nearest') # Switched COIL 1 and COIL 3
     merged_coil2_df = pd.merge_asof(ptr_df, nav_coil2_df, left_on='Time_PTR', right_on='Time', direction='nearest')
@@ -293,7 +329,8 @@ def extractData(folder_path, tss1_col, tss2_col, tss3_col):
     merged_coil1_df['Time_diff'] = time_diff
     high_time_diff = abs(time_diff) > MAX_TIME_DIFF_SEC
     if (abs(time_diff) > MAX_TIME_DIFF_SEC).any():
-        messagebox.showerror("Error", f"Time difference between PTR and Navigation timestamp is too high in {high_time_diff.sum()} points. Max value :  {abs(time_diff).max():.3f} seconds")
+        logging.warning(f"Time difference between PTR and Navigation timestamp is too high in {high_time_diff.sum()} points. Max value :  {abs(time_diff).max():.3f} seconds")
+        messagebox.showerror("Warning", f"Time difference between PTR and Navigation timestamp is too high in {high_time_diff.sum()} points. Max value :  {abs(time_diff).max():.3f} seconds")
 
     time_diff = (merged_coil2_df['Time_PTR'] - merged_coil2_df['Time']).dt.total_seconds()
     merged_coil2_df['Time_diff'] = time_diff
@@ -349,312 +386,375 @@ def mergeData(merged_coil1_df, merged_coil2_df, merged_coil3_df):
     return interleaved_df
 
 def plotMaps(folder_path, tss1_col, tss2_col, tss3_col):
-    # Extract the data from the PTR and Navigation files in the selected folder
-    coil1_df, coil2_df, coil3_df = extractData(folder_path, tss1_col, tss2_col, tss3_col)
-    merged_df = mergeData(coil1_df, coil2_df, coil3_df)
+    try:
+        # Extract the data from the PTR and Navigation files in the selected folder
+        coil1_df, coil2_df, coil3_df = extractData(folder_path, tss1_col, tss2_col, tss3_col)
+        merged_df = mergeData(coil1_df, coil2_df, coil3_df)
+        
+        # Validate merged_df
+        required_columns = {'Easting', 'Northing', 'TSS', 'Alt'}
+        if not required_columns.issubset(merged_df.columns):
+            missing = required_columns - set(merged_df.columns)
+            logging.error(f"Missing required columns in merged data: {missing}")
+            raise ValueError(f"Missing required columns in merged data: {missing}")
 
-    # Calculate the average heading for each line
-    attitude_df = calculateHeading(merged_df)
+        # Calculate the average heading for each line
+        attitude_df = calculateHeading(merged_df)
+        
+        # Ensure survey direction data exists
+        if 'Survey Direction' not in attitude_df.columns or attitude_df.empty:
+            logging.error("Survey direction data is missing or could not be computed.")
+            raise ValueError("Survey direction data is missing or could not be computed.")
+        
+        survey_direction = attitude_df['Survey Direction'].iloc[0]
+        
+        # Get the target path for the output files
+        target_path = get_target_path(folder_path)
 
-    # Get the target path for the output files
-    target_path = get_target_path(folder_path)
+        # Create a custom TSS colormap
+        cmap_tss = mcolors.ListedColormap(['blue', 'green', 'lime', 'yellow', 'red', 'purple'])
+        bounds_tss = [-500, -25, 25, 50, 75, 500, 10000]
+        norm_tss = mcolors.BoundaryNorm(bounds_tss, cmap_tss.N)
 
-    # Create a custom TSS colormap
-    cmap_tss = mcolors.ListedColormap(['blue', 'green', 'lime', 'yellow', 'red', 'purple'])
-    bounds_tss = [-500, -25, 25, 50, 75, 500, 10000]
-    norm_tss = mcolors.BoundaryNorm(bounds_tss, cmap_tss.N)
+        # Create scatter plots for TSS values
+        plt.figure(num= target_path + " Magnetic", figsize=(7, 6))
+        scatter = plt.scatter(merged_df['Easting'], merged_df['Northing'], c=merged_df['TSS'], cmap=cmap_tss, norm=norm_tss, marker='o')
+        plt.colorbar(scatter, label="TSS [uV]", boundaries=bounds_tss, ticks=[-500, -25, 0, 25, 50, 75, 500, 10000])
+        plt.xlabel("Easting [m]")
+        plt.ylabel("Northing [m]")
+        plt.suptitle(f"Heatmap of TSS Magnetic Values")
+        plt.title(f"Survey Direction: {survey_direction:.0f} º")
+        plt.gca().set_aspect('equal', adjustable='box')  # Set aspect ratio to 1:1
+        plt.grid(True)
 
-    # Create scatter plots for TSS values
-    plt.figure(num= target_path + " Magnetic", figsize=(7, 6))
-    scatter = plt.scatter(merged_df['Easting'], merged_df['Northing'], c=merged_df['TSS'], cmap=cmap_tss, norm=norm_tss, marker='o')
-    plt.colorbar(scatter, label="TSS [uV]", boundaries=bounds_tss, ticks=[-500, -25, 0, 25, 50, 75, 500, 10000])
-    plt.xlabel("Easting [m]")
-    plt.ylabel("Northing [m]")
-    plt.suptitle(f"Heatmap of TSS Magnetic Values")
-    plt.title(f"Survey Direction: {attitude_df['Survey Direction'].iloc[0]:.0f} º")
-    plt.gca().set_aspect('equal', adjustable='box')  # Set aspect ratio to 1:1
-    plt.grid(True)
+        # Create a custom Altitude colormap
+        cmap_alt = mcolors.ListedColormap(['purple', 'magenta', 'blue', 'cyan', 'yellow', 'orange', 'red'])
+        bounds_alt = [-0.5, -0.25, 0, 0.25, 0.5, 0.75, 1]
+        norm_alt = mcolors.BoundaryNorm(bounds_alt, cmap_alt.N)
 
-    # Create a custom Altitude colormap
-    cmap_alt = mcolors.ListedColormap(['purple', 'magenta', 'blue', 'cyan', 'yellow', 'orange', 'red'])
-    bounds_alt = [-0.5, -0.25, 0, 0.25, 0.5, 0.75, 1]
-    norm_alt = mcolors.BoundaryNorm(bounds_alt, cmap_alt.N)
+        # Create scatter plots for flying altitude
+        plt.figure(num=target_path + " Altitude", figsize=(7, 6))
+        scatter = plt.scatter(merged_df['Easting'], merged_df['Northing'], c=merged_df['Alt'], cmap=cmap_alt, norm=norm_alt, marker='o')
+        plt.colorbar(scatter, label="Altitude [m]", boundaries=bounds_alt, ticks=[-0.5, -0.25, 0, 0.25, 0.5, 0.75, 1])
+        plt.xlabel("Easting [m]")
+        plt.ylabel("Northing [m]")
+        plt.suptitle(f'Heatmap of TSS Flying Altitude')
+        plt.title(f"Survey Direction: {survey_direction:.0f} º")
+        plt.gca().set_aspect('equal', adjustable='box')  # Set aspect ratio to 1:1
+        plt.grid(True)
 
-    # Create scatter plots for flying altitude
-    plt.figure(num=target_path + " Altitude", figsize=(7, 6))
-    scatter = plt.scatter(merged_df['Easting'], merged_df['Northing'], c=merged_df['Alt'], cmap=cmap_alt, norm=norm_alt, marker='o')
-    plt.colorbar(scatter, label="Altitude [m]", boundaries=bounds_alt, ticks=[-0.5, -0.25, 0, 0.25, 0.5, 0.75, 1])
-    plt.xlabel("Easting [m]")
-    plt.ylabel("Northing [m]")
-    plt.suptitle(f'Heatmap of TSS Flying Altitude')
-    plt.title(f"Survey Direction: {attitude_df['Survey Direction'].iloc[0]:.0f} º")
-    plt.gca().set_aspect('equal', adjustable='box')  # Set aspect ratio to 1:1
-    plt.grid(True)
-
-    plt.show()
+        plt.show()
+        
+        # Log success message
+        logging.info("Magnetic and altitude heatmaps plotted succesfully.")
+        
+    except Exception as e:
+        logging.error(f"Error plotting maps: {e}")
+        messagebox.showerror("Error", f"Error plotting maps: {e}")
     
 def plotCoils(folder_path, tss1_col, tss2_col, tss3_col):
-    # Extract the data from the PTR and Navigation files in the selected folder
-    coil1_df, coil2_df, coil3_df = extractData(folder_path, tss1_col, tss2_col, tss3_col)
+    try:
+        # Extract the data from the PTR and Navigation files in the selected folder
+        coil1_df, coil2_df, coil3_df = extractData(folder_path, tss1_col, tss2_col, tss3_col)
+        
+        # Validate extracted data
+        if coil1_df.empty or coil2_df.empty or coil3_df.empty:
+            logging.error("Extracted data is empty. Please check the input files.")
+            raise ValueError("Extracted data is empty. Please check the input files.")
 
-    # Split the data into individual line files
-    line_files = []
-    for filename in coil1_df['Filename'].unique():
-        line_files.append({
-            'filename': filename,
-            'TSS1': coil1_df[coil1_df['Filename'] == filename]['TSS1'],
-            'TSS2': coil2_df[coil2_df['Filename'] == filename]['TSS2'],
-            'TSS3': coil3_df[coil3_df['Filename'] == filename]['TSS3']
-        })
+        required_columns = {'Filename', 'TSS1', 'TSS2', 'TSS3'}
+        for df in [coil1_df, coil2_df, coil3_df]:
+            if not required_columns.issubset(df.columns):             
+                missing = required_columns - set(df.columns)
+                logging.error(f"Missing required columns in extracted data: {missing}")
+                raise ValueError(f"Missing required columns in extracted data: {missing}")
 
-    # Loop through all line files in the folder
-    for line in line_files:    
-        plt.figure(num=line['filename'],figsize=(10, 6))
-        plt.plot(line['TSS1'], color='r', label='Coil 1')
-        plt.plot(line['TSS2'], color='b', label='Coil 2')
-        plt.plot(line['TSS3'], color='g', label='Coil 3')
+        # Split the data into individual line files
+        line_files = []
+        for filename in coil1_df['Filename'].unique():
+            line_files.append({
+                'filename': filename,
+                'TSS1': coil1_df[coil1_df['Filename'] == filename]['TSS1'],
+                'TSS2': coil2_df[coil2_df['Filename'] == filename]['TSS2'],
+                'TSS3': coil3_df[coil3_df['Filename'] == filename]['TSS3']
+            })
 
-        # Function to annotate min and max points
-        def annotate_peaks(tss_data, color, label):
-            max_idx = tss_data.idxmax()  # Index of max value
-            min_idx = tss_data.idxmin()  # Index of min value
-            max_val = tss_data[max_idx]  # Max value
-            min_val = tss_data[min_idx]  # Min value
+        # Loop through all line files in the folder
+        for line in line_files:    
+            plt.figure(num=line['filename'],figsize=(10, 6))
+            plt.plot(line['TSS1'], color='r', label='Coil 1')
+            plt.plot(line['TSS2'], color='b', label='Coil 2')
+            plt.plot(line['TSS3'], color='g', label='Coil 3')
 
-            # Annotate max
-            plt.annotate(f'Max: {max_val:.2f}', (max_idx, max_val),
-                         textcoords="offset points", xytext=(0,10), ha='center',
-                         color=color, fontsize=10, fontweight='bold')
+            # Function to annotate min and max points
+            def annotate_peaks(tss_data, color, label):
+                max_idx = tss_data.idxmax()  # Index of max value
+                min_idx = tss_data.idxmin()  # Index of min value
+                max_val = tss_data[max_idx]  # Max value
+                min_val = tss_data[min_idx]  # Min value
 
-            # Annotate min
-            plt.annotate(f'Min: {min_val:.2f}', (min_idx, min_val),
-                         textcoords="offset points", xytext=(0,-15), ha='center',
-                         color=color, fontsize=10, fontweight='bold')
+                # Annotate max
+                plt.annotate(f'Max: {max_val:.2f}', (max_idx, max_val),
+                            textcoords="offset points", xytext=(0,10), ha='center',
+                            color=color, fontsize=10, fontweight='bold')
 
-        # Annotate peaks for each coil
-        annotate_peaks(line['TSS1'], 'r', 'Coil 1')
-        annotate_peaks(line['TSS2'], 'b', 'Coil 2')
-        annotate_peaks(line['TSS3'], 'g', 'Coil 3')
-        plt.xlabel("Time [sec]")
-        plt.ylabel("TSS values [uV]")
-        plt.title(f'TSS values for each coil - {line['filename']}')
-        plt.legend()
-        plt.grid(True)    
-    plt.show() 
+                # Annotate min
+                plt.annotate(f'Min: {min_val:.2f}', (min_idx, min_val),
+                            textcoords="offset points", xytext=(0,-15), ha='center',
+                            color=color, fontsize=10, fontweight='bold')
+
+            # Annotate peaks for each coil
+            annotate_peaks(line['TSS1'], 'r', 'Coil 1')
+            annotate_peaks(line['TSS2'], 'b', 'Coil 2')
+            annotate_peaks(line['TSS3'], 'g', 'Coil 3')
+            plt.xlabel("Time [sec]")
+            plt.ylabel("TSS values [uV]")
+            plt.title(f'TSS values for each coil - {line['filename']}')
+            plt.legend()
+            plt.grid(True)    
+        plt.show() 
+        
+        # Log success message
+        logging.info("Coil data plotted succesfully.")
+        
+    except Exception as e:
+        logging.error(f"Error plotting coil data: {e}")
+        messagebox.showerror("Error", f"Error plotting coil data: {e}")
 
 def plotHeading(folder_path, tss1_col, tss2_col, tss3_col):
-    # Extract the data from the PTR and Navigation files in the selected folder
-    coil1_df, coil2_df, coil3_df = extractData(folder_path, tss1_col, tss2_col, tss3_col)
-
-    # Merge the DataFrames into a single DataFrame
-    merged_df = mergeData(coil1_df, coil2_df, coil3_df)
-
-    # Calculate the average heading for each line
-    attitude_df = calculateHeading(merged_df)
-
-    # Get the target path for the output files
-    target_path = get_target_path(folder_path)
-
-    # Scatter plot with color scale
-    headings_err = np.concatenate(attitude_df['Heading Error'].values)  # Flatten the list of lists into a 1D NumPy array
-    headings_err = pd.Series(headings_err)  # Convert back to a pandas Series for NaN handling
-    headings_err = headings_err.dropna()  # Drop NaN values
-    headings_err = pd.concat([headings_err, headings_err, headings_err], axis=0).sort_index(kind='merge')
-    headings_err = headings_err.abs()  # Take the absolute value
-    # Normalize the error to be between 0 and 90 degrees (for color scaling, not in the table)
-    headings_err = np.where(headings_err > 90, np.abs(180 - headings_err), headings_err)
-
-    # Scatter plot with color scale
-    fig, ax = plt.subplots(num= target_path + " Heading Error", figsize=(7, 6))
-    scatter = ax.scatter(merged_df['Easting'], merged_df['Northing'], c= headings_err, cmap='coolwarm', vmin=0, vmax= MAX_ANGLE_ERROR, edgecolors='k')
-
-    # Add colorbar
-    cbar = plt.colorbar(scatter, ax=ax)
-    cbar.set_label("Abs Heading Error [0º, 90º]", fontsize=12)
-
-    ax.set_xlabel("Easting [m]")
-    ax.set_ylabel("Northing [m]")
-    ax.set_aspect('equal', adjustable='box')  # Set aspect ratio to 1:1
-    ax.set_title("Scatter Plot of Heading Error")
-    ax.grid(True, linestyle='--', alpha=0.6)
-
-     # 🔹 Add arrows for each line
-    for line in merged_df['Filename'].unique():
-        df_line = merged_df[merged_df['Filename'] == line].copy()
+    try:
+        # Extract the data from the PTR and Navigation files in the selected folder
+        coil1_df, coil2_df, coil3_df = extractData(folder_path, tss1_col, tss2_col, tss3_col)
         
-        if len(df_line) < 2:
-            continue  # Skip if not enough points
+        if coil1_df.empty or coil2_df.empty or coil3_df.empty:
+            logging.error("One or more extracted DataFrames are empty. Check input data.")
+            return
 
-        # Get first two points
-        x1, y1 = df_line.iloc[1][['Easting', 'Northing']]
-        x2, y2 = df_line.iloc[len(df_line)-2][['Easting', 'Northing']]
-        dx = x2 - x1
-        dy = y2 - y1 
+        # Merge the DataFrames into a single DataFrame
+        merged_df = mergeData(coil1_df, coil2_df, coil3_df)
+        if merged_df.empty:
+            logging.error("Merged DataFrame is empty. Exiting function.")
+            return
+        
+        # Calculate the average heading for each line
+        attitude_df = calculateHeading(merged_df)
+        if attitude_df.empty:
+            logging.error("Attitude DataFrame is empty. Exiting function.")
+            return
 
-        # Draw arrow at the first point
-        ax.arrow(x1, y1, dx, dy, head_width=0.5, head_length=0.5, fc='black', ec='black')
+        # Get the target path for the output files
+        target_path = get_target_path(folder_path)
 
-    # Select the columns to display
-    columns_to_display = [
-        "Filename", 
-        "Line Direction",
-        "Heading Avg", 
-        "Course Avg", 
-        "Heading Error Avg", 
-        "Heading Std", 
-        "Course Std"
-    ]
-    table_data = attitude_df[columns_to_display].copy()
+        # Scatter plot with color scale
+        headings_err = np.concatenate(attitude_df['Heading Error'].values)  # Flatten the list of lists into a 1D NumPy array
+        headings_err = pd.Series(headings_err)  # Convert back to a pandas Series for NaN handling
+        headings_err = headings_err.dropna()  # Drop NaN values
+        headings_err = pd.concat([headings_err, headings_err, headings_err], axis=0).sort_index(kind='merge')
+        headings_err = headings_err.abs()  # Take the absolute value
+        # Normalize the error to be between 0 and 90 degrees (for color scaling, not in the table)
+        headings_err = np.where(headings_err > 90, np.abs(180 - headings_err), headings_err)
 
-    # Round numerical values for better readability
-    for col in columns_to_display[1:]:
-        table_data[col] = table_data[col].round(2)
+        # Scatter plot with color scale
+        fig, ax = plt.subplots(num= target_path + " Heading Error", figsize=(7, 6))
+        scatter = ax.scatter(merged_df['Easting'], merged_df['Northing'], c= headings_err, cmap='coolwarm', vmin=0, vmax= MAX_ANGLE_ERROR, edgecolors='k')
 
-    # Define function for color scaling
-    def get_color(value, max_error_angle = MAX_ANGLE_ERROR):
-        """Returns a color based on the value (white near 0, red near ±X)."""
-        abs_val = min(abs(value), max_error_angle) 
-        red_intensity = int((abs_val / max_error_angle) * 255)
-        red = 255
-        green = 255 - red_intensity
-        blue = 255 - red_intensity
-        return f"#{red:02X}{green:02X}{blue:02X}"
+        # Add colorbar
+        cbar = plt.colorbar(scatter, ax=ax)
+        cbar.set_label("Abs Heading Error [0º, 90º]", fontsize=12)
 
-    # Create figure
-    num_rows = len(table_data)
-    fig, ax = plt.subplots(num= target_path + " Heading Stats",figsize=(10, num_rows * 0.5 + 2))
-    ax.axis('off')  # Hide the axes
-    ax.axis('tight')
+        ax.set_xlabel("Easting [m]")
+        ax.set_ylabel("Northing [m]")
+        ax.set_aspect('equal', adjustable='box')  # Set aspect ratio to 1:1
+        ax.set_title("Scatter Plot of Heading Error")
+        ax.grid(True, linestyle='--', alpha=0.6)
 
-    # Create table
-    table = ax.table(
-        cellText=table_data.values,
-        colLabels=table_data.columns,
-        loc='center',
-        cellLoc='center',
-        cellColours=[["white"] * len(columns_to_display) for _ in range(num_rows)]  # Default colors
-    )
+        # 🔹 Add arrows for each line
+        for line in merged_df['Filename'].unique():
+            df_line = merged_df[merged_df['Filename'] == line].copy()
+            
+            if len(df_line) < 2:
+                logging.warning("Adding arrows Heading QC heatmap: Skipping line %s due to insufficient data points.", line)
+                continue  # Skip if not enough points
 
-    # Apply color formatting to specific columns
-    color_cols = ["Heading Error Avg", "Heading Std", "Course Std"]
-    for row_idx, row in table_data.iterrows():
-        for col_idx, col in enumerate(columns_to_display):
-            if col in color_cols:
-                cell = table[row_idx + 1, col_idx]  # Row +1 because index 0 is for headers
-                cell.set_facecolor(get_color(row[col]))
+            # Get first two points
+            x1, y1 = df_line.iloc[1][['Easting', 'Northing']]
+            x2, y2 = df_line.iloc[len(df_line)-2][['Easting', 'Northing']]
+            dx = x2 - x1
+            dy = y2 - y1 
 
-    table.auto_set_font_size(False)
-    table.set_fontsize(10)
-    table.scale(1, 1.5)  # Adjust table scaling
+            # Draw arrow at the first point
+            ax.arrow(x1, y1, dx, dy, head_width=0.5, head_length=0.5, fc='black', ec='black')
 
-    plt.title("Heading and Course Statistics per Line [º]")
+        # Select the columns to display
+        columns_to_display = [
+            "Filename", 
+            "Line Direction",
+            "Heading Avg", 
+            "Course Avg", 
+            "Heading Error Avg", 
+            "Heading Std", 
+            "Course Std"
+        ]
+        table_data = attitude_df[columns_to_display].copy()
 
-    # Show plot
-    plt.show()
+        # Round numerical values for better readability
+        for col in columns_to_display[1:]:
+            table_data[col] = table_data[col].round(2)
+
+        # Define function for color scaling
+        def get_color(value, max_error_angle = MAX_ANGLE_ERROR):
+            """Returns a color based on the value (white near 0, red near ±X)."""
+            abs_val = min(abs(value), max_error_angle) 
+            red_intensity = int((abs_val / max_error_angle) * 255)
+            red = 255
+            green = 255 - red_intensity
+            blue = 255 - red_intensity
+            return f"#{red:02X}{green:02X}{blue:02X}"
+
+        # Create figure
+        num_rows = len(table_data)
+        fig, ax = plt.subplots(num= target_path + " Heading Stats",figsize=(10, num_rows * 0.5 + 2))
+        ax.axis('off')  # Hide the axes
+        ax.axis('tight')
+
+        # Create table
+        table = ax.table(
+            cellText=table_data.values,
+            colLabels=table_data.columns,
+            loc='center',
+            cellLoc='center',
+            cellColours=[["white"] * len(columns_to_display) for _ in range(num_rows)]  # Default colors
+        )
+
+        # Apply color formatting to specific columns
+        color_cols = ["Heading Error Avg", "Heading Std", "Course Std"]
+        for row_idx, row in table_data.iterrows():
+            for col_idx, col in enumerate(columns_to_display):
+                if col in color_cols:
+                    cell = table[row_idx + 1, col_idx]  # Row +1 because index 0 is for headers
+                    cell.set_facecolor(get_color(row[col]))
+
+        table.auto_set_font_size(False)
+        table.set_fontsize(10)
+        table.scale(1, 1.5)  # Adjust table scaling
+
+        plt.title("Heading and Course Statistics per Line [º]")
+
+        # Show plot
+        plt.show()
+        
+        # Log success message
+        logging.info("Heading QC stats and heatmap plotted succesfully.")
+        
+    except Exception as e:
+        logging.error(f"Error plotting heading: {e}")
+        messagebox.showerror("Error", f"Error plotting heading: {e}")
 
 def processFiles(folder_path, tss1_col, tss2_col, tss3_col, output_file):
-    # Extract the data from the PTR and Navigation files in the selected folder
-    coil1_df, coil2_df, coil3_df = extractData(folder_path, tss1_col, tss2_col, tss3_col)
-
-    # Merge the DataFrames into a single DataFrame
-    merged_df = mergeData(coil1_df, coil2_df, coil3_df)
-
-    # Find the absolute maximum TSS value for each coil and its corresponding position
-    coil_peaks = getCoilPeaks(merged_df)  
-    print("Coil peak values:")
-    print(coil_peaks)
-
-    # Save the merged DataFrame to a new CSV file
-    output_file_path = os.path.join(folder_path, output_file)
-    merged_df.to_csv(output_file_path, index=False)
-    
-    # Save the coil peaks to a new CSV file
-    if '.csv' in output_file:
-        coil_peaks_file_path = os.path.join(folder_path, output_file.replace('.csv', '_coil_peaks.csv'))
-    elif '.txt' in output_file:
-        coil_peaks_file_path = os.path.join(folder_path, output_file.replace('.txt', '_coil_peaks.csv'))
-    else:
-        coil_peaks_file_path = os.path.join(folder_path, output_file + '_coil_peaks.csv')
-    
-    with open(coil_peaks_file_path, 'w', newline='') as f:
-        writer = csv.writer(f)
-        writer.writerow(["PTR file", "TSS peak value", "TSS coil", "Easting", "Northing"])
-        for peak in coil_peaks:
-            writer.writerow([peak['PTR file'], peak['TSS peak value'], peak['TSS coil'], peak['Easting'], peak['Northing']])
+    try:
+        if not os.path.isdir(folder_path):
+            raise ValueError("Invalid folder path.")
+        
+        # Extract the data from the PTR and Navigation files in the selected folder
+        coil1_df, coil2_df, coil3_df = extractData(folder_path, tss1_col, tss2_col, tss3_col)
+        
+        if coil1_df.empty or coil2_df.empty or coil3_df.empty:
+            raise ValueError("Extracted data is empty. Check input files and column names.")
+        
+        # Merge the DataFrames into a single DataFrame
+        merged_df = mergeData(coil1_df, coil2_df, coil3_df)
+        
+        # Find the absolute maximum TSS value for each coil and its corresponding position
+        coil_peaks = getCoilPeaks(merged_df)
+        logging.info("Coil peak values computed successfully.")
+        
+        # Save the merged DataFrame to a new CSV file
+        output_file_path = os.path.join(folder_path, output_file)
+        merged_df.to_csv(output_file_path, index=False)
+        logging.info(f"Merged data saved to {output_file_path}")
+        
+        # Save the coil peaks to a new CSV file
+        coil_peaks_file_path = os.path.splitext(output_file)[0] + '_coil_peaks.csv'
+        coil_peaks_file_path = os.path.join(folder_path, coil_peaks_file_path)
+        
+        with open(coil_peaks_file_path, 'w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(["PTR file", "TSS peak value", "TSS coil", "Easting", "Northing"])
+            for peak in coil_peaks:
+                writer.writerow([peak.get('PTR file', ''), peak.get('TSS peak value', ''), 
+                                 peak.get('TSS coil', ''), peak.get('Easting', ''), peak.get('Northing', '')])
+        logging.info(f"Coil peaks saved to {coil_peaks_file_path}")
+        
+        # Log and show success message
+        logging.info("Files processed successfully.")
+        messagebox.showinfo("Success", "Files processed successfully")
+        
+    except Exception as e:
+        logging.error(f"Error processing files: {e}")
+        messagebox.showerror("Error", f"Error processing files: {e}")
 
 def select_folder():
     folder_path = filedialog.askdirectory(title="Select a folder")
-    folder_entry.delete(0, tk.END)
-    folder_entry.insert(0, folder_path)
+    if folder_path:
+        folder_entry.delete(0, tk.END)
+        folder_entry.insert(0, folder_path)
+        logging.info(f"Selected folder path: {folder_path}")
+    
+def validate_inputs(folder_path, tss1_col, tss2_col, tss3_col, output_file=None):
+    if not folder_path:
+        raise ValueError("Missing folder path. Select it using the Browse button.")
+    if not all([tss1_col, tss2_col, tss3_col]):
+        raise ValueError("TSS column values are required.")
+    if output_file is not None and not output_file.strip():
+        raise ValueError("Output file name is required.")
 
 def show_heading():
-    folder_path = folder_entry.get()
-    print("Folder path: " + folder_path)
-    if not folder_path:
-        messagebox.showerror("Error", "Missing folder path. Select it using the Browse button")
-        return
-    
-    tss1_col = tss1_entry.get()
-    tss2_col = tss2_entry.get()
-    tss3_col = tss3_entry.get()
+    try:
+        folder_path = folder_entry.get()
+        tss1_col, tss2_col, tss3_col = tss1_entry.get(), tss2_entry.get(), tss3_entry.get()
+        validate_inputs(folder_path, tss1_col, tss2_col, tss3_col)
+        plotHeading(folder_path, tss1_col, tss2_col, tss3_col)
 
-    if not folder_path or not tss1_col or not tss2_col or not tss3_col:
-        messagebox.showerror("Error", "Some fields are required")
-        return
-    
-    plotHeading(folder_path, tss1_col, tss2_col, tss3_col)
+    except ValueError as e:
+        logging.error(f"Error plotting heading: {e}")
+        messagebox.showerror("Error", str(e))
 
 def show_maps():
-    folder_path = folder_entry.get()
-    print("Folder path: " + folder_path)
-    if not folder_path:
-        messagebox.showerror("Error", "Missing folder path. Select it using the Browse button")
-        return
-
-    tss1_col = tss1_entry.get()
-    tss2_col = tss2_entry.get()
-    tss3_col = tss3_entry.get()
-
-    if not folder_path or not tss1_col or not tss2_col or not tss3_col:
-        messagebox.showerror("Error", "Some fields are required")
-        return
-
-    plotMaps(folder_path, tss1_col, tss2_col, tss3_col)
+    try:
+        folder_path = folder_entry.get()
+        tss1_col, tss2_col, tss3_col = tss1_entry.get(), tss2_entry.get(), tss3_entry.get()
+        validate_inputs(folder_path, tss1_col, tss2_col, tss3_col)
+        plotMaps(folder_path, tss1_col, tss2_col, tss3_col)
+        
+    except ValueError as e:
+        logging.error(f"Error plotting maps: {e}")
+        messagebox.showerror("Error", str(e))
     
 def show_coils():
-    folder_path = folder_entry.get()
-    print("Folder path: " + folder_path)
-    if not folder_path:
-        messagebox.showerror("Error", "Missing folder path. Select it using the Browse button")
-    tss1_col = tss1_entry.get()
-    tss2_col = tss2_entry.get()
-    tss3_col = tss3_entry.get()
-
-    if not folder_path or not tss1_col or not tss2_col or not tss3_col:
-        messagebox.showerror("Error", "Some fields are required")
-        return
-
-    plotCoils(folder_path, tss1_col, tss2_col, tss3_col)
+    try:
+        folder_path = folder_entry.get()
+        tss1_col, tss2_col, tss3_col = tss1_entry.get(), tss2_entry.get(), tss3_entry.get()
+        validate_inputs(folder_path, tss1_col, tss2_col, tss3_col)
+        plotCoils(folder_path, tss1_col, tss2_col, tss3_col)
+ 
+    except ValueError as e:
+        logging.error(f"Error plotting coils: {e}")
+        messagebox.showerror("Error", str(e))
 
 def process():
-    folder_path = folder_entry.get()
-    tss1_col = tss1_entry.get()
-    tss2_col = tss2_entry.get()
-    tss3_col = tss3_entry.get()
-    output_file = output_entry.get()
+    try:
+        folder_path = folder_entry.get()
+        tss1_col, tss2_col, tss3_col = tss1_entry.get(), tss2_entry.get(), tss3_entry.get()
+        output_file = output_entry.get()
+        validate_inputs(folder_path, tss1_col, tss2_col, tss3_col, output_file)
+        processFiles(folder_path, tss1_col, tss2_col, tss3_col, output_file)
 
-    if not folder_path:
-        messagebox.showerror("Error", "Missing folder path. Select it using the Browse button")
-        return
-
-    if not folder_path or not tss1_col or not tss2_col or not tss3_col or not output_file:
-        messagebox.showerror("Error", "Some fields are required")
-        return
-
-    processFiles(folder_path, tss1_col, tss2_col, tss3_col, output_file)
+    except ValueError as e:
+        logging.error(f"Error processing files: {e}")
+        messagebox.showerror("Error", str(e))
 
 # Main program
-print("TSS Converter running...")
+logging.info("TSS Converter started.")
 
 # Create the main window
 root = tk.Tk()
@@ -696,6 +796,7 @@ tk.Button(root, text="Process Files", command=lambda: process(), font=font_bold)
 tk.Button(root, text="Show Map", command=lambda: show_maps(), font=font_bold).grid(row=10, column=1, columnspan=3, pady=10, sticky=tk.W)
 tk.Button(root, text="Show Coils", command=lambda: show_coils(), font=font_bold).grid(row=10, column=2, columnspan=3, pady=10, sticky=tk.W)
 
+logging.info("Graphic User Interface created. Main loop started.")
 
 # Run the main loop
 root.mainloop()
