@@ -135,7 +135,7 @@ def calculateHeading(merged_df):
         # Use circular mean for headings and courses
         heading_avg = circular_mean(heading_deg)
         course_avg = circular_mean(course)
-        heading_error_avg = heading_avg - course_avg
+        heading_error_avg = np.degrees(np.angle(np.exp(1j * np.radians(heading_avg - course_avg))))
         line_direction = round(heading_avg / 5) * 5  # Round to nearest 5 degrees
 
         # Compute circular standard deviation (in radians) and then convert to degrees.
