@@ -428,14 +428,14 @@ def plotMaps(folder_path, tss1_col, tss2_col, tss3_col):
         plt.grid(True)
 
         # Create a custom Altitude colormap
-        cmap_alt = mcolors.ListedColormap(['purple', 'magenta', 'blue', 'cyan', 'yellow', 'orange', 'red'])
-        bounds_alt = [-0.5, -0.25, 0, 0.25, 0.5, 0.75, 1]
+        cmap_alt = mcolors.ListedColormap(['lime','pink','magenta', 'purple', 'blue', 'dodgerblue', 'gold', 'orange', 'red'])
+        bounds_alt = [-1, -0.5, -0.25, -0.1, 0, 0.25, 0.5, 0.75, 1]
         norm_alt = mcolors.BoundaryNorm(bounds_alt, cmap_alt.N)
 
         # Create scatter plots for flying altitude
         plt.figure(num=target_path + " Altitude", figsize=(7, 6))
         scatter = plt.scatter(merged_df['Easting'], merged_df['Northing'], c=merged_df['Alt'], cmap=cmap_alt, norm=norm_alt, marker='o')
-        plt.colorbar(scatter, label="Altitude [m]", boundaries=bounds_alt, ticks=[-0.5, -0.25, 0, 0.25, 0.5, 0.75, 1])
+        plt.colorbar(scatter, label="Altitude [m]", boundaries=bounds_alt, ticks=[-1, -0.5, -0.25, -0.1, 0, 0.25, 0.5, 0.75, 1])
         plt.xlabel("Easting [m]")
         plt.ylabel("Northing [m]")
         plt.suptitle(f'Heatmap of TSS Flying Altitude')
