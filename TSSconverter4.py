@@ -28,6 +28,9 @@ COLUMN_COIL_3_DEFAULT = 12
 # Maximum angle error for heading and course in degrees
 MAX_ANGLE_ERROR = 20
 
+# Minimum amount of rows in a file to be considered valid
+MIN_FILE_ROWS = 10
+
 def convert_to_datetime(time_str, format_str='%H%M%S%f'):
     try:
         return datetime.strptime(str(time_str), format_str)
@@ -249,10 +252,23 @@ def extractData(folder_path, tss1_col, tss2_col, tss3_col):
                 logging.warning(f"Skipping PTR file {filename} due to missing navigation files")
                 continue  # Skip this iteration if any required navigation file is missing
             try:
-                df = pd.read_csv(file_path, delimiter=';', header=None)
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    first_line = f.readline().strip()
+
+                # Check if the first line contains text (headers)
+                if any(c.isalpha() for c in first_line):
+                    df = pd.read_csv(file_path, delimiter=';', skiprows=1, header=None)
+                else:
+                    df = pd.read_csv(file_path, delimiter=';', header=None)
+
             except Exception as e:
                 logging.error(f"Error reading PTR file {file_path}: {e}")
                 continue
+
+            if len(df) < MIN_FILE_ROWS:
+                messagebox.showwarning("Warning", f"PTR file has less than 10 lines: {filename}")
+                logging.warning(f"PTR file has less than 10 lines: {filename}")
+
             try:
                 df_extracted = pd.DataFrame({
                     'Filename': filename,
@@ -270,22 +286,47 @@ def extractData(folder_path, tss1_col, tss2_col, tss3_col):
                 continue
 
         if filename.endswith('_Coil_1.csv'):
-            only_name = filename.split('_')[0]
-            if not (only_name + '.ptr') in os.listdir(folder_path) or not (only_name + '_Coil_2.csv') in os.listdir(folder_path) or not (only_name + '_Coil_3.csv') in os.listdir(folder_path):
-                continue # Skip this iteration if any of the PTR or navigation required files is missing
-            nav_coil1_dataframe.append(read_csv_file(file_path, ','))
+            try:
+                only_name = filename.split('_')[0]
+                if not (only_name + '.ptr') in os.listdir(folder_path) or not (only_name + '_Coil_2.csv') in os.listdir(folder_path) or not (only_name + '_Coil_3.csv') in os.listdir(folder_path):
+                    continue # Skip this iteration if any of the PTR or navigation required files is missing
+                nav1_df = read_csv_file(file_path, ',')
+                if len(nav1_df) < MIN_FILE_ROWS:
+                    messagebox.showwarning("Warning", f"Coil 1 navigation file has less than 10 lines: {filename}")
+                    logging.warning(f"Coil 1 navigation file has less than 10 lines: {filename}")
+                nav_coil1_dataframe.append(nav1_df)
+            except Exception as e:
+                logging.error(f"Error reading coil 1 navigation file {file_path}: {e}")
+                continue
 
         if filename.endswith('_Coil_2.csv'):
-            only_name = filename.split('_')[0]
-            if not (only_name + '.ptr') in os.listdir(folder_path) or not (only_name + '_Coil_1.csv') in os.listdir(folder_path) or not (only_name + '_Coil_3.csv') in os.listdir(folder_path):
-                continue # Skip this iteration if any of the PTR or navigation required files is missing
-            nav_coil2_dataframe.append(read_csv_file(file_path, ','))
+            try:
+                only_name = filename.split('_')[0]
+                if not (only_name + '.ptr') in os.listdir(folder_path) or not (only_name + '_Coil_1.csv') in os.listdir(folder_path) or not (only_name + '_Coil_3.csv') in os.listdir(folder_path):
+                    continue # Skip this iteration if any of the PTR or navigation required files is missing
+                nav2_df = read_csv_file(file_path, ',')
+                if len(nav2_df) < MIN_FILE_ROWS:
+                    messagebox.showwarning("Warning", f"Coil 2 navigation file has less than 10 lines: {filename}")
+                    logging.warning(f"Coil 2 navigation file has less than 10 lines: {filename}")
+                nav_coil2_dataframe.append(nav2_df)
+            except Exception as e:
+                logging.error(f"Error reading coil 2 navigation file {file_path}: {e}")
+                continue
+
 
         if filename.endswith('_Coil_3.csv'):
-            only_name = filename.split('_')[0]
-            if not (only_name + '.ptr') in os.listdir(folder_path) or not (only_name + '_Coil_1.csv') in os.listdir(folder_path) or not (only_name + '_Coil_2.csv') in os.listdir(folder_path):
-                continue # Skip this iteration if any of the PTR or navigation required files is missing
-            nav_coil3_dataframe.append(read_csv_file(file_path, ','))
+            try:
+                only_name = filename.split('_')[0]
+                if not (only_name + '.ptr') in os.listdir(folder_path) or not (only_name + '_Coil_1.csv') in os.listdir(folder_path) or not (only_name + '_Coil_2.csv') in os.listdir(folder_path):
+                    continue # Skip this iteration if any of the PTR or navigation required files is missing
+                nav3_df = read_csv_file(file_path, ',')
+                if len(nav3_df) < MIN_FILE_ROWS:
+                    messagebox.showwarning("Warning", f"Coil 3 navigation file has less than 10 lines: {filename}")
+                    logging.warning(f"Coil 3 navigation file has less than 10 lines: {filename}")
+                nav_coil3_dataframe.append(nav3_df)
+            except Exception as e:
+                logging.error(f"Error reading coil 3 navigation file {file_path}: {e}")
+                continue
 
     # Check if any PTR or Navigation files were found
     if not ptr_dataframe:
@@ -330,7 +371,7 @@ def extractData(folder_path, tss1_col, tss2_col, tss3_col):
     high_time_diff = abs(time_diff) > MAX_TIME_DIFF_SEC
     if (abs(time_diff) > MAX_TIME_DIFF_SEC).any():
         logging.warning(f"Time difference between PTR and Navigation timestamp is too high in {high_time_diff.sum()} points. Max value :  {abs(time_diff).max():.3f} seconds")
-        messagebox.showerror("Warning", f"Time difference between PTR and Navigation timestamp is too high in {high_time_diff.sum()} points. Max value :  {abs(time_diff).max():.3f} seconds")
+        messagebox.showwarning("Warning", f"Time difference between PTR and Navigation timestamp is too high in {high_time_diff.sum()} points. Max value :  {abs(time_diff).max():.3f} seconds")
 
     time_diff = (merged_coil2_df['Time_PTR'] - merged_coil2_df['Time']).dt.total_seconds()
     merged_coil2_df['Time_diff'] = time_diff
