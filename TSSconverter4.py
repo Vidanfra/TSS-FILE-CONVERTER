@@ -205,6 +205,8 @@ def extractData(folder_path, tss1_col, tss2_col, tss3_col):
         logging.error(f"Folder {folder_path} is empty")
         messagebox.showerror("Error", f"Folder {folder_path} is empty")
         return
+    
+    #logging.info(f"Files in the folder: {os.listdir(folder_path)}") #DEBUG
 
     # Check all the corresponding files in the folder
     error_messages = []
@@ -212,7 +214,7 @@ def extractData(folder_path, tss1_col, tss2_col, tss3_col):
     for filename in os.listdir(folder_path):
 
         if filename.endswith('.ptr'):
-            only_name = filename.split('.')[0]
+            only_name = filename.removesuffix('.ptr')
             missing_files_coils = []
             
             if not (only_name + '_Coil_1.csv') in os.listdir(folder_path):
@@ -228,7 +230,7 @@ def extractData(folder_path, tss1_col, tss2_col, tss3_col):
                 error_messages.append(f"Missing CSV Navigation {', '.join(missing_files_coils)} files for PTR file: {filename}")
         
         if filename.endswith('_Coil_1.csv') or filename.endswith('_Coil_2.csv') or filename.endswith('_Coil_3.csv'):
-            only_name = filename.split('_')[0]
+            only_name = filename.removesuffix('_Coil_1.csv').removesuffix('_Coil_2.csv').removesuffix('_Coil_3.csv')
             if not (only_name + '.ptr') in os.listdir(folder_path):
                 error_messages.append(f"Missing PTR file for the CSV Navigation file: {filename}")
             if not (only_name + '_Coil_1.csv') in os.listdir(folder_path) or not (only_name + '_Coil_2.csv') in os.listdir(folder_path) or not (only_name + '_Coil_3.csv') in os.listdir(folder_path):
@@ -247,7 +249,7 @@ def extractData(folder_path, tss1_col, tss2_col, tss3_col):
         file_path = os.path.join(folder_path, filename)
 
         if filename.endswith('.ptr'):           
-            only_name = filename.split('.')[0]
+            only_name = filename.removesuffix('.ptr')
              # Check if all required files exist
             required_files = {f"{only_name}_Coil_1.csv", f"{only_name}_Coil_2.csv", f"{only_name}_Coil_3.csv"}
 
@@ -290,7 +292,7 @@ def extractData(folder_path, tss1_col, tss2_col, tss3_col):
 
         if filename.endswith('_Coil_1.csv'):
             try:
-                only_name = filename.split('_')[0]
+                only_name = filename.removesuffix('_Coil_1.csv')
                 if not (only_name + '.ptr') in os.listdir(folder_path) or not (only_name + '_Coil_2.csv') in os.listdir(folder_path) or not (only_name + '_Coil_3.csv') in os.listdir(folder_path):
                     continue # Skip this iteration if any of the PTR or navigation required files is missing
                 nav1_df = read_csv_file(file_path, ',')
@@ -304,7 +306,7 @@ def extractData(folder_path, tss1_col, tss2_col, tss3_col):
 
         if filename.endswith('_Coil_2.csv'):
             try:
-                only_name = filename.split('_')[0]
+                only_name = filename.removesuffix('_Coil_2.csv')
                 if not (only_name + '.ptr') in os.listdir(folder_path) or not (only_name + '_Coil_1.csv') in os.listdir(folder_path) or not (only_name + '_Coil_3.csv') in os.listdir(folder_path):
                     continue # Skip this iteration if any of the PTR or navigation required files is missing
                 nav2_df = read_csv_file(file_path, ',')
@@ -319,7 +321,7 @@ def extractData(folder_path, tss1_col, tss2_col, tss3_col):
 
         if filename.endswith('_Coil_3.csv'):
             try:
-                only_name = filename.split('_')[0]
+                only_name = filename.removesuffix('_Coil_3.csv')
                 if not (only_name + '.ptr') in os.listdir(folder_path) or not (only_name + '_Coil_1.csv') in os.listdir(folder_path) or not (only_name + '_Coil_2.csv') in os.listdir(folder_path):
                     continue # Skip this iteration if any of the PTR or navigation required files is missing
                 nav3_df = read_csv_file(file_path, ',')
