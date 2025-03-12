@@ -526,8 +526,10 @@ def plotCoils(folder_path, tss1_col, tss2_col, tss3_col):
             })
 
         # Loop through all line files in the folder
-        for line in line_files:    
-            plt.figure(num=line['filename'],figsize=(10, 6))
+        for line in line_files: 
+            fig_name = line['filename'].removesuffix('.ptr')  
+             
+            plt.figure(num=fig_name,figsize=(10, 6))
             plt.plot(line['TSS1'], color='r', label='Coil 1')
             plt.plot(line['TSS2'], color='b', label='Coil 2')
             plt.plot(line['TSS3'], color='g', label='Coil 3')
