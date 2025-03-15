@@ -13,6 +13,9 @@ import logging
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
+# Name of the script version
+SCRIPT_VERSION = "TSS Converter v4.4"
+
 # Maximum time difference in seconds
 MAX_TIME_DIFF_SEC = 0.25
 
@@ -802,11 +805,11 @@ def process():
         messagebox.showerror("Error", str(e))
 
 # Main program
-logging.info("TSS Converter started.")
+logging.info(f"{SCRIPT_VERSION} started.")
 
 # Create the main window
 root = tk.Tk()
-root.title("TSS Converter 4 (beta)")
+root.title(SCRIPT_VERSION)
 
 # Set the font size
 font = ("Helvetica", 14)
