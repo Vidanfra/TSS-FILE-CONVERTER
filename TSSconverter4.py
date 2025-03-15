@@ -595,6 +595,9 @@ def plotHeading(folder_path, tss1_col, tss2_col, tss3_col):
 
         # Get the target path for the output files
         target_path = get_target_path(folder_path)
+        
+        # Extract the survey direction
+        survey_direction = attitude_df['Survey Direction'].iloc[0]
 
         # Scatter plot with color scale
         headings_err = np.concatenate(attitude_df['Heading Error'].values)  # Flatten the list of lists into a 1D NumPy array
@@ -616,7 +619,8 @@ def plotHeading(folder_path, tss1_col, tss2_col, tss3_col):
         ax.set_xlabel("Easting [m]")
         ax.set_ylabel("Northing [m]")
         ax.set_aspect('equal', adjustable='box')  # Set aspect ratio to 1:1
-        ax.set_title("Scatter Plot of Heading Error")
+        fig.suptitle("Scatter Plot of Heading - Course Error")
+        ax.set_title(f"Survey Direction: {survey_direction:.0f} º")
         ax.grid(True, linestyle='--', alpha=0.6)
 
         # 🔹 Add arrows for each line
