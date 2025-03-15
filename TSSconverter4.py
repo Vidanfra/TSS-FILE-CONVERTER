@@ -284,16 +284,16 @@ def extractData(folder_path, tss1_col, tss2_col, tss3_col):
                     'Time_PTR': df.iloc[:, TIME_COLUMN_POS],
                     'Easting_PTR': df.iloc[:, EAST_COLUMN_POS],
                     'Northing_PTR': df.iloc[:, NORTH_COLUMN_POS],
-                    'TSS1': df.iloc[:, tss1_col],
-                    'TSS2': df.iloc[:, tss2_col],
-                    'TSS3': df.iloc[:, tss3_col],
+                    'TSS1': df.iloc[:, tss1_col], # Teledyne TSS DeepView coils numbers convention: COIL 1 = STARBOARD
+                    'TSS2': df.iloc[:, tss2_col], # Teledyne TSS DeepView coils numbers convention: COIL 2 = CENTER
+                    'TSS3': df.iloc[:, tss3_col], # Teledyne TSS DeepView coils numbers convention: COIL 3 = PORT
                 })
                 ptr_dataframe.append(df_extracted)
             except IndexError:
                 logging.error(f"Invalid column index in {filename}")
                 continue
 
-        if filename.endswith('_Coil_1.csv'):
+        if filename.endswith('_Coil_1.csv'): # NaviEdit User Offsets coils numbers convention: COIL 1 = PORT
             try:
                 only_name = filename.removesuffix('_Coil_1.csv')
                 if not (only_name + '.ptr') in os.listdir(folder_path) or not (only_name + '_Coil_2.csv') in os.listdir(folder_path) or not (only_name + '_Coil_3.csv') in os.listdir(folder_path):
@@ -307,7 +307,7 @@ def extractData(folder_path, tss1_col, tss2_col, tss3_col):
                 logging.error(f"Error reading coil 1 navigation file {file_path}: {e}")
                 continue
 
-        if filename.endswith('_Coil_2.csv'):
+        if filename.endswith('_Coil_2.csv'): # NaviEdit User Offsets coils numbers convention: COIL 2 = CENTER
             try:
                 only_name = filename.removesuffix('_Coil_2.csv')
                 if not (only_name + '.ptr') in os.listdir(folder_path) or not (only_name + '_Coil_1.csv') in os.listdir(folder_path) or not (only_name + '_Coil_3.csv') in os.listdir(folder_path):
@@ -322,7 +322,7 @@ def extractData(folder_path, tss1_col, tss2_col, tss3_col):
                 continue
 
 
-        if filename.endswith('_Coil_3.csv'):
+        if filename.endswith('_Coil_3.csv'): # NaviEdit User Offsets coils numbers convention: COIL 3 = STARBOARD
             try:
                 only_name = filename.removesuffix('_Coil_3.csv')
                 if not (only_name + '.ptr') in os.listdir(folder_path) or not (only_name + '_Coil_1.csv') in os.listdir(folder_path) or not (only_name + '_Coil_2.csv') in os.listdir(folder_path):
@@ -368,10 +368,17 @@ def extractData(folder_path, tss1_col, tss2_col, tss3_col):
     nav_coil2_df = nav_coil2_df.sort_values(by='Time')
     nav_coil3_df = nav_coil3_df.sort_values(by='Time')
     
+    # Swapping of COIL 1 and COIL 3 to match both coils numbers conventions. PTR files numbers convention will be used as reference.
+    # - PTR files: TSS DeepView coils numbers convention, Coil 1 = STARBOARD, Coil 2 = CENTRAL, Coil 3 = PORT [DEFAULT]
+    # - Navigation files: NaviEdit User Offsets coils numbers convention, Coil 1 = PORT, Coil 2 = CENTER, Coil 3 = STARBOARD
+    nav_coil1_df_swapped = nav_coil3_df.copy() # Swapped COIL 1 and COIL 3 to match PTR files numbers convention
+    nav_coil2_df_swapped = nav_coil2_df.copy()
+    nav_coil3_df_swapped = nav_coil1_df.copy() # Swapped COIL 3 and COIL 1 to match PTR files numbers convention
+    
     # Merge the DataFrames based on the closest time in the navigation data to the PTR data
-    merged_coil1_df = pd.merge_asof(ptr_df, nav_coil3_df, left_on='Time_PTR', right_on='Time', direction='nearest') # Switched COIL 1 and COIL 3
-    merged_coil2_df = pd.merge_asof(ptr_df, nav_coil2_df, left_on='Time_PTR', right_on='Time', direction='nearest')
-    merged_coil3_df = pd.merge_asof(ptr_df, nav_coil1_df, left_on='Time_PTR', right_on='Time', direction='nearest') # Switched COIL 3 and COIL 1
+    merged_coil1_df = pd.merge_asof(ptr_df, nav_coil1_df_swapped, left_on='Time_PTR', right_on='Time', direction='nearest') 
+    merged_coil2_df = pd.merge_asof(ptr_df, nav_coil2_df_swapped, left_on='Time_PTR', right_on='Time', direction='nearest')
+    merged_coil3_df = pd.merge_asof(ptr_df, nav_coil3_df_swapped, left_on='Time_PTR', right_on='Time', direction='nearest') 
 
     # Check if time difference exceeds the allowed threshold
     time_diff = (merged_coil1_df['Time_PTR'] - merged_coil1_df['Time']).dt.total_seconds()
@@ -427,7 +434,7 @@ def mergeData(merged_coil1_df, merged_coil2_df, merged_coil3_df):
     merged_coil3_df = merged_coil3_df.iloc[:min_length]
 
     # Create an interleaved dataframe
-    interleaved_df = pd.concat([merged_coil1_df, merged_coil2_df, merged_coil3_df], axis=0).sort_index(kind='merge') # sort_index(kind='merge') interleaves the dataframes (first row of each, then second row of each, etc.)
+    interleaved_df = pd.concat([merged_coil1_df, merged_coil2_df, merged_coil3_df], axis=0).sort_index(kind='merge') # sort_index(kind='merge') interleaves the dataframes (first row of each df, then second row of each df, etc.)
 
     # Reset index for a clean output
     interleaved_df = interleaved_df.reset_index(drop=True)
@@ -533,9 +540,9 @@ def plotCoils(folder_path, tss1_col, tss2_col, tss3_col):
             fig_name = line['filename'].removesuffix('.ptr')  
              
             plt.figure(num=fig_name,figsize=(10, 6))
-            plt.plot(line['TSS1'], color='r', label='Coil 1')
-            plt.plot(line['TSS2'], color='b', label='Coil 2')
-            plt.plot(line['TSS3'], color='g', label='Coil 3')
+            plt.plot(line['TSS1'], color='r', label='Coil 1 - STBD')
+            plt.plot(line['TSS2'], color='b', label='Coil 2 - CENTER')
+            plt.plot(line['TSS3'], color='g', label='Coil 3 - PORT')
 
             # Function to annotate min and max points
             def annotate_peaks(tss_data, color, label):
@@ -826,7 +833,7 @@ folder_entry.grid(row=0, column=1, padx=10, pady=5, sticky=tk.W)
 folder_entry.insert(0, os.getcwd())  # Default to current working directory
 tk.Button(root, text="Browse", command=select_folder, font=font_bold).grid(row=0, column=2, padx=10, pady=5, sticky=tk.W)
 
-tk.Label(root, text="Coil 1 (port) Column PTR file:", font=font).grid(row=3, column=0, padx=10, pady=5, sticky=tk.W)
+tk.Label(root, text="Coil 1 (starboard) Column PTR file:", font=font).grid(row=3, column=0, padx=10, pady=5, sticky=tk.W)
 tss1_entry = tk.Entry(root, width=20, font=font)
 tss1_entry.grid(row=3, column=1, padx=10, pady=5, sticky=tk.W)
 tss1_entry.insert(0, COLUMN_COIL_1_DEFAULT)  # Default value
@@ -836,7 +843,7 @@ tss2_entry = tk.Entry(root, width=20, font=font)
 tss2_entry.grid(row=4, column=1, padx=10, pady=5, sticky=tk.W)
 tss2_entry.insert(0, COLUMN_COIL_2_DEFAULT)  # Default value
 
-tk.Label(root, text="Coil 3 (starbord) Column PTR file:", font=font).grid(row=5, column=0, padx=10, pady=5, sticky=tk.W)
+tk.Label(root, text="Coil 3 (port) Column PTR file:", font=font).grid(row=5, column=0, padx=10, pady=5, sticky=tk.W)
 tss3_entry = tk.Entry(root, width=20, font=font)
 tss3_entry.grid(row=5, column=1, padx=10, pady=5, sticky=tk.W)
 tss3_entry.insert(0, COLUMN_COIL_3_DEFAULT)  # Default value
