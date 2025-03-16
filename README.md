@@ -1,94 +1,113 @@
-# TSS Converter 4 (beta)
+# **TSS Converter v4.4**
 
-## Overview
-This script processes the Pipetracker (`.ptr`) and VisualSoft navigation (`_Coil_X.csv`) exported files from NaviEdit to extract Northing, Easting, and TSS coil values, compute estimated headings, and generate various outputs including heatmaps, heading error analysis, and peak value logs. The new version improves accuracy, visualization, and error handling.
+## **Overview**
+TSS Converter v4.4 is a Python-based tool for processing and analyzing **electromagnetic survey data** from **Teledyne Pipetarcker TSS440 and Visualsoft Navigation CSV files** exported from **EIVA NaviEdit**. It extracts, merges, and analyzes **navigation and electromagnetic data** from UXO detection surveys, allowing users to:
+- Process raw **PTR files** and navigation data.
+- Generate **heatmaps** and **quality control plots**.
+- Calculate **heading errors** and survey statistics.
+- Export processed data in a structured format.
 
-## Features (Version 4)
-1. **Read all the pipetracker and navigation files in the same folder**:
-   - It is no longer necessary to use 2 different folder for every type of file.
-   - All the survey files (inputs and outputs) keep in the same folder.
-2. **Improved Heading Calculation**:
-   - Uses `merge_asof` to accurately match navigation data with PTR timestamps.
-   - Computes course with reference to **compass North (0° to 360°)**.
-   - Implements **circular mean and standard deviation** to avoid 0°/360° wrap-around errors.
-   - Heading error is now correctly calculated within **±180°** range.
-3. **Improved Coil Positioning**:
-   - Extracts the positions of port and starboard coils using the computed points from NaviEdit in the navigation files.
-   - Ensures accurate placement of each coil's data.
-4. **New Heading Error Map**:
-   - Displays heading error as a scatter plot with a **color scale**.
-   - Adds **directional arrows** at the start of each line to indicate average course of each line.
-5. **Improved Heatmaps**:
-   - Magnetic field values and altitude are now plotted with **better-scaled color gradients**.
-   - More accurate representation of survey data.
-6. **Peak Detection for TSS Values**:
-   - Detects and logs **max and min TSS values** along with their locations.
-   - Saves peak information to a CSV file for further analysis.
-7. **Enhanced Heading and Course Quality Control (QC) Table**:
-   - Displays heading statistics in a formatted table.
-   - **Color-coded cells**: White (low error), Red (high error) for quick interpretation.
-8. **Error Handling Improvements**:
-   - Consolidated error messages into a **single prompt**, reducing user interruptions.
-   - Added time difference verification to ensure synchronization between PTR and navigation data.
+---
+## **Installation**
+### **1. Clone the Repository**
+```bash
+git clone https://github.com/Vidanfra/TSSConverter.git 
+cd TSSConverter
+```
+### **2. Install Required Dependencies**
+Ensure you have Python **3.7+** installed. Install required packages with:
+```bash
+pip install -r requeriments.txt
+```
+If `requirements.txt` is missing, install manually:
+```bash
+pip install pandas matplotlib numpy scipy tk
+```
+---
+## **Usage**
+### **1. Run the Script**
+Run the script from the command line or a Python environment:
+```bash
+python TSSconverter4.py
+```
+Alternatively, double-click the `TSSconverter v4.4.exe` file to launch the script.
 
-## Changes from Version 3
-### **1. Improved Data Handling**
-✅ **v3**: Basic merging of data without detailed time synchronization.
+### **2. Select Input Data**
+- Click **Browse** to select the folder containing **PTR and CSV files**.
+- Ensure **PTR files** and corresponding **Coil navigation CSV files** are present.
+- You must use the **column numbers** for each coil in the PTR files by default **[Coil 1 = 10, Coil 2 = 11, Coil 3 = 12]**.
+- You only need to change column numbers if the convention in NaviEdit or TSS DeepView is changed.
 
-✅ **v4**: Uses `merge_asof` for precise timestamp alignment and checks time differences against a threshold.
+### **3. Process Data**
+- **Process Files**: Extract and merge navigation and electromagnetic data.
+- **Show Map**: Generate a **heatmap** of **TSS electromagnetic values** and **altitude**.
+- **Show Coils**: Plot **TSS values** for each coil.
+- **Heading QC**: Display heading quality control statistics.
 
-### **2. Advanced Heading Calculation**
-✅ **v3**: Simple heading computation based on `arctan2`.
+### **4. Export Processed Data**
+- The processed data is saved in the selected folder as **BOSSE_XXX_A.txt** (default).
+- Coil peak values are saved separately in **BOSSE_XXX_A_coil_peaks.csv** (default).
 
-✅ **v4**: Extracts the NaviEdit computed heading values from NaviEdit.
+---
 
-### **3. Better Visualization & QC**
-✅ **v3**: Basic scatter plots for TSS values.
+## **File Naming Conventions**
+| File Type  | Naming Format        | Description |
+|------------|---------------------|-------------|
+| PTR File  | `Survey_XYZ.ptr`     | Raw TSS data |
+| Coil 1 Nav | `Survey_XYZ_Coil_1.csv` | Navigation for Coil 1 |
+| Coil 2 Nav | `Survey_XYZ_Coil_2.csv` | Navigation for Coil 2 |
+| Coil 3 Nav | `Survey_XYZ_Coil_3.csv` | Navigation for Coil 3 |
+| Output     | `BOSSE_XXX_A.txt`   | Processed TSS Data |
+| Coil Peaks | `BOSSE_XXX_A_coil_peaks.csv` | Peak values per coil |
 
-✅ **v4**:
-- Heatmaps for **magnetic field** and **altitude**.
-- **Heading Error Map** with a color scale and directional arrows.
-- **Table of heading statistics** with a color-coded format.
+---
 
-### **4. Error Handling Improvements**
-✅ **v3**: Individual error pop-ups for missing files.
+## **Features & Functionality**
+### ✅ **Data Processing**
+- Reads **pipetracker files** and corresponding **navigation CSVs**.
+- Matches timestamps between **PTR** and **navigation** data.
+- Swaps coil numbers to match **TSS DeepView** with **NaviEdit Offsets** conventions.
+- Exports an output `.txt` file to create **TSS electromagnetic values** and **altitude** in **NaviModel**.
+- Exports an output `.csv` file cointaining the **TSS peak values of each coil at each line** of the survey.
 
-✅ **v4**: Consolidated error messages in a single prompt for better user experience.
+### ✅ **Analysis & Visualization**
+- **Heatmaps** for **TSS electromagnetic values** and **altitude**.
+- **Coil plots** showing TSS variations over time.
+- **Heading Quality Control (QC)** with statistical analysis.
 
-### **5. Additional Enhancements**
-- Time parsing improvements to correctly interpret PTR timestamps.
-- More robust NaN handling to avoid issues in heading error calculations.
-- Optimized performance by reducing redundant computations and ensuring efficient indexing.
+### ✅ **Error Handling & Logging**
+- **Logs errors and warnings** for missing or inconsistent data.
+- Provides **user-friendly warnings** and **alerts** via GUI.
 
-## Necessary Software
-This script is written using the Python programming language and several standard libraries. However, it is not necessary to install Python to use it because the script was exported as a `.exe` file and can be run on any Windows computer.
+---
 
-### If Modification is Needed
-If it is necessary to modify the script, it can be edited using the following software (already installed on the OLTA Offline computers):
-- **Visual Studio Code** (or any other development environment)
-- **Python 3.12.6**
-- **Python libraries**:
-  - `pandas`: to manage the data inside the program (`pip install pandas`)
-  - `matplotlib`: to plot the heatmap and the coils values (`pip install matplotlib`)
-  - `scipy`: for circular statistics calculations (`pip install scipy`)
-  - `pyinstaller`: to create the `.exe` file (`pip install pyinstaller`)
+## **Troubleshooting**
+### ❓ Coils position looks swapped in the heatmaps
+✔ Check that the **coils numbers convention is what is expected** in both files.
 
-### Running the Script
-If the Python script is modified, it can be run from Visual Studio Code. However, this is not recommended for the regular workflow because someone could modify and ruin it by mistake. It is recommended to create a new `.exe` file. This can be done by running the `.bat` script `CREATE_exe.bat` (it is necessary to have the `pyinstaller` Python library installed previously).
+✔ Check **column numbers** for TSS values.
 
-## Usage
-1. Place the Pipetracker (`.ptr`) and the VisualSoft navigation (`_Coil_X.csv`) files from NaviEdit in the same folder.
-2. Run the TSS Converter 4 executable.
-3. Select the folder containing the files.
-4. Configure the necessary parameters (e.g., coils columns indices, output filename).
-5. Use the provided buttons to preview the heatmaps, coil plots, and heading error map.
-6. Export the results as `.txt` and `.csv` files pressing ProcessFiles.
+✔ By default the coils numbers convention are:
 
-## Output Files
-- `processed_data.csv`: Merged TSS and navigation data.
-- `coil_peaks.csv`: Peak TSS values with corresponding locations.
+- TSS DeepView: **[Coil 1 = Starboard, Coil 2 = Central, Coil 3 = Port]**
+- NaviEdit Offsets: **[Coil 1 = Port, Coil 2 = Central, Coil 3 = Starboard]**
+### ❓ No data appears after processing
+✔ Ensure the **PTR and CSV files** are correctly formatted and in the selected folder.  
+✔ Check **column numbers** for TSS values.
 
-## Contact
-For any issues or questions, please contact vicente.danvila@reachsubsea.com.
+### ❓ Time mismatch errors
+✔ Ensure **navigation and PTR timestamps** match within **0.25 seconds**.  
+✔ Sometimes **files may contain several points not paired** on time.
+✔ Check the files **if you get more than 5 or 10 points mismached**.
 
+### ❓ Missing Navigation Files warning
+✔ Make sure all **three coil navigation CSVs** exist and are named correctly for each **PTR file**.
 
+---
+
+## **Contributing**
+Feel free to **fork** this repository, submit **issues**, and open **pull requests** for improvements.
+
+👨‍💻 **Author:** Vicente Danvila Fraile
+
+📧 **Contact:** vicente.danvila@reachsubsea.com  
