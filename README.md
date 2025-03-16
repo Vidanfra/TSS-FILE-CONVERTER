@@ -11,7 +11,7 @@ TSS Converter v4.4 is a Python-based tool for processing and analyzing **electro
 ## **Installation**
 ### **1. Clone the Repository**
 ```bash
-git clone https://github.com/Vidanfra/TSSConverter.git 
+git clone https://github.com/Vidanfra/TSS-FILE-CONVERTER 
 cd TSSConverter
 ```
 ### **2. Install Required Dependencies**
