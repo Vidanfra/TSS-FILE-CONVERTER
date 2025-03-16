@@ -32,7 +32,7 @@ python TSSconverter4.py
 ```
 Alternatively, double-click the `TSSconverter v4.4.exe` file to launch the script.
 
-![alt text](image.png)
+![alt text](README_images/image.png)
 ### **2. Select Input Data**
 - Click **Browse** to select the folder containing **PTR and CSV files**.
 - Ensure **PTR files** and corresponding **Coil navigation CSV files** are present.
@@ -73,11 +73,11 @@ Alternatively, double-click the `TSSconverter v4.4.exe` file to launch the scrip
 
 ### ✅ **Analysis & Visualization**
 - **Heatmaps** for **TSS electromagnetic values** and **altitude**.
-![alt text](image-1.png)
+![alt text](README_images/image-1.png)
 - **Coil plots** showing TSS variations over time.
-![alt text](image-2.png)
+![alt text](README_images/image-2.png)
 - **Heading Quality Control (QC)** with statistical analysis.
-![alt text](image-3.png)
+![alt text](README_images/image-3.png)
 
 ### ✅ **Error Handling & Logging**
 - **Logs errors and warnings** for missing or inconsistent data.
