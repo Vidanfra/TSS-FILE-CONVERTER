@@ -78,10 +78,16 @@ def getCoilPeaks(merged_df):
         max_index = df['TSS'].idxmax()
         min_index = df['TSS'].idxmin()
         
-        abs_max_tss = df.loc[max_index, 'TSS'] if abs(df.loc[max_index, 'TSS']) > abs(df.loc[min_index, 'TSS']) else df.loc[min_index, 'TSS']
-        coil = df.loc[max_index, 'Coil']
-        easting = df.loc[max_index, 'Easting']
-        northing = df.loc[max_index, 'Northing']
+        if abs(df.loc[max_index, 'TSS']) > abs(df.loc[min_index, 'TSS']): # Positive peak
+            abs_max_tss = df.loc[max_index, 'TSS']
+            coil = df.loc[max_index, 'Coil']
+            easting = df.loc[max_index, 'Easting']
+            northing = df.loc[max_index, 'Northing']
+        else: # Negative peak
+            abs_max_tss = df.loc[min_index, 'TSS']
+            coil = df.loc[min_index, 'Coil']
+            easting = df.loc[min_index, 'Easting']
+            northing = df.loc[min_index, 'Northing']
 
         coil_peaks.append({
             'PTR file': line,
