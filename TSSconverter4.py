@@ -809,6 +809,13 @@ def show_coils():
     except ValueError as e:
         logging.error(f"Error plotting coils: {e}")
         messagebox.showerror("Error", str(e))
+        
+def close_plots():
+    try:
+        plt.close('all')  # Close all open plots
+    except Exception as e:
+        logging.error(f"Error closing plots: {e}")
+        messagebox.showerror("Error", f"Error closing plots: {e}")
 
 def process():
     try:
@@ -864,6 +871,7 @@ tk.Button(root, text="Heading QC", command=lambda: show_heading(), font=font_bol
 tk.Button(root, text="Process Files", command=lambda: process(), font=font_bold).grid(row=10, column=0, columnspan=3, pady=10, sticky=tk.W)
 tk.Button(root, text="Show Map", command=lambda: show_maps(), font=font_bold).grid(row=10, column=1, columnspan=3, pady=10, sticky=tk.W)
 tk.Button(root, text="Show Coils", command=lambda: show_coils(), font=font_bold).grid(row=10, column=2, columnspan=3, pady=10, sticky=tk.W)
+tk.Button(root, text="Close Plots", command=lambda: close_plots(), font=font_bold).grid(row=9, column=2, columnspan=3, pady=10, sticky=tk.W)
 
 logging.info("Graphic User Interface created. Main loop started.")
 
