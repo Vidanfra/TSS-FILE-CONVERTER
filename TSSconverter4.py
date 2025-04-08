@@ -2,6 +2,7 @@ import pandas as pd #pip install pandas
 import os
 import tkinter as tk
 from tkinter import filedialog, messagebox
+import matplotlib
 import matplotlib.pyplot as plt #pip install matplotlib
 import matplotlib.colors as mcolors
 import numpy as np
@@ -13,6 +14,9 @@ import logging
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+# Set the backend for matplotlib to avoid GUI tinker issues
+matplotlib.use('TkAgg')  # Use a non-GUI backend for script execution
 
 # Name of the script version
 SCRIPT_VERSION = "TSS Converter v4.6"
