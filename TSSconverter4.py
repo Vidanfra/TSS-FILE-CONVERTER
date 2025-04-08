@@ -15,7 +15,7 @@ import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Name of the script version
-SCRIPT_VERSION = "TSS Converter v4.5"
+SCRIPT_VERSION = "TSS Converter v4.6"
 
 # Maximum time difference in seconds
 MAX_TIME_DIFF_SEC = 0.25
@@ -741,6 +741,11 @@ def processFiles(folder_path, tss1_col, tss2_col, tss3_col, output_file):
         output_file_path = os.path.join(folder_path, output_file)
         merged_df.to_csv(output_file_path, index=False)
         logging.info(f"Merged data saved to {output_file_path}")
+        
+        merged_df_TSS = merged_df[['Easting', 'Northing', 'TSS']]
+        merged_df_ALT = merged_df[['Easting', 'Northing', 'Alt']]
+        merged_df_TSS.to_csv(os.path.join(folder_path, os.path.splitext(output_file)[0] + '_TSS.txt'), index=False)
+        merged_df_ALT.to_csv(os.path.join(folder_path, os.path.splitext(output_file)[0] + '_ALT.txt'), index=False)
         
         # Save the coil peaks to a new CSV file
         coil_peaks_file_path = os.path.splitext(output_file)[0] + '_coil_peaks.csv'
