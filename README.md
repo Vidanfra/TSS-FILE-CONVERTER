@@ -1,7 +1,7 @@
-# **TSS Converter v4.4**
+# **TSS Converter v4.5**
 
 ## **Overview**
-TSS Converter v4.4 is a Python-based tool for processing and analyzing **electromagnetic survey data** from **Teledyne Pipetarcker TSS440 and Visualsoft Navigation CSV files** exported from **EIVA NaviEdit**. It extracts, merges, and analyzes **navigation and electromagnetic data** from UXO detection surveys, allowing users to:
+TSS Converter v4.5 is a Python-based tool for processing and analyzing **electromagnetic survey data** from **Teledyne Pipetarcker TSS440 and Visualsoft Navigation CSV files** exported from **EIVA NaviEdit**. It extracts, merges, and analyzes **navigation and electromagnetic data** from UXO detection surveys, allowing users to:
 - Process raw **PTR files** and navigation data.
 - Generate **heatmaps** and **quality control plots**.
 - Calculate **heading errors** and survey statistics.

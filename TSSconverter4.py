@@ -15,7 +15,7 @@ import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Name of the script version
-SCRIPT_VERSION = "TSS Converter v4.4"
+SCRIPT_VERSION = "TSS Converter v4.5"
 
 # Maximum time difference in seconds
 MAX_TIME_DIFF_SEC = 0.25
