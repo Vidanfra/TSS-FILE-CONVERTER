@@ -8,7 +8,6 @@ import matplotlib.colors as mcolors
 import numpy as np
 import csv
 from datetime import datetime
-import scipy.stats as st #pip install scipy
 import logging
 
 
@@ -112,6 +111,25 @@ def circular_mean(angles):
     mean_angle = np.degrees(np.arctan2(mean_y, mean_x)) % 360  # Ensure 0-360 range
     return mean_angle
 
+def circular_std(angles):
+    """Compute circular standard deviation (degrees) without SciPy."""
+    if angles is None:
+        return np.nan
+
+    angles_series = pd.Series(angles).dropna()
+    if angles_series.empty:
+        return np.nan
+
+    angles_rad = np.radians(angles_series.to_numpy())
+    sin_sum = np.sin(angles_rad).sum()
+    cos_sum = np.cos(angles_rad).sum()
+    r = np.sqrt(sin_sum ** 2 + cos_sum ** 2) / len(angles_rad)
+
+    # Clamp r to avoid log(0) while preserving behaviour near 0
+    r = np.clip(r, 1e-12, 1.0)
+    std_rad = np.sqrt(-2.0 * np.log(r))
+    return np.degrees(std_rad)
+
 def calculateHeading(merged_df):
     if merged_df.empty or not {'Filename', 'Coil', 'Easting', 'Northing', 'Gyro'}.issubset(merged_df.columns):
         logging.error("Missing required columns in DataFrame")
@@ -155,12 +173,9 @@ def calculateHeading(merged_df):
         if line_direction == 360:
             line_direction = 0  # Ensure 360 is converted to 0
 
-        # Compute circular standard deviation (in radians) and then convert to degrees.
-        heading_std_rad = st.circstd(np.radians(heading_deg), high=2*np.pi, low=0)
-        heading_std = np.degrees(heading_std_rad)
-
-        course_std_rad = st.circstd(np.radians(course), high=2*np.pi, low=0)
-        course_std = np.degrees(course_std_rad)
+        # Compute circular standard deviation in degrees using NumPy-based helper
+        heading_std = circular_std(heading_deg)
+        course_std = circular_std(course)
 
         # Store values in a dictionary
         attitude_list.append({

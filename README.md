@@ -1,7 +1,7 @@
-# **TSS Converter v4.5**
+# **TSS Converter v4.6**
 
 ## **Overview**
-TSS Converter v4.5 is a Python-based tool for processing and analyzing **electromagnetic survey data** from **Teledyne Pipetarcker TSS440 and Visualsoft Navigation CSV files** exported from **EIVA NaviEdit**. It extracts, merges, and analyzes **navigation and electromagnetic data** from UXO detection surveys, allowing users to:
+TSS Converter v4.6 is a Python-based tool for processing and analyzing **electromagnetic survey data** from **Teledyne Pipetarcker TSS440 and Visualsoft Navigation CSV files** exported from **EIVA NaviEdit**. It extracts, merges, and analyzes **navigation and electromagnetic data** from UXO detection surveys, allowing users to:
 - Process raw **PTR files** and navigation data.
 - Generate **heatmaps** and **quality control plots**.
 - Calculate **heading errors** and survey statistics.
@@ -21,7 +21,7 @@ pip install -r requeriments.txt
 ```
 If `requirements.txt` is missing, install manually:
 ```bash
-pip install pandas matplotlib numpy scipy tk
+pip install pandas matplotlib numpy tk
 ```
 ---
 ## **Usage**
@@ -30,7 +30,7 @@ Run the script from the command line or a Python environment:
 ```bash
 python TSSconverter4.py
 ```
-Alternatively, double-click the `TSSconverter v4.4.exe` file to launch the script.
+Alternatively, double-click the `TSSconverter v4.6.exe` file to launch the script.
 
 ![alt text](README_images/image.png)
 ### **2. Select Input Data**
@@ -108,6 +108,65 @@ Alternatively, double-click the `TSSconverter v4.4.exe` file to launch the scrip
 ✔ Make sure all **three coil navigation CSVs** exist and are named correctly for each **PTR file**.
 
 ---
+
+## **Building a smaller executable**
+The default requirements now omit SciPy (the only heavy dependency we previously needed solely for `circstd`).
+Combined with a clean build environment and compression, the standalone executable drops from ~2.5 GB to under 150 MB.
+
+### **Quick Build (Recommended)**
+Use the automated PowerShell script that handles everything:
+```powershell
+.\BUILD_CLEAN_EXE.ps1
+```
+
+This script will:
+1. Create a clean virtual environment (`.venv-build`)
+2. Install only the minimal required dependencies
+3. Build the optimized executable with PyInstaller
+4. Report the final size and build time
+5. Leave the environment for debugging (you can delete it manually after)
+
+### **Manual Build (Advanced)**
+If you prefer to build manually or troubleshoot:
+
+1. **Create a clean virtual environment** so PyInstaller only sees the dependencies from `requirements.txt`:
+   ```powershell
+   python -m venv .venv-build
+   .\.venv-build\Scripts\Activate.ps1
+   pip install --upgrade pip
+   pip install pandas numpy matplotlib pyinstaller --no-cache-dir
+   ```
+
+2. **Build using the optimized spec file**:
+   ```powershell
+   pyinstaller TSSconverter4.spec --clean --noconfirm
+   ```
+   
+3. *(Optional but recommended)* **Install [UPX](https://upx.github.io/)** and add it to your `PATH`. PyInstaller will automatically use it to compress DLLs when available.
+
+4. **Deactivate and remove** the temporary environment when you are done to free disk space:
+   ```powershell
+   deactivate
+   Remove-Item .venv-build -Recurse -Force
+   ```
+
+### **Why was my executable 2.5 GB?**
+Large executables typically result from:
+- **Building from your main Python environment** with dozens of unnecessary packages (scipy, jupyter, pytest, etc.)
+- **Debug symbols not stripped** (`strip=False` in spec file)
+- **No bytecode optimization** (`optimize=0` in spec file)
+- **Missing exclusions** for heavy packages like Qt, IPython, scipy
+
+The optimized build configuration (`TSSconverter4.spec`) now:
+- Enables `strip=True` to remove debug symbols
+- Sets `optimize=2` for maximum bytecode optimization
+- Excludes 20+ unnecessary packages that were being auto-detected
+- Uses UPX compression when available
+
+**Expected sizes:**
+- Without optimization: 2-3 GB ❌
+- With clean venv + optimizations: 80-150 MB ✅
+- With UPX compression: 50-100 MB ✅✅---
 
 ## **Contributing**
 Feel free to **fork** this repository, submit **issues**, and open **pull requests** for improvements.

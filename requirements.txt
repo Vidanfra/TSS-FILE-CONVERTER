@@ -1,6 +1,5 @@
 pandas
 numpy
 matplotlib
-scipy
 tk
 pyinstaller

@@ -1,0 +1,15 @@
+# Ignore build and dist folders
+build/
+dist/
+
+# Ignore PyInstaller output
+*.spec
+
+# Ignore Python cache and environment files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+venv/
+.venv-build/
