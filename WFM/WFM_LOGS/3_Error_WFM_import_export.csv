@@ -1,0 +1,8 @@
+Data;Time;TaskName;Logging Level;Message;Exception; 2025.11.26;17.41.11;[SbdImportTask];ERROR;Could not read XML element '/NaviEditTask/Geodesy/Shift';;
+2025.11.26;17.41.11;[SbdImportTask];ERROR;Couldn't find a valid datum shift in the XML file;;
+2025.11.26;17.41.12;[ExportVisualSoftNavigationTask];ERROR;Could not read XML attribute '/NaviEditTask/Export/Settings/@addRunlineName';;
+2025.11.26;17.41.21;[ExportVisualSoftNavigationTask];ERROR;Could not read XML attribute '/NaviEditTask/Export/Settings/@addRunlineName';;
+2025.11.26;17.41.21;[ExportVisualSoftNavigationTask];ERROR;Could not read XML attribute '/NaviEditTask/Export/Settings/@addRunlineName';;
+2025.11.26;17.41.22;[ExportVisualSoftNavigationTask];ERROR;Could not read XML attribute '/NaviEditTask/Export/Settings/@addRunlineName';;
+2025.11.26;17.41.23;[ExportAsciiTask];ERROR;No runline found.;;
+2025.11.26;17.41.23;[ExportAsciiTask];ERROR;Should the export continue with possible invalid KPs?;;

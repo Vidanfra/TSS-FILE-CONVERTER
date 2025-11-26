@@ -38,6 +38,12 @@ MAX_ANGLE_ERROR = 20
 # Minimum amount of rows in a file to be considered valid
 MIN_FILE_ROWS = 10
 
+# File suffix conventions for navigation CSV files
+COIL_1_SUFFIX = "_Coil_port.csv"      # Port coil (NaviEdit convention: Coil 1 = PORT)
+COIL_2_SUFFIX = "_Coil_center.csv"    # Center coil
+COIL_3_SUFFIX = "_Coil_stbd.csv"      # Starboard coil (NaviEdit convention: Coil 3 = STARBOARD)
+CRP_SUFFIX = "_CRP.csv"               # ROV CRP navigation
+
 def convert_to_datetime(time_str, format_str='%H%M%S%f'):
     try:
         return datetime.strptime(str(time_str), format_str)
@@ -51,6 +57,22 @@ def read_csv_file(file_path, delimiter=','):
     except Exception as e:
         logging.error(f"Error reading CSV file {file_path}: {e}")
         return pd.DataFrame()
+
+def normalize_nav_time_column(df):
+    """
+    Normalize the time column name in navigation dataframes.
+    Handles both old NaviEdit header 'Time' and new header 'HH:MM:SS.SSS'.
+    Returns the dataframe with the time column renamed to 'Time' if needed.
+    """
+    if 'Time' in df.columns:
+        return df  # Already has the standard 'Time' column
+    elif 'HH:MM:SS.SSS' in df.columns:
+        df = df.rename(columns={'HH:MM:SS.SSS': 'Time'})
+        logging.info("Renamed 'HH:MM:SS.SSS' column to 'Time' (new NaviEdit format detected)")
+        return df
+    else:
+        logging.warning(f"Time column not found. Available columns: {df.columns.tolist()}")
+        return df
 
 def get_target_path(folder_path):
     # Normalize path for cross-platform compatibility
@@ -212,6 +234,7 @@ def extractData(folder_path, tss1_col, tss2_col, tss3_col):
     nav_coil1_dataframe = []
     nav_coil2_dataframe = []
     nav_coil3_dataframe = []
+    nav_crp_dataframe = []
 
     # Validate column numbers
     try:
@@ -246,23 +269,32 @@ def extractData(folder_path, tss1_col, tss2_col, tss3_col):
             only_name = filename.removesuffix('.ptr')
             missing_files_coils = []
             
-            if not (only_name + '_Coil_1.csv') in os.listdir(folder_path):
+            if not (only_name + COIL_1_SUFFIX) in os.listdir(folder_path):
                 missing_files_coils.append("Coil 1")
-            if not (only_name + '_Coil_2.csv') in os.listdir(folder_path):
+            if not (only_name + COIL_2_SUFFIX) in os.listdir(folder_path):
                 missing_files_coils.append("Coil 2")
-            if not (only_name + '_Coil_3.csv') in os.listdir(folder_path):
+            if not (only_name + COIL_3_SUFFIX) in os.listdir(folder_path):
                 missing_files_coils.append("Coil 3")
+            if not (only_name + CRP_SUFFIX) in os.listdir(folder_path):
+                missing_files_coils.append("CRP")
 
-            if len(missing_files_coils) == 3:
+            if len(missing_files_coils) == 4:
                 error_messages.append(f"Missing all CSV Navigation files for PTR file: {filename}")
             elif missing_files_coils:
-                error_messages.append(f"Missing CSV Navigation {', '.join(missing_files_coils)} files for PTR file: {filename}")
+                # CRP is optional - only warn, don't add to error messages
+                coil_missing = [c for c in missing_files_coils if c != "CRP"]
+                crp_missing = "CRP" in missing_files_coils
+                if coil_missing:
+                    error_messages.append(f"Missing CSV Navigation {', '.join(coil_missing)} files for PTR file: {filename}")
+                if crp_missing:
+                    logging.warning(f"Missing CRP navigation file for PTR file: {filename} - CRP data will not be included")
         
-        if filename.endswith('_Coil_1.csv') or filename.endswith('_Coil_2.csv') or filename.endswith('_Coil_3.csv'):
-            only_name = filename.removesuffix('_Coil_1.csv').removesuffix('_Coil_2.csv').removesuffix('_Coil_3.csv')
+        if filename.endswith(COIL_1_SUFFIX) or filename.endswith(COIL_2_SUFFIX) or filename.endswith(COIL_3_SUFFIX) or filename.endswith(CRP_SUFFIX):
+            only_name = filename.removesuffix(COIL_1_SUFFIX).removesuffix(COIL_2_SUFFIX).removesuffix(COIL_3_SUFFIX).removesuffix(CRP_SUFFIX)
             if not (only_name + '.ptr') in os.listdir(folder_path):
                 error_messages.append(f"Missing PTR file for the CSV Navigation file: {filename}")
-            if not (only_name + '_Coil_1.csv') in os.listdir(folder_path) or not (only_name + '_Coil_2.csv') in os.listdir(folder_path) or not (only_name + '_Coil_3.csv') in os.listdir(folder_path):
+            # Check for required coil files (CRP is optional)
+            if not (only_name + COIL_1_SUFFIX) in os.listdir(folder_path) or not (only_name + COIL_2_SUFFIX) in os.listdir(folder_path) or not (only_name + COIL_3_SUFFIX) in os.listdir(folder_path):
                 error_messages.append(f"Missing the other necessary CSV Navigation files for this file: {filename}")
     
     # Show all errors in a single message box at the end
@@ -279,12 +311,17 @@ def extractData(folder_path, tss1_col, tss2_col, tss3_col):
 
         if filename.endswith('.ptr'):           
             only_name = filename.removesuffix('.ptr')
-             # Check if all required files exist
-            required_files = {f"{only_name}_Coil_1.csv", f"{only_name}_Coil_2.csv", f"{only_name}_Coil_3.csv"}
+             # Check if all required coil files exist (CRP is optional)
+            required_files = {f"{only_name}{COIL_1_SUFFIX}", f"{only_name}{COIL_2_SUFFIX}", f"{only_name}{COIL_3_SUFFIX}"}
 
             if not required_files.issubset(existing_files):
                 logging.warning(f"Skipping PTR file {filename} due to missing navigation files")
                 continue  # Skip this iteration if any required navigation file is missing
+            
+            # Check if CRP file exists (optional)
+            crp_file = f"{only_name}{CRP_SUFFIX}"
+            if crp_file not in existing_files:
+                logging.warning(f"CRP navigation file missing for {filename} - CRP data will not be included")
             try:
                 with open(file_path, 'r', encoding='utf-8') as f:
                     first_line = f.readline().strip()
@@ -319,10 +356,10 @@ def extractData(folder_path, tss1_col, tss2_col, tss3_col):
                 logging.error(f"Invalid column index in {filename}")
                 continue
 
-        if filename.endswith('_Coil_1.csv'): # NaviEdit User Offsets coils numbers convention: COIL 1 = PORT
+        if filename.endswith(COIL_1_SUFFIX): # NaviEdit User Offsets coils numbers convention: COIL 1 = PORT
             try:
-                only_name = filename.removesuffix('_Coil_1.csv')
-                if not (only_name + '.ptr') in os.listdir(folder_path) or not (only_name + '_Coil_2.csv') in os.listdir(folder_path) or not (only_name + '_Coil_3.csv') in os.listdir(folder_path):
+                only_name = filename.removesuffix(COIL_1_SUFFIX)
+                if not (only_name + '.ptr') in os.listdir(folder_path) or not (only_name + COIL_2_SUFFIX) in os.listdir(folder_path) or not (only_name + COIL_3_SUFFIX) in os.listdir(folder_path):
                     continue # Skip this iteration if any of the PTR or navigation required files is missing
                 nav1_df = read_csv_file(file_path, ',')
                 if len(nav1_df) < MIN_FILE_ROWS:
@@ -333,10 +370,10 @@ def extractData(folder_path, tss1_col, tss2_col, tss3_col):
                 logging.error(f"Error reading coil 1 navigation file {file_path}: {e}")
                 continue
 
-        if filename.endswith('_Coil_2.csv'): # NaviEdit User Offsets coils numbers convention: COIL 2 = CENTER
+        if filename.endswith(COIL_2_SUFFIX): # NaviEdit User Offsets coils numbers convention: COIL 2 = CENTER
             try:
-                only_name = filename.removesuffix('_Coil_2.csv')
-                if not (only_name + '.ptr') in os.listdir(folder_path) or not (only_name + '_Coil_1.csv') in os.listdir(folder_path) or not (only_name + '_Coil_3.csv') in os.listdir(folder_path):
+                only_name = filename.removesuffix(COIL_2_SUFFIX)
+                if not (only_name + '.ptr') in os.listdir(folder_path) or not (only_name + COIL_1_SUFFIX) in os.listdir(folder_path) or not (only_name + COIL_3_SUFFIX) in os.listdir(folder_path):
                     continue # Skip this iteration if any of the PTR or navigation required files is missing
                 nav2_df = read_csv_file(file_path, ',')
                 if len(nav2_df) < MIN_FILE_ROWS:
@@ -348,10 +385,10 @@ def extractData(folder_path, tss1_col, tss2_col, tss3_col):
                 continue
 
 
-        if filename.endswith('_Coil_3.csv'): # NaviEdit User Offsets coils numbers convention: COIL 3 = STARBOARD
+        if filename.endswith(COIL_3_SUFFIX): # NaviEdit User Offsets coils numbers convention: COIL 3 = STARBOARD
             try:
-                only_name = filename.removesuffix('_Coil_3.csv')
-                if not (only_name + '.ptr') in os.listdir(folder_path) or not (only_name + '_Coil_1.csv') in os.listdir(folder_path) or not (only_name + '_Coil_2.csv') in os.listdir(folder_path):
+                only_name = filename.removesuffix(COIL_3_SUFFIX)
+                if not (only_name + '.ptr') in os.listdir(folder_path) or not (only_name + COIL_1_SUFFIX) in os.listdir(folder_path) or not (only_name + COIL_2_SUFFIX) in os.listdir(folder_path):
                     continue # Skip this iteration if any of the PTR or navigation required files is missing
                 nav3_df = read_csv_file(file_path, ',')
                 if len(nav3_df) < MIN_FILE_ROWS:
@@ -360,6 +397,20 @@ def extractData(folder_path, tss1_col, tss2_col, tss3_col):
                 nav_coil3_dataframe.append(nav3_df)
             except Exception as e:
                 logging.error(f"Error reading coil 3 navigation file {file_path}: {e}")
+                continue
+
+        if filename.endswith(CRP_SUFFIX): # ROV CRP (Center Reference Point) navigation
+            try:
+                only_name = filename.removesuffix(CRP_SUFFIX)
+                if not (only_name + '.ptr') in os.listdir(folder_path) or not (only_name + COIL_1_SUFFIX) in os.listdir(folder_path) or not (only_name + COIL_2_SUFFIX) in os.listdir(folder_path) or not (only_name + COIL_3_SUFFIX) in os.listdir(folder_path):
+                    continue # Skip this iteration if any of the PTR or navigation required files is missing
+                crp_df = read_csv_file(file_path, ',')
+                if len(crp_df) < MIN_FILE_ROWS:
+                    messagebox.showwarning("Warning", f"CRP navigation file has less than 10 lines: {filename}")
+                    logging.warning(f"CRP navigation file has less than 10 lines: {filename}")
+                nav_crp_dataframe.append(crp_df)
+            except Exception as e:
+                logging.error(f"Error reading CRP navigation file {file_path}: {e}")
                 continue
 
     # Check if any PTR or Navigation files were found
@@ -372,11 +423,25 @@ def extractData(folder_path, tss1_col, tss2_col, tss3_col):
         #messagebox.showerror("Error", "No Navigation files extracted")
         return
     
+    # Check if CRP data is available
+    has_crp_data = len(nav_crp_dataframe) > 0
+    if not has_crp_data:
+        logging.warning("No CRP navigation files found - CRP data will not be included in output")
+        messagebox.showwarning("Warning", "No CRP navigation files found - CRP data will not be included in output")
+    
     # Concatenate data
     ptr_df = pd.concat(ptr_dataframe, ignore_index=True)
     nav_coil1_df = pd.concat(nav_coil1_dataframe, ignore_index=True)
     nav_coil2_df = pd.concat(nav_coil2_dataframe, ignore_index=True)
     nav_coil3_df = pd.concat(nav_coil3_dataframe, ignore_index=True)
+    nav_crp_df = pd.concat(nav_crp_dataframe, ignore_index=True) if has_crp_data else None
+
+    # Normalize the time column name for navigation dataframes (handles both old 'Time' and new 'HH:MM:SS.SSS' headers)
+    nav_coil1_df = normalize_nav_time_column(nav_coil1_df)
+    nav_coil2_df = normalize_nav_time_column(nav_coil2_df)
+    nav_coil3_df = normalize_nav_time_column(nav_coil3_df)
+    if has_crp_data:
+        nav_crp_df = normalize_nav_time_column(nav_crp_df)
 
     # Ensure the Time PTR column is formatted correctly
     ptr_df['Time_PTR'] = ptr_df['Time_PTR'].astype(str).str.zfill(9)  # Ensure the time string is 9 chars
@@ -387,12 +452,16 @@ def extractData(folder_path, tss1_col, tss2_col, tss3_col):
     nav_coil1_df['Time'] = pd.to_datetime(nav_coil1_df['Date'] + ' ' + nav_coil1_df['Time'], format='%d/%m/%Y %H:%M:%S.%f')
     nav_coil2_df['Time'] = pd.to_datetime(nav_coil2_df['Date'] + ' ' + nav_coil2_df['Time'], format='%d/%m/%Y %H:%M:%S.%f')
     nav_coil3_df['Time'] = pd.to_datetime(nav_coil3_df['Date'] + ' ' + nav_coil3_df['Time'], format='%d/%m/%Y %H:%M:%S.%f')
+    if has_crp_data:
+        nav_crp_df['Time'] = pd.to_datetime(nav_crp_df['Date'] + ' ' + nav_crp_df['Time'], format='%d/%m/%Y %H:%M:%S.%f')
 
     # Ensure both DataFrames are sorted by the key columns
     ptr_df = ptr_df.sort_values(by='Time_PTR')
     nav_coil1_df = nav_coil1_df.sort_values(by='Time')
     nav_coil2_df = nav_coil2_df.sort_values(by='Time')
     nav_coil3_df = nav_coil3_df.sort_values(by='Time')
+    if has_crp_data:
+        nav_crp_df = nav_crp_df.sort_values(by='Time')
     
     # Swapping of COIL 1 and COIL 3 to match both coils numbers conventions. PTR files numbers convention will be used as reference.
     # - PTR files: TSS DeepView coils numbers convention, Coil 1 = STARBOARD, Coil 2 = CENTRAL, Coil 3 = PORT [DEFAULT]
@@ -404,7 +473,8 @@ def extractData(folder_path, tss1_col, tss2_col, tss3_col):
     # Merge the DataFrames based on the closest time in the navigation data to the PTR data
     merged_coil1_df = pd.merge_asof(ptr_df, nav_coil1_df_swapped, left_on='Time_PTR', right_on='Time', direction='nearest') 
     merged_coil2_df = pd.merge_asof(ptr_df, nav_coil2_df_swapped, left_on='Time_PTR', right_on='Time', direction='nearest')
-    merged_coil3_df = pd.merge_asof(ptr_df, nav_coil3_df_swapped, left_on='Time_PTR', right_on='Time', direction='nearest') 
+    merged_coil3_df = pd.merge_asof(ptr_df, nav_coil3_df_swapped, left_on='Time_PTR', right_on='Time', direction='nearest')
+    merged_crp_df = pd.merge_asof(ptr_df, nav_crp_df, left_on='Time_PTR', right_on='Time', direction='nearest') if has_crp_data else None 
 
     # Check if time difference exceeds the allowed threshold
     time_diff = (merged_coil1_df['Time_PTR'] - merged_coil1_df['Time']).dt.total_seconds()
@@ -422,11 +492,18 @@ def extractData(folder_path, tss1_col, tss2_col, tss3_col):
     time_diff = (merged_coil3_df['Time_PTR'] - merged_coil3_df['Time']).dt.total_seconds()
     merged_coil3_df['Time_diff'] = time_diff
     #if (abs(time_diff) > MAX_TIME_DIFF_SEC).any():
-        #messagebox.showerror("Error", f"Time difference between PTR and Coil 3 is too high: {abs(time_diff).max():.3f} seconds")   
+        #messagebox.showerror("Error", f"Time difference between PTR and Coil 3 is too high: {abs(time_diff).max():.3f} seconds")
 
-    return merged_coil1_df, merged_coil2_df, merged_coil3_df
+    if has_crp_data and merged_crp_df is not None:
+        time_diff = (merged_crp_df['Time_PTR'] - merged_crp_df['Time']).dt.total_seconds()
+        merged_crp_df['Time_diff'] = time_diff
+        high_time_diff_crp = abs(time_diff) > MAX_TIME_DIFF_SEC
+        if high_time_diff_crp.any():
+            logging.warning(f"Time difference between PTR and CRP Navigation timestamp is too high in {high_time_diff_crp.sum()} points. Max value: {abs(time_diff).max():.3f} seconds")
 
-def mergeData(merged_coil1_df, merged_coil2_df, merged_coil3_df):
+    return merged_coil1_df, merged_coil2_df, merged_coil3_df, merged_crp_df
+
+def mergeData(merged_coil1_df, merged_coil2_df, merged_coil3_df, merged_crp_df):
     # Drop the innecessary TSS and Date columns
     merged_coil1_df['TSS']  = merged_coil1_df['TSS1']
     merged_coil1_df['Coil'] = 1
@@ -435,6 +512,17 @@ def mergeData(merged_coil1_df, merged_coil2_df, merged_coil3_df):
     del merged_coil1_df['TSS3']
     del merged_coil1_df['Date_PTR']
     del merged_coil1_df['Date']
+    # Remove PTR position columns (we use ROV/Navigation Easting and Northing instead)
+    del merged_coil1_df['Easting_PTR']
+    del merged_coil1_df['Northing_PTR']
+    # Remove unnecessary columns
+    if 'NavQ' in merged_coil1_df.columns:
+        del merged_coil1_df['NavQ']
+    if 'PipeZ' in merged_coil1_df.columns:
+        del merged_coil1_df['PipeZ']
+    if 'PipeX' in merged_coil1_df.columns:
+        del merged_coil1_df['PipeX']
+    # del merged_coil1_df['Time_diff']  # Keep Time_diff commented for debugging purposes
 
     merged_coil2_df['TSS']  = merged_coil2_df['TSS2']
     merged_coil2_df['Coil'] = 2
@@ -443,6 +531,17 @@ def mergeData(merged_coil1_df, merged_coil2_df, merged_coil3_df):
     del merged_coil2_df['TSS3']
     del merged_coil2_df['Date_PTR']
     del merged_coil2_df['Date']
+    # Remove PTR position columns (we use ROV/Navigation Easting and Northing instead)
+    del merged_coil2_df['Easting_PTR']
+    del merged_coil2_df['Northing_PTR']
+    # Remove unnecessary columns
+    if 'NavQ' in merged_coil2_df.columns:
+        del merged_coil2_df['NavQ']
+    if 'PipeZ' in merged_coil2_df.columns:
+        del merged_coil2_df['PipeZ']
+    if 'PipeX' in merged_coil2_df.columns:
+        del merged_coil2_df['PipeX']
+    # del merged_coil2_df['Time_diff']  # Keep Time_diff commented for debugging purposes
 
     merged_coil3_df['TSS']  = merged_coil3_df['TSS3']
     merged_coil3_df['Coil'] = 3
@@ -451,13 +550,40 @@ def mergeData(merged_coil1_df, merged_coil2_df, merged_coil3_df):
     del merged_coil3_df['TSS3']
     del merged_coil3_df['Date_PTR']
     del merged_coil3_df['Date']
+    # Remove PTR position columns (we use ROV/Navigation Easting and Northing instead)
+    del merged_coil3_df['Easting_PTR']
+    del merged_coil3_df['Northing_PTR']
+    # Remove unnecessary columns
+    if 'NavQ' in merged_coil3_df.columns:
+        del merged_coil3_df['NavQ']
+    if 'PipeZ' in merged_coil3_df.columns:
+        del merged_coil3_df['PipeZ']
+    if 'PipeX' in merged_coil3_df.columns:
+        del merged_coil3_df['PipeX']
+    # del merged_coil3_df['Time_diff']  # Keep Time_diff commented for debugging purposes
+
+    # Check if CRP data is available
+    has_crp_data = merged_crp_df is not None and not merged_crp_df.empty
 
     # Ensure all dataframes have the same index length (if not, trim to the smallest length)
-    min_length = min(len(merged_coil1_df), len(merged_coil2_df), len(merged_coil3_df))
+    if has_crp_data:
+        min_length = min(len(merged_coil1_df), len(merged_coil2_df), len(merged_coil3_df), len(merged_crp_df))
+        merged_crp_df = merged_crp_df.iloc[:min_length].reset_index(drop=True)
+    else:
+        min_length = min(len(merged_coil1_df), len(merged_coil2_df), len(merged_coil3_df))
 
     merged_coil1_df = merged_coil1_df.iloc[:min_length]
     merged_coil2_df = merged_coil2_df.iloc[:min_length]
     merged_coil3_df = merged_coil3_df.iloc[:min_length]
+
+    # Add CRP columns to each coil dataframe before interleaving
+    if has_crp_data:
+        merged_coil1_df['Easting_CRP'] = merged_crp_df['Easting'].values
+        merged_coil1_df['Northing_CRP'] = merged_crp_df['Northing'].values
+        merged_coil2_df['Easting_CRP'] = merged_crp_df['Easting'].values
+        merged_coil2_df['Northing_CRP'] = merged_crp_df['Northing'].values
+        merged_coil3_df['Easting_CRP'] = merged_crp_df['Easting'].values
+        merged_coil3_df['Northing_CRP'] = merged_crp_df['Northing'].values
 
     # Create an interleaved dataframe
     interleaved_df = pd.concat([merged_coil1_df, merged_coil2_df, merged_coil3_df], axis=0).sort_index(kind='merge') # sort_index(kind='merge') interleaves the dataframes (first row of each df, then second row of each df, etc.)
@@ -476,6 +602,9 @@ def reorganizeData(merged_df):
         logging.error("Input DataFrame is empty")
         return pd.DataFrame()
     
+    # Check if CRP data is available in the merged dataframe
+    has_crp_data = 'Easting_CRP' in merged_df.columns and 'Northing_CRP' in merged_df.columns
+    
     # Separate data by coil
     coil1_df = merged_df[merged_df['Coil'] == 1].copy()
     coil2_df = merged_df[merged_df['Coil'] == 2].copy()
@@ -488,6 +617,7 @@ def reorganizeData(merged_df):
     
     # Ensure all dataframes have the same length
     min_length = min(len(coil1_df), len(coil2_df), len(coil3_df))
+    
     coil1_df = coil1_df.iloc[:min_length]
     coil2_df = coil2_df.iloc[:min_length]
     coil3_df = coil3_df.iloc[:min_length]
@@ -496,8 +626,6 @@ def reorganizeData(merged_df):
     reorganized_df = pd.DataFrame({
         'Filename': coil2_df['Filename'],
         'Time_PTR': coil2_df['Time_PTR'],
-        'Easting_PTR': coil2_df['Easting_PTR'],
-        'Northing_PTR': coil2_df['Northing_PTR'],
         
         # Coil 1 (Starboard) position and TSS
         'Easting_Coil1': coil1_df['Easting'],
@@ -522,20 +650,21 @@ def reorganizeData(merged_df):
         'Depth': coil2_df['Depth'],
         'GeographicalEast': coil2_df['GeographicalEast'],
         'GeographicalNorth': coil2_df['GeographicalNorth'],
-        'NavQ': coil2_df['NavQ'],
         'Tide': coil2_df['Tide'],
-        'PipeZ': coil2_df['PipeZ'],
-        'PipeX': coil2_df['PipeX'],
-        'Time_diff': coil2_df['Time_diff']
     })
+    
+    # Add ROV CRP position columns if available (take from coil2 since all coils have the same CRP values)
+    if has_crp_data:
+        reorganized_df['Easting_CRP'] = coil2_df['Easting_CRP'].values
+        reorganized_df['Northing_CRP'] = coil2_df['Northing_CRP'].values
     
     return reorganized_df
 
 def plotMaps(folder_path, tss1_col, tss2_col, tss3_col):
     try:
         # Extract the data from the PTR and Navigation files in the selected folder
-        coil1_df, coil2_df, coil3_df = extractData(folder_path, tss1_col, tss2_col, tss3_col)
-        merged_df = mergeData(coil1_df, coil2_df, coil3_df)
+        coil1_df, coil2_df, coil3_df, crp_df = extractData(folder_path, tss1_col, tss2_col, tss3_col)
+        merged_df = mergeData(coil1_df, coil2_df, coil3_df, crp_df)
         
         # Validate merged_df
         required_columns = {'Easting', 'Northing', 'TSS', 'Alt'}
@@ -601,7 +730,7 @@ def plotMaps(folder_path, tss1_col, tss2_col, tss3_col):
 def plotCoils(folder_path, tss1_col, tss2_col, tss3_col):
     try:
         # Extract the data from the PTR and Navigation files in the selected folder
-        coil1_df, coil2_df, coil3_df = extractData(folder_path, tss1_col, tss2_col, tss3_col)
+        coil1_df, coil2_df, coil3_df, crp_df = extractData(folder_path, tss1_col, tss2_col, tss3_col)
         
         # Validate extracted data
         if coil1_df.empty or coil2_df.empty or coil3_df.empty:
@@ -672,14 +801,14 @@ def plotCoils(folder_path, tss1_col, tss2_col, tss3_col):
 def plotHeading(folder_path, tss1_col, tss2_col, tss3_col):
     try:
         # Extract the data from the PTR and Navigation files in the selected folder
-        coil1_df, coil2_df, coil3_df = extractData(folder_path, tss1_col, tss2_col, tss3_col)
+        coil1_df, coil2_df, coil3_df, crp_df = extractData(folder_path, tss1_col, tss2_col, tss3_col)
         
         if coil1_df.empty or coil2_df.empty or coil3_df.empty:
             logging.error("One or more extracted DataFrames are empty. Check input data.")
             return
 
         # Merge the DataFrames into a single DataFrame
-        merged_df = mergeData(coil1_df, coil2_df, coil3_df)
+        merged_df = mergeData(coil1_df, coil2_df, coil3_df, crp_df)
         if merged_df.empty:
             logging.error("Merged DataFrame is empty. Exiting function.")
             return
@@ -808,22 +937,29 @@ def processFiles(folder_path, tss1_col, tss2_col, tss3_col, output_file):
             raise ValueError("Invalid folder path.")
         
         # Extract the data from the PTR and Navigation files in the selected folder
-        coil1_df, coil2_df, coil3_df = extractData(folder_path, tss1_col, tss2_col, tss3_col)
+        coil1_df, coil2_df, coil3_df, crp_df = extractData(folder_path, tss1_col, tss2_col, tss3_col)
         
         if coil1_df.empty or coil2_df.empty or coil3_df.empty:
             raise ValueError("Extracted data is empty. Check input files and column names.")
         
         # Merge the DataFrames into a single DataFrame
-        merged_df = mergeData(coil1_df, coil2_df, coil3_df)
-        reorganized_df = reorganizeData(merged_df)
+        merged_df = mergeData(coil1_df, coil2_df, coil3_df, crp_df)
+        #merged_df = reorganizeData(merged_df) # Optional: reorganize data to have one row per timestamp with all three coils' data
         
         # Find the absolute maximum TSS value for each coil and its corresponding position
         coil_peaks = getCoilPeaks(merged_df)
         logging.info("Coil peak values computed successfully.")
         
+        # Format datetime columns to 'HH:MM:SS.SSS' for better readability in output
+        output_df = merged_df.copy()
+        if 'Time_PTR' in output_df.columns:
+            output_df['Time_PTR'] = output_df['Time_PTR'].dt.strftime('%H:%M:%S.%f').str[:-3]  # Remove last 3 digits to get milliseconds
+        if 'Time' in output_df.columns:
+            output_df['Time'] = output_df['Time'].dt.strftime('%H:%M:%S.%f').str[:-3]  # Remove last 3 digits to get milliseconds
+        
         # Save the merged DataFrame to a new CSV file
         output_file_path = os.path.join(folder_path, output_file)
-        reorganized_df.to_csv(output_file_path, index=False)
+        output_df.to_csv(output_file_path, index=False)
         logging.info(f"Merged data saved to {output_file_path}")
         
         merged_df_TSS = merged_df[['Easting', 'Northing', 'TSS']]

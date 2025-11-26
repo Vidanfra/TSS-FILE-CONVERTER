@@ -1,0 +1,233 @@
+<?xml version="1.0"?>
+<Setup StateDatabaseLocation="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\WFM\WFM_LOGS\1_WFM_import_export.db">
+    <Log TimingLog="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\WFM\WFM_LOGS\2_Timing_WFM_import_export.csv"/>
+	<Log ErrorLog="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\WFM\WFM_LOGS\3_Error_WFM_import_export.csv"/>
+	<Log InfoLogFile="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\WFM\WFM_LOGS\4_InfoLogFile_WFM_import_export.txt"/>	
+				
+	<GroupTask name="Import SBD and Export PTR and VisualSoft Nav">
+
+        <SqlServer>localhost</SqlServer>
+        <DatabaseName>600090_GOEL_WindMultiplikator</DatabaseName>
+
+        <!-- ==================== DEFINE VARIABLES ==================== -->
+        <GroupTask po="1" name="Define Variable Inputs">
+            <!-- Paths -->
+			<SetPropertyTask po="1" name="Define Base Directory" input="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER" output="BaseDir" level="2" />	
+			<SetPropertyTask po="2" name="Define NAVISCAN Logging Path" input="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\TEST DATA\SBD" output="NaviScanLoggingPath" level="2" />
+            <SetPropertyTask po="3" name="Define Output Directory" input="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\TEST DATA\WFM_exports" output="OutputDirectory" level="2"/>
+            <SetPropertyTask po="4" name="Define WFM Log Path" input="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\WFM\WFM_LOGS" output="LogPath" level="2" />
+            
+            <!-- User Offset IDs for VisualSoft Nav Export -->
+            <SetPropertyTask po="5" name="CRP ID" input="1" output="crp_id" level="2"/>
+            <SetPropertyTask po="6" name="PORT ID" input="2" output="port_id" level="2"/>
+            <SetPropertyTask po="7" name="CENTER ID" input="3" output="center_id" level="2"/>
+            <SetPropertyTask po="8" name="STBD ID" input="4" output="stbd_id" level="2"/>
+
+            <!-- Project Name Extraction -->
+			<GetParentFolderNamesTask po="9" name="Extract Project Name" path="{NaviScanLoggingPath}" output="ProjectFolderName" indexes="1" countfromtheleft="true" directoryseperator="\"/>
+			<SplitVariablesTask po="10" name="Isolate Project Name" Input="{ProjectFolderName}" Seperator="\" Output0="blank1" Output1="ProjectName" Output2="blank2" />
+			<SetPropertyTask po="11" name="Define Project Name" input="{ProjectName}" output="Proj_Name" level="2" />
+        </GroupTask>
+
+        <!-- ==================== FILE WATCHER - IMPORT SBD ==================== -->
+        <FileWatcherTask po="2" name="Detect and Process SBD Files" logKeyword="Detect and Process SBD Files" Output="SBDFile" Location="{NaviScanLoggingPath}" Filter="*.sbd" Timeout="60000" IncludeSubDir="true"> 
+        <GroupTask po="1" name="Process_{SBDFile.Filename}_Data">
+
+		<GroupTask po="1" name="{SBDFile.Filename}">
+						
+			<OverwritePropertyTask po="1" name="{SBDFile.Filename} - Define SBD File Name" logKeyword="{SBDFile.Filename}" input="{SBDFile.NameWithoutExtension}" output="SBDFileName" level="2" />							
+			<OverwritePropertyTask po="2" name="{SBDFile.Filename} - Define SBD Platform Name" logKeyword="{SBDFile.Filename}" input="PROV_WROV" output="PlatformName" level="2" />
+
+			<GetParentFolderNamesTask po="3" name="{SBDFile.Filename} - Extract SBD Level 1 Subfolder" logKeyword="{SBDFile.Filename}" path="{SBDFile}" output="SBDLvl1SubFolder" indexes="5" countfromtheleft="true" directoryseperator="\"/>			
+			<SplitVariablesTask po="4" name="{SBDFile.Filename} - Identify SBD Level 1 Subfolder" Input="{SBDLvl1SubFolder}" Seperator="\" Output0="blank1" Output1="Level1SubFolderName" Output2="blank2" />	
+			<OverwritePropertyTask po="5" name="{SBDFile.Filename} - Define SBD Level 1 Subfolder" logKeyword="{SBDFile.Filename}" input="{Level1SubFolderName}" output="Level1Folder" level="2" />	
+
+			<GetParentFolderNamesTask po="6" name="{SBDFile.Filename} - Extract Remaining SBD Subfolder Path" logKeyword="{SBDFile.Filename}" path="{SBDFile}" output="SBDSubFolderPath" indexes="6 7 8 9 10 11 12 13 14 15" countfromtheleft="true" directoryseperator="\"/>			
+			<OverwritePropertyTask po="7" name="{SBDFile.Filename} - Define Remaining SBD Subfolder Path" logKeyword="{SBDFile.Filename}" input="{SBDSubFolderPath}" output="SBDSubFolder" level="2" />	
+
+			<SetTitleTask po="8" name="Set WorkFlow Title" title="Processing SBD: {SBDFileName}" size="25" red="255" green="255" blue="0" />
+				
+            <!-- ==================== IMPORT SBD TO NAVIEDIT ==================== -->
+            <SbdImportTask po="9" name="{SBDFile.Filename} - Import into NaviEdit" logKeyword="{SBDFile.Filename}" output="SBDSQLBlockID" OnError="Restart">
+                <NaviEditTask version="1.0">
+                    <Input xml="{SqlServer}"/>
+                    <Input xml="{DatabaseName}"/>
+                    <Geodesy useSbdGeodesy="yes">
+                    </Geodesy>
+                    <SbdInterpreter version="1.0">
+                        <Destination matchFolder="yes" importSVP="no" linkSVP="no">
+                            <Folder>\01_NaviScan_SBD</Folder>
+                        </Destination>
+                        <Source>
+                            <FileList>
+                                {SBDFile} 
+                            </FileList>
+                        </Source>
+                        <Filters>
+                            <MBEQuality setDeletedFlag="no" qualityThreshold="0"/>
+                        </Filters>
+                        <Options disableBathy="no" useOnlineSV="no" onlineSVStart="-1.1" onlineSVEnd="15.5" scanReductionImportEvery="1" />
+                    </SbdInterpreter>
+                </NaviEditTask>
+            </SbdImportTask>
+
+            <!-- ==================== EXPORT VISUALSOFT NAV - CRP ==================== -->
+            <ExportVisualSoftNavigationTask po="10" name="{SBDFile.Filename} - Export Visualsoft Nav CRP" logKeyword="NAVxport" output=" ">
+                <NaviEditTask version="1.0">
+                    <Input xml="{SqlServer}"/>
+                    <Input xml="{DatabaseName}"/>
+                    <Export type="xyvsoftvev">
+                        <BlockId>
+                            {SBDSQLBlockID}
+                        </BlockId>
+
+                        <Output>
+                            <Location outputMethod="0" prefixKPRange="no" combineFiles="no" sortCombined="no">
+                                <Path>{OutputDirectory}</Path>
+                                <AppendPath></AppendPath>
+                            </Location>
+
+                            <DbFolderUsage createSubdir="no" prefixFileName="no" useAsFilename="no"/>
+                            <Options writeHeader="yes" selectionMethod="0" reduceMethod="0" sortKP="no" interval="10.0"/>
+                        </Output>
+                        <Units depthScale="1.0" posScale="1.0"/>
+                        <Settings>
+                            <Selection object="{crp_id}"/> 
+                            <Singlebeam maxInterpolDist="-1" interpolateDepth="yes"/>
+                            <Multibeam averagingWindow="1.0"/> 
+                            <NoOfDecimals position="3" depth="3" />
+                            <Options downsampleFactor="0" downsampleMinDist="0.0" timeFormat="0" />
+                        </Settings>
+                    </Export>
+                </NaviEditTask>
+            </ExportVisualSoftNavigationTask>
+
+            <!-- ==================== EXPORT VISUALSOFT NAV - PORT ==================== -->
+            <ExportVisualSoftNavigationTask po="11" name="{SBDFile.Filename} - Export Visualsoft Nav PORT Coil" logKeyword="NAVxport" output=" ">
+                <NaviEditTask version="1.0">
+                    <Input xml="{SqlServer}"/>
+                    <Input xml="{DatabaseName}"/>
+                    <Export type="xyvsoftvev">
+                        <BlockId>
+                            {SBDSQLBlockID}
+                        </BlockId>
+
+                        <Output>
+                            <Location outputMethod="0" prefixKPRange="no" combineFiles="no" sortCombined="no">
+                                <Path>{OutputDirectory}</Path>
+                                <AppendPath></AppendPath>
+                            </Location>
+
+                            <DbFolderUsage createSubdir="no" prefixFileName="no" useAsFilename="no"/>
+                            <Options writeHeader="yes" selectionMethod="0" reduceMethod="0" sortKP="no" interval="10.0"/>
+                        </Output>
+                        <Units depthScale="1.0" posScale="1.0"/>
+                        <Settings>
+                            <Selection object="{port_id}"/> 
+                            <Singlebeam maxInterpolDist="-1" interpolateDepth="yes"/>
+                            <Multibeam averagingWindow="1.0"/> 
+                            <NoOfDecimals position="3" depth="3" />
+                            <Options downsampleFactor="0" downsampleMinDist="0.0" timeFormat="0" />
+                        </Settings>
+                    </Export>
+                </NaviEditTask>
+            </ExportVisualSoftNavigationTask>
+
+            <!-- ==================== EXPORT VISUALSOFT NAV - CENTER ==================== -->
+            <ExportVisualSoftNavigationTask po="12" name="{SBDFile.Filename} - Export Visualsoft Nav CENTER Coil" logKeyword="NAVxport" output=" ">
+                <NaviEditTask version="1.0">
+                    <Input xml="{SqlServer}"/>
+                    <Input xml="{DatabaseName}"/>
+                    <Export type="xyvsoftvev">
+                        <BlockId>
+                            {SBDSQLBlockID}
+                        </BlockId>
+
+                        <Output>
+                            <Location outputMethod="0" prefixKPRange="no" combineFiles="no" sortCombined="no">
+                                <Path>{OutputDirectory}</Path>
+                                <AppendPath></AppendPath>
+                            </Location>
+
+                            <DbFolderUsage createSubdir="no" prefixFileName="no" useAsFilename="no"/>
+                            <Options writeHeader="yes" selectionMethod="0" reduceMethod="0" sortKP="no" interval="10.0"/>
+                        </Output>
+                        <Units depthScale="1.0" posScale="1.0"/>
+                        <Settings>
+                            <Selection object="{center_id}"/> 
+                            <Singlebeam maxInterpolDist="-1" interpolateDepth="yes"/>
+                            <Multibeam averagingWindow="1.0"/> 
+                            <NoOfDecimals position="3" depth="3" />
+                            <Options downsampleFactor="0" downsampleMinDist="0.0" timeFormat="0" />
+                        </Settings>
+                    </Export>
+                </NaviEditTask>
+            </ExportVisualSoftNavigationTask>
+
+            <!-- ==================== EXPORT VISUALSOFT NAV - STARBOARD ==================== -->
+            <ExportVisualSoftNavigationTask po="13" name="{SBDFile.Filename} - Export Visualsoft Nav STARBOARD Coil" logKeyword="NAVxport" output=" ">
+                <NaviEditTask version="1.0">
+                    <Input xml="{SqlServer}"/>
+                    <Input xml="{DatabaseName}"/>
+                    <Export type="xyvsoftvev">
+                        <BlockId>
+                            {SBDSQLBlockID}
+                        </BlockId>
+
+                        <Output>
+                            <Location outputMethod="0" prefixKPRange="no" combineFiles="no" sortCombined="no">
+                                <Path>{OutputDirectory}</Path>
+                                <AppendPath></AppendPath>
+                            </Location>
+
+                            <DbFolderUsage createSubdir="no" prefixFileName="no" useAsFilename="no"/>
+                            <Options writeHeader="yes" selectionMethod="0" reduceMethod="0" sortKP="no" interval="10.0"/>
+                        </Output>
+                        <Units depthScale="1.0" posScale="1.0"/>
+                        <Settings>
+                            <Selection object="{stbd_id}"/> 
+                            <Singlebeam maxInterpolDist="-1" interpolateDepth="yes"/>
+                            <Multibeam averagingWindow="1.0"/> 
+                            <NoOfDecimals position="3" depth="3" />
+                            <Options downsampleFactor="0" downsampleMinDist="0.0" timeFormat="0" />
+                        </Settings>
+                    </Export>
+                </NaviEditTask>
+            </ExportVisualSoftNavigationTask>
+
+            <!-- ==================== EXPORT PTR ==================== -->
+            <ExportAsciiTask po="14" name="{SBDFile.Filename} - Export PTR" logKeyword="PTRxport">
+                <NaviEditTask version="1.0">
+                    <Input xml="{SqlServer}"/>
+                    <Input xml="{DatabaseName}"/>
+                    <Export type="xyp_ptr">
+                        <BlockId>
+                            {SBDSQLBlockID}
+                        </BlockId>
+
+                        <Output>
+                            <Location outputMethod="0" prefixKPRange="no" combineFiles="no" sortCombined="no">
+                                <Path>{OutputDirectory}</Path>
+                                <AppendPath></AppendPath>
+                            </Location>
+
+                            <DbFolderUsage createSubdir="no" prefixFileName="no" useAsFilename="no"/>
+                            <Options writeHeader="yes" sortKP="no" reduceMethod="0" selectionMethod="0" interval="1.0"/>
+                        </Output>
+                        <Units posScale="1.0" depthScale="1.0"/>
+                        <Settings>
+                            <Pipe type="0" onlyExportGoodValues="true">
+                                <Bathy seq="1"/>
+                            </Pipe>
+                        </Settings>
+                    </Export>
+                </NaviEditTask>
+            </ExportAsciiTask>
+
+        </GroupTask>
+        </GroupTask>
+        </FileWatcherTask>
+    </GroupTask>
+</Setup>
+
+
