@@ -504,63 +504,34 @@ def extractData(folder_path, tss1_col, tss2_col, tss3_col):
     return merged_coil1_df, merged_coil2_df, merged_coil3_df, merged_crp_df
 
 def mergeData(merged_coil1_df, merged_coil2_df, merged_coil3_df, merged_crp_df):
-    # Drop the innecessary TSS and Date columns
-    merged_coil1_df['TSS']  = merged_coil1_df['TSS1']
-    merged_coil1_df['Coil'] = 1
-    del merged_coil1_df['TSS1']
-    del merged_coil1_df['TSS2']
-    del merged_coil1_df['TSS3']
-    del merged_coil1_df['Date_PTR']
-    del merged_coil1_df['Date']
-    # Remove PTR position columns (we use ROV/Navigation Easting and Northing instead)
-    del merged_coil1_df['Easting_PTR']
-    del merged_coil1_df['Northing_PTR']
-    # Remove unnecessary columns
-    if 'NavQ' in merged_coil1_df.columns:
-        del merged_coil1_df['NavQ']
-    if 'PipeZ' in merged_coil1_df.columns:
-        del merged_coil1_df['PipeZ']
-    if 'PipeX' in merged_coil1_df.columns:
-        del merged_coil1_df['PipeX']
-    # del merged_coil1_df['Time_diff']  # Keep Time_diff commented for debugging purposes
-
-    merged_coil2_df['TSS']  = merged_coil2_df['TSS2']
-    merged_coil2_df['Coil'] = 2
-    del merged_coil2_df['TSS1']
-    del merged_coil2_df['TSS2']
-    del merged_coil2_df['TSS3']
-    del merged_coil2_df['Date_PTR']
-    del merged_coil2_df['Date']
-    # Remove PTR position columns (we use ROV/Navigation Easting and Northing instead)
-    del merged_coil2_df['Easting_PTR']
-    del merged_coil2_df['Northing_PTR']
-    # Remove unnecessary columns
-    if 'NavQ' in merged_coil2_df.columns:
-        del merged_coil2_df['NavQ']
-    if 'PipeZ' in merged_coil2_df.columns:
-        del merged_coil2_df['PipeZ']
-    if 'PipeX' in merged_coil2_df.columns:
-        del merged_coil2_df['PipeX']
-    # del merged_coil2_df['Time_diff']  # Keep Time_diff commented for debugging purposes
-
-    merged_coil3_df['TSS']  = merged_coil3_df['TSS3']
-    merged_coil3_df['Coil'] = 3
-    del merged_coil3_df['TSS1']
-    del merged_coil3_df['TSS2']
-    del merged_coil3_df['TSS3']
-    del merged_coil3_df['Date_PTR']
-    del merged_coil3_df['Date']
-    # Remove PTR position columns (we use ROV/Navigation Easting and Northing instead)
-    del merged_coil3_df['Easting_PTR']
-    del merged_coil3_df['Northing_PTR']
-    # Remove unnecessary columns
-    if 'NavQ' in merged_coil3_df.columns:
-        del merged_coil3_df['NavQ']
-    if 'PipeZ' in merged_coil3_df.columns:
-        del merged_coil3_df['PipeZ']
-    if 'PipeX' in merged_coil3_df.columns:
-        del merged_coil3_df['PipeX']
-    # del merged_coil3_df['Time_diff']  # Keep Time_diff commented for debugging purposes
+    # Helper function to clean up a coil dataframe
+    def cleanup_coil_df(df, coil_number, tss_column):
+        df['TSS'] = df[tss_column]
+        df['Coil'] = coil_number
+        # Remove individual TSS columns
+        for col in ['TSS1', 'TSS2', 'TSS3']:
+            if col in df.columns:
+                del df[col]
+        # Remove Date_PTR and Time_PTR (we keep Date and Time from navigation)
+        if 'Date_PTR' in df.columns:
+            del df['Date_PTR']
+        if 'Time_PTR' in df.columns:
+            del df['Time_PTR']
+        # Remove PTR position columns (we use ROV/Navigation Easting and Northing instead)
+        if 'Easting_PTR' in df.columns:
+            del df['Easting_PTR']
+        if 'Northing_PTR' in df.columns:
+            del df['Northing_PTR']
+        # Remove unnecessary columns
+        for col in ['NavQ', 'PipeZ', 'PipeX', 'Time_diff']:
+            if col in df.columns:
+                del df[col]
+        return df
+    
+    # Clean up each coil dataframe
+    merged_coil1_df = cleanup_coil_df(merged_coil1_df, 1, 'TSS1')
+    merged_coil2_df = cleanup_coil_df(merged_coil2_df, 2, 'TSS2')
+    merged_coil3_df = cleanup_coil_df(merged_coil3_df, 3, 'TSS3')
 
     # Check if CRP data is available
     has_crp_data = merged_crp_df is not None and not merged_crp_df.empty
@@ -590,6 +561,22 @@ def mergeData(merged_coil1_df, merged_coil2_df, merged_coil3_df, merged_crp_df):
 
     # Reset index for a clean output
     interleaved_df = interleaved_df.reset_index(drop=True)
+    
+    # Reorder columns: Filename, Date, Time, Easting, Northing, Coil, TSS, GeographicalEast, GeographicalNorth, then the rest, with Easting_CRP and Northing_CRP at the end
+    priority_columns = [
+        'Filename', 'Date', 'Time', 'Easting', 'Northing', 'Coil', 'TSS',
+        'GeographicalEast', 'GeographicalNorth'
+    ]
+    end_columns = ['Easting_CRP', 'Northing_CRP']
+    
+    # Get columns that exist in the dataframe
+    existing_priority = [col for col in priority_columns if col in interleaved_df.columns]
+    existing_end = [col for col in end_columns if col in interleaved_df.columns]
+    # Get remaining columns not in priority or end lists
+    remaining_columns = [col for col in interleaved_df.columns if col not in priority_columns and col not in end_columns]
+    # Combine in desired order: priority first, then remaining, then CRP at the end
+    ordered_columns = existing_priority + remaining_columns + existing_end
+    interleaved_df = interleaved_df[ordered_columns]
 
     return interleaved_df
 
