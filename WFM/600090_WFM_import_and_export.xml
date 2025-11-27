@@ -47,14 +47,14 @@
              The input folder name will be used as the destination folder in NaviEdit database
         -->
         <GroupTask po="1" name="Data selection and setup">
-            <InputTask po="1" name="Select INPUT folder (SBD files location)" output="InputDirectory" AskForInput="true"/>
+            <InputTask po="1" name="Select INPUT folder (SBD files location)" output="InputDirectory" AskForInput="true" Message="Select INPUT folder (SBD files location)"/>
             <SetPropertyTask po="2" name="Define input directory" input="{InputDirectory}" output="NaviScanLoggingPath" level="2"/>
             
             <!-- Extract the folder name from input path to use in NaviEdit database -->
             <GetParentFolderNamesTask po="3" name="Extract Input Folder Name" path="{InputDirectory}" output="InputFolderPath" indexes="1" countfromtheleft="false" directoryseperator="\"/>
             <SetPropertyTask po="4" name="Define NaviEdit Destination Folder" input="{InputFolderPath}" output="NaviEditDestFolder" level="2"/>
             
-            <InputTask po="5" name="Select OUTPUT folder (for PTR and Nav exports)" output="OutputDirectory" AskForInput="true"/>
+            <InputTask po="5" name="Select OUTPUT folder (for PTR and Nav exports)" output="OutputDirectory" AskForInput="true" Message="Select OUTPUT folder (for PTR and Nav exports)"/>
             <SetPropertyTask po="6" name="Define output directory" input="{OutputDirectory}" output="OutputDirectory" level="2"/>
         </GroupTask>
 
@@ -125,11 +125,11 @@
                     <DatabaseName>{DatabaseName}</DatabaseName>
                     <Geodesy useSbdGeodesy="no">
                         <Source>
-                            <Ellipsoid epsg="7022" name="International 1924">
-                                <SemiMajorAxis>6378388.0</SemiMajorAxis>
-                                <InverseFlattening>297.0</InverseFlattening>
+                            <Ellipsoid epsg="16032" name="GRS 1980">
+                                <SemiMajorAxis>6378137.00</SemiMajorAxis>
+                                <InverseFlattening>298.257222101</InverseFlattening>
                             </Ellipsoid>
-                            <Projection epsg="32631" name="UTM zone 31N">
+                            <Projection epsg="25832" name="UTM zone 32N">
                                 <EivaType>5</EivaType>
                                 <FalseEasting>500000</FalseEasting>
                                 <FalseNorthing>0</FalseNorthing>
@@ -137,16 +137,16 @@
                                 <SecondParallel></SecondParallel>
                                 <Scale>0.9996</Scale>
                                 <OrigLatitude>0</OrigLatitude>
-                                <OrigLongitude>3</OrigLongitude>
-                                <Zone>31</Zone>
+                                <OrigLongitude>9</OrigLongitude>
+                                <Zone>32</Zone>
                             </Projection>
                         </Source>
                         <Destination>
-                            <Ellipsoid epsg="7022" name="International 1924">
-                                <SemiMajorAxis>6378388.0</SemiMajorAxis>
-                                <InverseFlattening>297.0</InverseFlattening>
+                            <Ellipsoid epsg="16032" name="GRS 1980">
+                                <SemiMajorAxis>6378137.00</SemiMajorAxis>
+                                <InverseFlattening>298.257222101</InverseFlattening>
                             </Ellipsoid>
-                            <Projection epsg="32631" name="UTM zone 31N">
+                            <Projection epsg="25832" name="UTM zone 32N">
                                 <EivaType>5</EivaType>
                                 <FalseEasting>500000</FalseEasting>
                                 <FalseNorthing>0</FalseNorthing>
@@ -154,14 +154,14 @@
                                 <SecondParallel></SecondParallel>
                                 <Scale>0.9996</Scale>
                                 <OrigLatitude>0</OrigLatitude>
-                                <OrigLongitude>3</OrigLongitude>
-                                <Zone>31</Zone>
+                                <OrigLongitude>9</OrigLongitude>
+                                <Zone>32</Zone>
                             </Projection>
                         </Destination>
-                        <Shift type="0" method="0" name="No shift">
-                            <Translation X="0" Y="0" Z="0"/>
-                            <Rotation X="0" Y="0" Z="0"/>
-                            <ScaleFactor ppm="0"/>
+                        <Shift type="1" method="1" name="ITRF2020 to ETRS89 epoch 2026.0 (Central Europe)">
+                            <Translation X="0.10551" Y="0.05439" Z="-0.14074"/>
+                            <Rotation X="0.002695" Y="0.015977" Z="-0.029049"/>
+                            <ScaleFactor ppm="0.002748"/>
                         </Shift>
                     </Geodesy>
                     <SbdInterpreter version="1.0">
