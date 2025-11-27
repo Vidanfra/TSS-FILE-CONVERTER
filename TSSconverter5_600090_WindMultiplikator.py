@@ -1,7 +1,7 @@
 import pandas as pd #pip install pandas
 import os
 import tkinter as tk
-from tkinter import filedialog, messagebox
+from tkinter import filedialog, messagebox, ttk
 import matplotlib
 import matplotlib.pyplot as plt #pip install matplotlib
 import matplotlib.colors as mcolors
@@ -9,7 +9,8 @@ import numpy as np
 import csv
 from datetime import datetime
 import logging
-
+import json
+import generate_heatmap as heatmaps
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -229,7 +230,7 @@ def calculateHeading(merged_df):
 
     return attitude_df
 
-def extractData(folder_path, tss1_col, tss2_col, tss3_col):
+def extractData(folder_path, tss1_col, tss2_col, tss3_col, use_crp=True):
     ptr_dataframe = []
     nav_coil1_dataframe = []
     nav_coil2_dataframe = []
@@ -275,7 +276,7 @@ def extractData(folder_path, tss1_col, tss2_col, tss3_col):
                 missing_files_coils.append("Coil 2")
             if not (only_name + COIL_3_SUFFIX) in os.listdir(folder_path):
                 missing_files_coils.append("Coil 3")
-            if not (only_name + CRP_SUFFIX) in os.listdir(folder_path):
+            if use_crp and not (only_name + CRP_SUFFIX) in os.listdir(folder_path):
                 missing_files_coils.append("CRP")
 
             if len(missing_files_coils) == 4:
@@ -286,10 +287,10 @@ def extractData(folder_path, tss1_col, tss2_col, tss3_col):
                 crp_missing = "CRP" in missing_files_coils
                 if coil_missing:
                     error_messages.append(f"Missing CSV Navigation {', '.join(coil_missing)} files for PTR file: {filename}")
-                if crp_missing:
+                if crp_missing and use_crp:
                     logging.warning(f"Missing CRP navigation file for PTR file: {filename} - CRP data will not be included")
         
-        if filename.endswith(COIL_1_SUFFIX) or filename.endswith(COIL_2_SUFFIX) or filename.endswith(COIL_3_SUFFIX) or filename.endswith(CRP_SUFFIX):
+        if filename.endswith(COIL_1_SUFFIX) or filename.endswith(COIL_2_SUFFIX) or filename.endswith(COIL_3_SUFFIX) or (use_crp and filename.endswith(CRP_SUFFIX)):
             only_name = filename.removesuffix(COIL_1_SUFFIX).removesuffix(COIL_2_SUFFIX).removesuffix(COIL_3_SUFFIX).removesuffix(CRP_SUFFIX)
             if not (only_name + '.ptr') in os.listdir(folder_path):
                 error_messages.append(f"Missing PTR file for the CSV Navigation file: {filename}")
@@ -320,7 +321,7 @@ def extractData(folder_path, tss1_col, tss2_col, tss3_col):
             
             # Check if CRP file exists (optional)
             crp_file = f"{only_name}{CRP_SUFFIX}"
-            if crp_file not in existing_files:
+            if use_crp and crp_file not in existing_files:
                 logging.warning(f"CRP navigation file missing for {filename} - CRP data will not be included")
             try:
                 with open(file_path, 'r', encoding='utf-8') as f:
@@ -399,7 +400,7 @@ def extractData(folder_path, tss1_col, tss2_col, tss3_col):
                 logging.error(f"Error reading coil 3 navigation file {file_path}: {e}")
                 continue
 
-        if filename.endswith(CRP_SUFFIX): # ROV CRP (Center Reference Point) navigation
+        if use_crp and filename.endswith(CRP_SUFFIX): # ROV CRP (Center Reference Point) navigation
             try:
                 only_name = filename.removesuffix(CRP_SUFFIX)
                 if not (only_name + '.ptr') in os.listdir(folder_path) or not (only_name + COIL_1_SUFFIX) in os.listdir(folder_path) or not (only_name + COIL_2_SUFFIX) in os.listdir(folder_path) or not (only_name + COIL_3_SUFFIX) in os.listdir(folder_path):
@@ -425,7 +426,7 @@ def extractData(folder_path, tss1_col, tss2_col, tss3_col):
     
     # Check if CRP data is available
     has_crp_data = len(nav_crp_dataframe) > 0
-    if not has_crp_data:
+    if use_crp and not has_crp_data:
         logging.warning("No CRP navigation files found - CRP data will not be included in output")
         messagebox.showwarning("Warning", "No CRP navigation files found - CRP data will not be included in output")
     
@@ -647,10 +648,10 @@ def reorganizeData(merged_df):
     
     return reorganized_df
 
-def plotMaps(folder_path, tss1_col, tss2_col, tss3_col):
+def plotMaps(folder_path, tss1_col, tss2_col, tss3_col, use_crp=True):
     try:
         # Extract the data from the PTR and Navigation files in the selected folder
-        coil1_df, coil2_df, coil3_df, crp_df = extractData(folder_path, tss1_col, tss2_col, tss3_col)
+        coil1_df, coil2_df, coil3_df, crp_df = extractData(folder_path, tss1_col, tss2_col, tss3_col, use_crp)
         merged_df = mergeData(coil1_df, coil2_df, coil3_df, crp_df)
         
         # Validate merged_df
@@ -714,10 +715,10 @@ def plotMaps(folder_path, tss1_col, tss2_col, tss3_col):
         logging.error(f"Error plotting maps: {e}")
         messagebox.showerror("Error", f"Error plotting maps: {e}")
     
-def plotCoils(folder_path, tss1_col, tss2_col, tss3_col):
+def plotCoils(folder_path, tss1_col, tss2_col, tss3_col, use_crp=True):
     try:
         # Extract the data from the PTR and Navigation files in the selected folder
-        coil1_df, coil2_df, coil3_df, crp_df = extractData(folder_path, tss1_col, tss2_col, tss3_col)
+        coil1_df, coil2_df, coil3_df, crp_df = extractData(folder_path, tss1_col, tss2_col, tss3_col, use_crp)
         
         # Validate extracted data
         if coil1_df.empty or coil2_df.empty or coil3_df.empty:
@@ -785,10 +786,10 @@ def plotCoils(folder_path, tss1_col, tss2_col, tss3_col):
         logging.error(f"Error plotting coil data: {e}")
         messagebox.showerror("Error", f"Error plotting coil data: {e}")
 
-def plotHeading(folder_path, tss1_col, tss2_col, tss3_col):
+def plotHeading(folder_path, tss1_col, tss2_col, tss3_col, use_crp=True):
     try:
         # Extract the data from the PTR and Navigation files in the selected folder
-        coil1_df, coil2_df, coil3_df, crp_df = extractData(folder_path, tss1_col, tss2_col, tss3_col)
+        coil1_df, coil2_df, coil3_df, crp_df = extractData(folder_path, tss1_col, tss2_col, tss3_col, use_crp)
         
         if coil1_df.empty or coil2_df.empty or coil3_df.empty:
             logging.error("One or more extracted DataFrames are empty. Check input data.")
@@ -918,13 +919,13 @@ def plotHeading(folder_path, tss1_col, tss2_col, tss3_col):
         logging.error(f"Error plotting heading: {e}")
         messagebox.showerror("Error", f"Error plotting heading: {e}")
 
-def processFiles(folder_path, tss1_col, tss2_col, tss3_col, output_file):
+def processFiles(folder_path, tss1_col, tss2_col, tss3_col, output_file, silent=False, use_crp=True):
     try:
         if not os.path.isdir(folder_path):
             raise ValueError("Invalid folder path.")
         
         # Extract the data from the PTR and Navigation files in the selected folder
-        coil1_df, coil2_df, coil3_df, crp_df = extractData(folder_path, tss1_col, tss2_col, tss3_col)
+        coil1_df, coil2_df, coil3_df, crp_df = extractData(folder_path, tss1_col, tss2_col, tss3_col, use_crp)
         
         if coil1_df.empty or coil2_df.empty or coil3_df.empty:
             raise ValueError("Extracted data is empty. Check input files and column names.")
@@ -968,11 +969,74 @@ def processFiles(folder_path, tss1_col, tss2_col, tss3_col, output_file):
         
         # Log and show success message
         logging.info("Files processed successfully.")
-        messagebox.showinfo("Success", "Files processed successfully")
+        if not silent:
+            messagebox.showinfo("Success", "Files processed successfully")
         
+        return merged_df
+
     except Exception as e:
         logging.error(f"Error processing files: {e}")
         messagebox.showerror("Error", f"Error processing files: {e}")
+        return None
+
+CONFIG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config', 'settings.json')
+CELL_SIZE = 0.5 # Default
+
+def load_settings():
+    defaults = {
+        "folder_path": os.getcwd(),
+        "tss1_col": COLUMN_COIL_1_DEFAULT,
+        "tss2_col": COLUMN_COIL_2_DEFAULT,
+        "tss3_col": COLUMN_COIL_3_DEFAULT,
+        "output_file": "TARGET_XXX_AF.txt",
+        "coil1_suffix": COIL_1_SUFFIX,
+        "coil2_suffix": COIL_2_SUFFIX,
+        "coil3_suffix": COIL_3_SUFFIX,
+        "crp_suffix": CRP_SUFFIX,
+        "cell_size": 0.5,
+        "use_crp": True
+    }
+    if os.path.exists(CONFIG_FILE):
+        try:
+            with open(CONFIG_FILE, 'r') as f:
+                settings = json.load(f)
+                defaults.update(settings)
+        except Exception as e:
+            logging.error(f"Error loading settings: {e}")
+    return defaults
+
+def save_settings():
+    settings = {
+        "folder_path": folder_entry.get(),
+        "tss1_col": tss1_entry.get(),
+        "tss2_col": tss2_entry.get(),
+        "tss3_col": tss3_entry.get(),
+        "output_file": output_entry.get(),
+        "coil1_suffix": coil1_suffix_entry.get(),
+        "coil2_suffix": coil2_suffix_entry.get(),
+        "coil3_suffix": coil3_suffix_entry.get(),
+        "crp_suffix": crp_suffix_entry.get(),
+        "cell_size": cell_size_entry.get(),
+        "use_crp": use_crp_var.get()
+    }
+    try:
+        os.makedirs(os.path.dirname(CONFIG_FILE), exist_ok=True)
+        with open(CONFIG_FILE, 'w') as f:
+            json.dump(settings, f, indent=4)
+        logging.info("Settings saved.")
+    except Exception as e:
+        logging.error(f"Error saving settings: {e}")
+
+def update_globals():
+    global COIL_1_SUFFIX, COIL_2_SUFFIX, COIL_3_SUFFIX, CRP_SUFFIX, CELL_SIZE
+    COIL_1_SUFFIX = coil1_suffix_entry.get()
+    COIL_2_SUFFIX = coil2_suffix_entry.get()
+    COIL_3_SUFFIX = coil3_suffix_entry.get()
+    CRP_SUFFIX = crp_suffix_entry.get()
+    try:
+        CELL_SIZE = float(cell_size_entry.get())
+    except ValueError:
+        CELL_SIZE = 0.5 # Default fallback
 
 def select_folder():
     folder_path = filedialog.askdirectory(title="Select a folder")
@@ -980,7 +1044,7 @@ def select_folder():
         folder_entry.delete(0, tk.END)
         folder_entry.insert(0, folder_path)
         logging.info(f"Selected folder path: {folder_path}")
-    
+
 def validate_inputs(folder_path, tss1_col, tss2_col, tss3_col, output_file=None):
     if not folder_path:
         raise ValueError("Missing folder path. Select it using the Browse button.")
@@ -991,33 +1055,39 @@ def validate_inputs(folder_path, tss1_col, tss2_col, tss3_col, output_file=None)
 
 def show_heading():
     try:
+        update_globals()
+        save_settings()
         folder_path = folder_entry.get()
         tss1_col, tss2_col, tss3_col = tss1_entry.get(), tss2_entry.get(), tss3_entry.get()
+        use_crp = use_crp_var.get()
         validate_inputs(folder_path, tss1_col, tss2_col, tss3_col)
-        plotHeading(folder_path, tss1_col, tss2_col, tss3_col)
-
+        plotHeading(folder_path, tss1_col, tss2_col, tss3_col, use_crp)
     except ValueError as e:
         logging.error(f"Error plotting heading: {e}")
         messagebox.showerror("Error", str(e))
 
 def show_maps():
     try:
+        update_globals()
+        save_settings()
         folder_path = folder_entry.get()
         tss1_col, tss2_col, tss3_col = tss1_entry.get(), tss2_entry.get(), tss3_entry.get()
+        use_crp = use_crp_var.get()
         validate_inputs(folder_path, tss1_col, tss2_col, tss3_col)
-        plotMaps(folder_path, tss1_col, tss2_col, tss3_col)
-        
+        plotMaps(folder_path, tss1_col, tss2_col, tss3_col, use_crp)
     except ValueError as e:
         logging.error(f"Error plotting maps: {e}")
         messagebox.showerror("Error", str(e))
     
 def show_coils():
     try:
+        update_globals()
+        save_settings()
         folder_path = folder_entry.get()
         tss1_col, tss2_col, tss3_col = tss1_entry.get(), tss2_entry.get(), tss3_entry.get()
+        use_crp = use_crp_var.get()
         validate_inputs(folder_path, tss1_col, tss2_col, tss3_col)
-        plotCoils(folder_path, tss1_col, tss2_col, tss3_col)
- 
+        plotCoils(folder_path, tss1_col, tss2_col, tss3_col, use_crp)
     except ValueError as e:
         logging.error(f"Error plotting coils: {e}")
         messagebox.showerror("Error", str(e))
@@ -1031,15 +1101,68 @@ def close_plots():
 
 def process():
     try:
+        update_globals()
+        save_settings()
         folder_path = folder_entry.get()
         tss1_col, tss2_col, tss3_col = tss1_entry.get(), tss2_entry.get(), tss3_entry.get()
         output_file = output_entry.get()
+        use_crp = use_crp_var.get()
         validate_inputs(folder_path, tss1_col, tss2_col, tss3_col, output_file)
-        processFiles(folder_path, tss1_col, tss2_col, tss3_col, output_file)
-
+        processFiles(folder_path, tss1_col, tss2_col, tss3_col, output_file, use_crp=use_crp)
     except ValueError as e:
         logging.error(f"Error processing files: {e}")
         messagebox.showerror("Error", str(e))
+
+def create_heatmaps_action():
+    try:
+        update_globals()
+        save_settings()
+        folder_path = folder_entry.get()
+        tss1_col, tss2_col, tss3_col = tss1_entry.get(), tss2_entry.get(), tss3_entry.get()
+        output_file = output_entry.get()
+        use_crp = use_crp_var.get()
+        validate_inputs(folder_path, tss1_col, tss2_col, tss3_col, output_file)
+        
+        # Run processFiles silently to get the dataframe
+        merged_df = processFiles(folder_path, tss1_col, tss2_col, tss3_col, output_file, silent=True, use_crp=use_crp)
+        
+        if merged_df is not None:
+            # Generate heatmaps
+            # Color map and boundaries for TSS heatmaps
+            colorsTSS = ['blue', 'dodgerblue', 'green', 'lime', 'yellow', 'orange', 'red', 'purple', 'pink']
+            boundariesTSS = [-500, -100, -25, 25, 50, 75, 150, 500, 5000, 10000]  
+
+            # Color map and boundaries for Alt heatmaps
+            colorsALT = ['black', 'darkblue', 'green', 'lime', 'yellow', 'orange', 'red']
+            boundariesALT = [-0.5, -0.25, 0, 0.25, 0.5, 0.75, 1.0, 2.0]  
+            
+            output_file_path = os.path.join(folder_path, output_file)
+            filename = os.path.basename(output_file_path)
+            
+            # TSS heatmap generation
+            required_columns = {'Easting', 'Northing', 'TSS'}
+            if required_columns.issubset(merged_df.columns):
+                heatmaps.generate_TSS_heatmap(output_file_path, filename, merged_df, 0, CELL_SIZE, colorsTSS, boundariesTSS)
+                logging.info(f"Generated TSS heatmap for {filename}")
+            else:
+                logging.warning(f"Skipping TSS heatmap for {filename}: Missing required columns.")
+
+            # Altitude heatmap generation
+            required_columns = {'Easting', 'Northing', 'Alt'}
+            if required_columns.issubset(merged_df.columns):
+                heatmaps.generate_ALT_heatmap(output_file_path, filename, merged_df, 0, CELL_SIZE, colorsALT, boundariesALT)
+                logging.info(f"Generated Altitude heatmap for {filename}")
+            else:
+                logging.warning(f"Skipping Altitude heatmap for {filename}: Missing required columns.")
+            
+            messagebox.showinfo("Success", "Files processed and heatmaps generated successfully")
+
+    except ValueError as e:
+        logging.error(f"Error creating heatmaps: {e}")
+        messagebox.showerror("Error", str(e))
+    except Exception as e:
+        logging.error(f"Unexpected error creating heatmaps: {e}")
+        messagebox.showerror("Error", f"Unexpected error: {e}")
 
 # Main program
 logging.info(f"{SCRIPT_VERSION} started.")
@@ -1047,43 +1170,122 @@ logging.info(f"{SCRIPT_VERSION} started.")
 # Create the main window
 root = tk.Tk()
 root.title(SCRIPT_VERSION)
+root.geometry("1200x650")
 
-# Set the font size
-font = ("Helvetica", 14)
-font_bold = ("Helvetica", 14, "bold")
+# Load settings
+settings = load_settings()
 
-# Create and place the widgets
-tk.Label(root, text="Select Folder:", font=font).grid(row=0, column=0, padx=10, pady=5, sticky=tk.W)
-folder_entry = tk.Entry(root, width=50, font=font)
-folder_entry.grid(row=0, column=1, padx=10, pady=5, sticky=tk.W)
-folder_entry.insert(0, os.getcwd())  # Default to current working directory
-tk.Button(root, text="Browse", command=select_folder, font=font_bold).grid(row=0, column=2, padx=10, pady=5, sticky=tk.W)
+# Style configuration
+style = ttk.Style()
+style.theme_use('clam') # 'clam', 'alt', 'default', 'classic'
 
-tk.Label(root, text="Coil 1 (starboard) Column PTR file:", font=font).grid(row=3, column=0, padx=10, pady=5, sticky=tk.W)
-tss1_entry = tk.Entry(root, width=20, font=font)
-tss1_entry.grid(row=3, column=1, padx=10, pady=5, sticky=tk.W)
-tss1_entry.insert(0, COLUMN_COIL_1_DEFAULT)  # Default value
+# Define colors
+bg_color = "#f5f6f7"
+accent_color = "#0078d7"
+text_color = "#333333"
+entry_bg = "#ffffff"
 
-tk.Label(root, text="Coil 2 (center) Column PTR file:", font=font).grid(row=4, column=0, padx=10, pady=5, sticky=tk.W)
-tss2_entry = tk.Entry(root, width=20, font=font)
-tss2_entry.grid(row=4, column=1, padx=10, pady=5, sticky=tk.W)
-tss2_entry.insert(0, COLUMN_COIL_2_DEFAULT)  # Default value
+root.configure(bg=bg_color)
 
-tk.Label(root, text="Coil 3 (port) Column PTR file:", font=font).grid(row=5, column=0, padx=10, pady=5, sticky=tk.W)
-tss3_entry = tk.Entry(root, width=20, font=font)
-tss3_entry.grid(row=5, column=1, padx=10, pady=5, sticky=tk.W)
-tss3_entry.insert(0, COLUMN_COIL_3_DEFAULT)  # Default value
+style.configure(".", background=bg_color, foreground=text_color, font=("Segoe UI", 10))
+style.configure("TLabel", background=bg_color, foreground=text_color)
+style.configure("TButton", font=("Segoe UI", 10, "bold"))
+style.configure("TEntry", fieldbackground=entry_bg)
+style.configure("TLabelframe", background=bg_color, foreground=accent_color)
+style.configure("TLabelframe.Label", background=bg_color, foreground=accent_color, font=("Segoe UI", 11, "bold"))
+style.configure("TCheckbutton", background=bg_color)
 
-tk.Label(root, text="Output File Name:", font=font).grid(row=8, column=0, padx=10, pady=5, sticky=tk.W)
-output_entry = tk.Entry(root, width=50, font=font)
-output_entry.grid(row=8, column=1, padx=10, pady=5, sticky=tk.W)
-output_entry.insert(0, "TARGET_XXX_AF.txt")  # Default value
+# Main container
+main_frame = ttk.Frame(root, padding="10", style="TFrame")
+main_frame.pack(fill=tk.BOTH, expand=True)
 
-tk.Button(root, text="Heading QC", command=lambda: show_heading(), font=font_bold).grid(row=9, column=0, columnspan=3, pady=10, sticky=tk.W)
-tk.Button(root, text="Process Files", command=lambda: process(), font=font_bold).grid(row=10, column=0, columnspan=3, pady=10, sticky=tk.W)
-tk.Button(root, text="Show Map", command=lambda: show_maps(), font=font_bold).grid(row=10, column=1, columnspan=3, pady=10, sticky=tk.W)
-tk.Button(root, text="Show Coils", command=lambda: show_coils(), font=font_bold).grid(row=10, column=2, columnspan=3, pady=10, sticky=tk.W)
-tk.Button(root, text="Close Plots", command=lambda: close_plots(), font=font_bold).grid(row=9, column=2, columnspan=3, pady=10, sticky=tk.W)
+# --- Left Frame: Settings ---
+left_frame = ttk.LabelFrame(main_frame, text="Settings", padding="10")
+left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5, pady=5)
+
+# Folder Selection
+ttk.Label(left_frame, text="Select Folder:").grid(row=0, column=0, sticky=tk.W, pady=(5, 2))
+folder_entry = ttk.Entry(left_frame)
+folder_entry.grid(row=1, column=0, sticky="ew", padx=(0, 5), pady=2)
+folder_entry.insert(0, settings["folder_path"])
+ttk.Button(left_frame, text="Browse", command=select_folder).grid(row=1, column=1, sticky="e", pady=2)
+left_frame.columnconfigure(0, weight=1) # Make entry expand
+
+# Column Settings
+ttk.Label(left_frame, text="Coil 1 (Starboard) Column:").grid(row=2, column=0, sticky=tk.W, pady=2)
+tss1_entry = ttk.Entry(left_frame, width=10)
+tss1_entry.grid(row=2, column=1, sticky=tk.W, pady=2)
+tss1_entry.insert(0, settings["tss1_col"])
+
+ttk.Label(left_frame, text="Coil 2 (Center) Column:").grid(row=3, column=0, sticky=tk.W, pady=2)
+tss2_entry = ttk.Entry(left_frame, width=10)
+tss2_entry.grid(row=3, column=1, sticky=tk.W, pady=2)
+tss2_entry.insert(0, settings["tss2_col"])
+
+ttk.Label(left_frame, text="Coil 3 (Port) Column:").grid(row=4, column=0, sticky=tk.W, pady=2)
+tss3_entry = ttk.Entry(left_frame, width=10)
+tss3_entry.grid(row=4, column=1, sticky=tk.W, pady=2)
+tss3_entry.insert(0, settings["tss3_col"])
+
+# Suffix Settings
+ttk.Separator(left_frame, orient='horizontal').grid(row=5, column=0, columnspan=2, sticky="ew", pady=10)
+ttk.Label(left_frame, text="File Suffixes:").grid(row=6, column=0, sticky=tk.W, pady=2)
+
+ttk.Label(left_frame, text="Coil 1 Suffix:").grid(row=7, column=0, sticky=tk.W, pady=2)
+coil1_suffix_entry = ttk.Entry(left_frame, width=20)
+coil1_suffix_entry.grid(row=7, column=1, sticky=tk.W, pady=2)
+coil1_suffix_entry.insert(0, settings["coil1_suffix"])
+
+ttk.Label(left_frame, text="Coil 2 Suffix:").grid(row=8, column=0, sticky=tk.W, pady=2)
+coil2_suffix_entry = ttk.Entry(left_frame, width=20)
+coil2_suffix_entry.grid(row=8, column=1, sticky=tk.W, pady=2)
+coil2_suffix_entry.insert(0, settings["coil2_suffix"])
+
+ttk.Label(left_frame, text="Coil 3 Suffix:").grid(row=9, column=0, sticky=tk.W, pady=2)
+coil3_suffix_entry = ttk.Entry(left_frame, width=20)
+coil3_suffix_entry.grid(row=9, column=1, sticky=tk.W, pady=2)
+coil3_suffix_entry.insert(0, settings["coil3_suffix"])
+
+ttk.Label(left_frame, text="CRP Suffix:").grid(row=10, column=0, sticky=tk.W, pady=2)
+crp_suffix_entry = ttk.Entry(left_frame, width=20)
+crp_suffix_entry.grid(row=10, column=1, sticky=tk.W, pady=2)
+crp_suffix_entry.insert(0, settings["crp_suffix"])
+
+# CRP Checkbox
+use_crp_var = tk.BooleanVar(value=settings.get("use_crp", True))
+ttk.Checkbutton(left_frame, text="Include CRP Navigation", variable=use_crp_var).grid(row=11, column=0, columnspan=2, sticky=tk.W, pady=5)
+
+# Output Settings
+ttk.Separator(left_frame, orient='horizontal').grid(row=12, column=0, columnspan=2, sticky="ew", pady=10)
+ttk.Label(left_frame, text="Output File Name:").grid(row=13, column=0, sticky=tk.W, pady=2)
+output_entry = ttk.Entry(left_frame, width=40)
+output_entry.grid(row=14, column=0, columnspan=2, sticky="ew", pady=2)
+output_entry.insert(0, settings["output_file"])
+
+ttk.Label(left_frame, text="Heatmap Cell Size (m):").grid(row=15, column=0, sticky=tk.W, pady=2)
+cell_size_entry = ttk.Entry(left_frame, width=10)
+cell_size_entry.grid(row=15, column=1, sticky=tk.W, pady=2)
+cell_size_entry.insert(0, settings["cell_size"])
+
+
+# --- Middle Frame: QC Tools ---
+middle_frame = ttk.LabelFrame(main_frame, text="QC Tools", padding="10")
+middle_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5, pady=5)
+
+ttk.Button(middle_frame, text="Heading QC", command=show_heading).pack(fill=tk.X, pady=5)
+ttk.Button(middle_frame, text="Show Map", command=show_maps).pack(fill=tk.X, pady=5)
+ttk.Button(middle_frame, text="Show Coils", command=show_coils).pack(fill=tk.X, pady=5)
+ttk.Separator(middle_frame, orient='horizontal').pack(fill=tk.X, pady=10)
+ttk.Button(middle_frame, text="Close Plots", command=close_plots).pack(fill=tk.X, pady=5)
+
+
+# --- Right Frame: Creation ---
+right_frame = ttk.LabelFrame(main_frame, text="Creation", padding="10")
+right_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5, pady=5)
+
+ttk.Button(right_frame, text="Process Files", command=process).pack(fill=tk.X, pady=5)
+ttk.Separator(right_frame, orient='horizontal').pack(fill=tk.X, pady=10)
+ttk.Button(right_frame, text="Create Heatmaps", command=create_heatmaps_action).pack(fill=tk.X, pady=5)
 
 logging.info("Graphic User Interface created. Main loop started.")
 
