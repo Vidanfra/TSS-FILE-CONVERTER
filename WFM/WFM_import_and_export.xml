@@ -9,11 +9,17 @@
         <SqlServer>localhost</SqlServer>
         <DatabaseName>600090_GOEL_WindMultiplikator</DatabaseName>
 
+        <!-- ==================== DATA SELECTION AND SETUP ==================== -->
+        <GroupTask po="1" name="Data selection and setup">
+            <InputTask po="1" name="Choose data folder" output="BaseDirectory" AskForInput="true"/>
+            <SetPropertyTask po="2" name="Define data directory" input="{BaseDirectory}" output="BaseDirectory" level="2"/>
+        </GroupTask>
+
+
         <!-- ==================== DEFINE VARIABLES ==================== -->
-        <GroupTask po="1" name="Define Variable Inputs">
+        <GroupTask po="2" name="Define Variable Inputs">
             <!-- Paths -->
-			<SetPropertyTask po="1" name="Define Base Directory" input="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER" output="BaseDir" level="2" />	
-			<SetPropertyTask po="2" name="Define NAVISCAN Logging Path" input="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\TEST DATA\SBD" output="NaviScanLoggingPath" level="2" />
+			<SetPropertyTask po="2" name="Define NAVISCAN Logging Path" input="{BaseDirectory}" output="NaviScanLoggingPath" level="2" />
             <SetPropertyTask po="3" name="Define Output Directory" input="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\TEST DATA\WFM_exports" output="OutputDirectory" level="2"/>
             <SetPropertyTask po="4" name="Define WFM Log Path" input="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\WFM\WFM_LOGS" output="LogPath" level="2" />
             
@@ -30,7 +36,7 @@
         </GroupTask>
 
         <!-- ==================== FILE WATCHER - IMPORT SBD ==================== -->
-        <FileWatcherTask po="2" name="Detect and Process SBD Files" logKeyword="Detect and Process SBD Files" Output="SBDFile" Location="{NaviScanLoggingPath}" Filter="*.sbd" Timeout="60000" IncludeSubDir="true"> 
+        <FileWatcherTask po="2" name="Detect and Process SBD Files" logKeyword="Detect and Process SBD Files" output="SBDFile" location="{NaviScanLoggingPath}" Filter="*.sbd" Timeout="60000" IncludeSubDir="true"> 
         <GroupTask po="1" name="Process_{SBDFile.Filename}_Data">
 
 		<GroupTask po="1" name="{SBDFile.Filename}">
@@ -50,9 +56,48 @@
             <!-- ==================== IMPORT SBD TO NAVIEDIT ==================== -->
             <SbdImportTask po="9" name="{SBDFile.Filename} - Import into NaviEdit" logKeyword="{SBDFile.Filename}" output="SBDSQLBlockID" OnError="Restart">
                 <NaviEditTask version="1.0">
-                    <Input xml="{SqlServer}"/>
-                    <Input xml="{DatabaseName}"/>
-                    <Geodesy useSbdGeodesy="yes">
+                    <SqlServer>{SqlServer}</SqlServer>
+                    <DatabaseName>{DatabaseName}</DatabaseName>
+                    <Geodesy useSbdGeodesy="no">
+                        <Source>
+                            <Ellipsoid epsg="7022" name="International 1924">
+                                <SemiMajorAxis>6378388.0</SemiMajorAxis>
+                                <InverseFlattening>297.0</InverseFlattening>
+                            </Ellipsoid>
+                            <Projection epsg="32631" name="UTM zone 31N">
+                                <EivaType>5</EivaType>
+                                <FalseEasting>500000</FalseEasting>
+                                <FalseNorthing>0</FalseNorthing>
+                                <FirstParallel>0</FirstParallel>
+                                <SecondParallel></SecondParallel>
+                                <Scale>0.9996</Scale>
+                                <OrigLatitude>0</OrigLatitude>
+                                <OrigLongitude>3</OrigLongitude>
+                                <Zone>31</Zone>
+                            </Projection>
+                        </Source>
+                        <Destination>
+                            <Ellipsoid epsg="7022" name="International 1924">
+                                <SemiMajorAxis>6378388.0</SemiMajorAxis>
+                                <InverseFlattening>297.0</InverseFlattening>
+                            </Ellipsoid>
+                            <Projection epsg="32631" name="UTM zone 31N">
+                                <EivaType>5</EivaType>
+                                <FalseEasting>500000</FalseEasting>
+                                <FalseNorthing>0</FalseNorthing>
+                                <FirstParallel>0</FirstParallel>
+                                <SecondParallel></SecondParallel>
+                                <Scale>0.9996</Scale>
+                                <OrigLatitude>0</OrigLatitude>
+                                <OrigLongitude>3</OrigLongitude>
+                                <Zone>31</Zone>
+                            </Projection>
+                        </Destination>
+                        <Shift type="0" method="0" name="No shift">
+                            <Translation X="0" Y="0" Z="0"/>
+                            <Rotation X="0" Y="0" Z="0"/>
+                            <ScaleFactor ppm="0"/>
+                        </Shift>
                     </Geodesy>
                     <SbdInterpreter version="1.0">
                         <Destination matchFolder="yes" importSVP="no" linkSVP="no">
@@ -66,16 +111,31 @@
                         <Filters>
                             <MBEQuality setDeletedFlag="no" qualityThreshold="0"/>
                         </Filters>
-                        <Options disableBathy="no" useOnlineSV="no" onlineSVStart="-1.1" onlineSVEnd="15.5" scanReductionImportEvery="1" />
+                        <Options disableBathy="no" useOnlineSV="no" onlineSVStart="-1.1" onlineSVEnd="15.5" scanReductionImportEvery="1" skipScansWithoutMotion="false"/>
                     </SbdInterpreter>
                 </NaviEditTask>
             </SbdImportTask>
 
-            <!-- ==================== EXPORT VISUALSOFT NAV - CRP ==================== -->
-            <ExportVisualSoftNavigationTask po="10" name="{SBDFile.Filename} - Export Visualsoft Nav CRP" logKeyword="NAVxport" output=" ">
+            <!-- ==================== APPLY BLOCK SETTINGS ==================== -->
+            <BlockSettingsTask po="10" name="{SBDFile.Filename} - Apply Block Settings" logKeyword="{SBDFile.Filename}">
                 <NaviEditTask version="1.0">
-                    <Input xml="{SqlServer}"/>
-                    <Input xml="{DatabaseName}"/>
+                    <SqlServer>{SqlServer}</SqlServer>
+                    <DatabaseName>{DatabaseName}</DatabaseName>
+                    <BlockSettings version="1.0">
+                        <BlockId>
+                            {SBDSQLBlockID}
+                        </BlockId>
+                        <Options skipScansWithoutMotion="no" disableBathy="no" useHeave="yes" induceHeave="no"/>
+                        <QualityThreshold quality="12"/>
+                    </BlockSettings>
+                </NaviEditTask>
+            </BlockSettingsTask>
+
+            <!-- ==================== EXPORT VISUALSOFT NAV - CRP ==================== -->
+            <ExportAsciiTask po="11" name="{SBDFile.Filename} - Export Visualsoft Nav CRP" logKeyword="NAVxport" output=" ">
+                <NaviEditTask version="1.0">
+                    <SqlServer>{SqlServer}</SqlServer>
+                    <DatabaseName>{DatabaseName}</DatabaseName>
                     <Export type="xyvsoftvev">
                         <BlockId>
                             {SBDSQLBlockID}
@@ -91,7 +151,7 @@
                             <Options writeHeader="yes" selectionMethod="0" reduceMethod="0" sortKP="no" interval="10.0"/>
                         </Output>
                         <Units depthScale="1.0" posScale="1.0"/>
-                        <Settings>
+                        <Settings addRunlineName="no">
                             <Selection object="{crp_id}"/> 
                             <Singlebeam maxInterpolDist="-1" interpolateDepth="yes"/>
                             <Multibeam averagingWindow="1.0"/> 
@@ -100,13 +160,13 @@
                         </Settings>
                     </Export>
                 </NaviEditTask>
-            </ExportVisualSoftNavigationTask>
+            </ExportAsciiTask>
 
             <!-- ==================== EXPORT VISUALSOFT NAV - PORT ==================== -->
-            <ExportVisualSoftNavigationTask po="11" name="{SBDFile.Filename} - Export Visualsoft Nav PORT Coil" logKeyword="NAVxport" output=" ">
+            <ExportAsciiTask po="12" name="{SBDFile.Filename} - Export Visualsoft Nav PORT Coil" logKeyword="NAVxport" output=" ">
                 <NaviEditTask version="1.0">
-                    <Input xml="{SqlServer}"/>
-                    <Input xml="{DatabaseName}"/>
+                    <SqlServer>{SqlServer}</SqlServer>
+                    <DatabaseName>{DatabaseName}</DatabaseName>
                     <Export type="xyvsoftvev">
                         <BlockId>
                             {SBDSQLBlockID}
@@ -122,7 +182,7 @@
                             <Options writeHeader="yes" selectionMethod="0" reduceMethod="0" sortKP="no" interval="10.0"/>
                         </Output>
                         <Units depthScale="1.0" posScale="1.0"/>
-                        <Settings>
+                        <Settings addRunlineName="no">
                             <Selection object="{port_id}"/> 
                             <Singlebeam maxInterpolDist="-1" interpolateDepth="yes"/>
                             <Multibeam averagingWindow="1.0"/> 
@@ -131,13 +191,13 @@
                         </Settings>
                     </Export>
                 </NaviEditTask>
-            </ExportVisualSoftNavigationTask>
+            </ExportAsciiTask>
 
             <!-- ==================== EXPORT VISUALSOFT NAV - CENTER ==================== -->
-            <ExportVisualSoftNavigationTask po="12" name="{SBDFile.Filename} - Export Visualsoft Nav CENTER Coil" logKeyword="NAVxport" output=" ">
+            <ExportAsciiTask po="13" name="{SBDFile.Filename} - Export Visualsoft Nav CENTER Coil" logKeyword="NAVxport" output=" ">
                 <NaviEditTask version="1.0">
-                    <Input xml="{SqlServer}"/>
-                    <Input xml="{DatabaseName}"/>
+                    <SqlServer>{SqlServer}</SqlServer>
+                    <DatabaseName>{DatabaseName}</DatabaseName>
                     <Export type="xyvsoftvev">
                         <BlockId>
                             {SBDSQLBlockID}
@@ -153,7 +213,7 @@
                             <Options writeHeader="yes" selectionMethod="0" reduceMethod="0" sortKP="no" interval="10.0"/>
                         </Output>
                         <Units depthScale="1.0" posScale="1.0"/>
-                        <Settings>
+                        <Settings addRunlineName="no">
                             <Selection object="{center_id}"/> 
                             <Singlebeam maxInterpolDist="-1" interpolateDepth="yes"/>
                             <Multibeam averagingWindow="1.0"/> 
@@ -162,13 +222,13 @@
                         </Settings>
                     </Export>
                 </NaviEditTask>
-            </ExportVisualSoftNavigationTask>
+            </ExportAsciiTask>
 
             <!-- ==================== EXPORT VISUALSOFT NAV - STARBOARD ==================== -->
-            <ExportVisualSoftNavigationTask po="13" name="{SBDFile.Filename} - Export Visualsoft Nav STARBOARD Coil" logKeyword="NAVxport" output=" ">
+            <ExportAsciiTask po="14" name="{SBDFile.Filename} - Export Visualsoft Nav STARBOARD Coil" logKeyword="NAVxport" output=" ">
                 <NaviEditTask version="1.0">
-                    <Input xml="{SqlServer}"/>
-                    <Input xml="{DatabaseName}"/>
+                    <SqlServer>{SqlServer}</SqlServer>
+                    <DatabaseName>{DatabaseName}</DatabaseName>
                     <Export type="xyvsoftvev">
                         <BlockId>
                             {SBDSQLBlockID}
@@ -184,7 +244,7 @@
                             <Options writeHeader="yes" selectionMethod="0" reduceMethod="0" sortKP="no" interval="10.0"/>
                         </Output>
                         <Units depthScale="1.0" posScale="1.0"/>
-                        <Settings>
+                        <Settings addRunlineName="no">
                             <Selection object="{stbd_id}"/> 
                             <Singlebeam maxInterpolDist="-1" interpolateDepth="yes"/>
                             <Multibeam averagingWindow="1.0"/> 
@@ -193,13 +253,13 @@
                         </Settings>
                     </Export>
                 </NaviEditTask>
-            </ExportVisualSoftNavigationTask>
+            </ExportAsciiTask>
 
             <!-- ==================== EXPORT PTR ==================== -->
-            <ExportAsciiTask po="14" name="{SBDFile.Filename} - Export PTR" logKeyword="PTRxport">
+            <ExportAsciiTask po="15" name="{SBDFile.Filename} - Export PTR" logKeyword="PTRxport">
                 <NaviEditTask version="1.0">
-                    <Input xml="{SqlServer}"/>
-                    <Input xml="{DatabaseName}"/>
+                    <SqlServer>{SqlServer}</SqlServer>
+                    <DatabaseName>{DatabaseName}</DatabaseName>
                     <Export type="xyp_ptr">
                         <BlockId>
                             {SBDSQLBlockID}
@@ -215,11 +275,6 @@
                             <Options writeHeader="yes" sortKP="no" reduceMethod="0" selectionMethod="0" interval="1.0"/>
                         </Output>
                         <Units posScale="1.0" depthScale="1.0"/>
-                        <Settings>
-                            <Pipe type="0" onlyExportGoodValues="true">
-                                <Bathy seq="1"/>
-                            </Pipe>
-                        </Settings>
                     </Export>
                 </NaviEditTask>
             </ExportAsciiTask>

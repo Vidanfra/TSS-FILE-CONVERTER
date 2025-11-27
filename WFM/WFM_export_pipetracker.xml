@@ -1,16 +1,16 @@
 <?xml version="1.0"?>
-<Setup StateDatabaseLocation="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\WFM\1_WFM_test.db">
-    <Log TimingLog="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\WFM\2_Timing_WFM_test.csv"/>
-	<Log ErrorLog="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\WFM\3_Error_WFM_testcsv"/>
-	<Log InfoLogFile="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\WFM\4_InfoLogFile_WFM_test.txt"/>					
+<Setup StateDatabaseLocation="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\WFM\WFM_LOGS\1_WFM_import_export.db">
+    <Log TimingLog="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\WFM\WFM_LOGS\2_Timing_WFM_import_export.csv"/>
+	<Log ErrorLog="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\WFM\WFM_LOGS\3_Error_WFM_import_export.csv"/>
+	<Log InfoLogFile="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\WFM\WFM_LOGS\4_InfoLogFile_WFM_import_export.txt"/>					
 	<GroupTask name="Export Pipetracker Data">
         <ExportAsciiTask po="1" name="Export PTR" logKeyword="PTRxport">
         <NaviEditTask version="1.0">
             <SqlServer>localhost</SqlServer>
-            <DatabaseName>EOG_600030_PELICAN</DatabaseName>
+            <DatabaseName>600090_GOEL_WindMultiplikator</DatabaseName>
             <Export type="xyp_ptr">
             <BlockId>
-                155
+                52
             </BlockId>
 
             <Output>

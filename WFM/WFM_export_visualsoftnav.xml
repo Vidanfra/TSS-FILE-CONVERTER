@@ -1,18 +1,18 @@
 <?xml version="1.0"?>
-<Setup StateDatabaseLocation="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\WFM\1_WFM_test.db">
-    <Log TimingLog="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\WFM\2_Timing_WFM_test.csv"/>
-	<Log ErrorLog="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\WFM\3_Error_WFM_testcsv"/>
-	<Log InfoLogFile="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\WFM\4_InfoLogFile_WFM_test.txt"/>	
+<Setup StateDatabaseLocation="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\WFM\WFM_LOGS\1_WFM_import_export.db">
+    <Log TimingLog="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\WFM\WFM_LOGS\2_Timing_WFM_import_export.csv"/>
+	<Log ErrorLog="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\WFM\WFM_LOGS\3_Error_WFM_import_export.csv"/>
+	<Log InfoLogFile="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\WFM\WFM_LOGS\4_InfoLogFile_WFM_import_export.txt"/>	
 				
 	<GroupTask name="Export Visualsoft Navigation Data">
 
         <GroupTask name="Define variables">
-            <SetPropertyTask po="2" name="Output directory" input="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\TEST DATA\WFM_DATA" output="OutputDirectory" level="2"/>
-            <SetPropertyTask po="2" name="CRP ID" input="5" output="crp_id" level="2"/>
+            <SetPropertyTask po="2" name="Output directory" input="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\TEST DATA\WFM_exports" output="OutputDirectory" level="2"/>
+            <SetPropertyTask po="2" name="CRP ID" input="1" output="crp_id" level="2"/>
             <SetPropertyTask po="2" name="PORT ID" input="2" output="port_id" level="2"/>
             <SetPropertyTask po="2" name="CENTER ID" input="3" output="center_id" level="2"/>
             <SetPropertyTask po="2" name="STBD ID" input="4" output="stbd_id" level="2"/>
-            <SetPropertyTask po="2" name="Database Name" input="Tests_vicente" output="NE_database" level="2"/>
+            <SetPropertyTask po="2" name="Database Name" input="600090_GOEL_WindMultiplikator" output="NE_database" level="2"/>
             <SetPropertyTask po="2" name="Block ID" input="15" output="block_id" level="2"/>
         </GroupTask>
 

@@ -1,20 +1,25 @@
 <?xml version="1.0"?>
-<Setup StateDatabaseLocation="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\WFM\1_WFM_test.db">
-    <Log TimingLog="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\WFM\2_Timing_WFM_test.csv"/>
-	<Log ErrorLog="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\WFM\3_Error_WFM_testcsv"/>
-	<Log InfoLogFile="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\WFM\4_InfoLogFile_WFM_test.txt"/>	
+<Setup StateDatabaseLocation="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\WFM\WFM_LOGS\1_WFM_import_export.db">
+    <Log TimingLog="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\WFM\WFM_LOGS\2_Timing_WFM_import_export.csv"/>
+	<Log ErrorLog="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\WFM\WFM_LOGS\3_Error_WFM_import_export.csv"/>
+	<Log InfoLogFile="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\WFM\WFM_LOGS\4_InfoLogFile_WFM_import_export.txt"/>	
     <GroupTask name="Import SBDs">
 
         <SqlServer>localhost</SqlServer>
-        <DatabaseName>Tests_vicente</DatabaseName>
+        <DatabaseName>600090_GOEL_WindMultiplikator</DatabaseName>
 
+        <!-- ==================== DEFINE VARIABLES ==================== -->
         <GroupTask po="1" name="Define Variable Inputs">
+            <!-- Paths -->
 			<SetPropertyTask po="1" name="Define Base Directory" input="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER" output="BaseDir" level="2" />	
-			<SetPropertyTask po="2" name="Define NAVISCAN Logging Path" input="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\SBD" output="NaviScanLoggingPath" level="2" />
-			<GetParentFolderNamesTask po="3" name="Extract Project Name" path="{NaviScanLoggingPath}" output="ProjectFolderName" indexes="1" countfromtheleft="true" directoryseperator="\"/>
-			<SplitVariablesTask po="4" name="Isolate Project Name" Input="{ProjectFolderName}" Seperator="\" Output0="blank1" Output1="ProjectName" Output2="blank2" />
-			<SetPropertyTask po="5" name="Define Project Name" input="{ProjectName}" output="Proj_Name" level="2" />
-            <SetPropertyTask po="1" name="Define WFM Log Path" input="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\WFM" output="LogPath" level="2" />	
+			<SetPropertyTask po="2" name="Define NAVISCAN Logging Path" input="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\TEST DATA\SBD" output="NaviScanLoggingPath" level="2" />
+            <SetPropertyTask po="3" name="Define Output Directory" input="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\TEST DATA\WFM_exports" output="OutputDirectory" level="2"/>
+            <SetPropertyTask po="4" name="Define WFM Log Path" input="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\WFM\WFM_LOGS" output="LogPath" level="2" />
+
+            <!-- Project Name Extraction -->
+			<GetParentFolderNamesTask po="9" name="Extract Project Name" path="{NaviScanLoggingPath}" output="ProjectFolderName" indexes="1" countfromtheleft="true" directoryseperator="\"/>
+			<SplitVariablesTask po="10" name="Isolate Project Name" Input="{ProjectFolderName}" Seperator="\" Output0="blank1" Output1="ProjectName" Output2="blank2" />
+			<SetPropertyTask po="11" name="Define Project Name" input="{ProjectName}" output="Proj_Name" level="2" />
         </GroupTask>
 
         <FileWatcherTask po="2" name="Detect and Process SBD Files" logKeyword="Detect and Process SBD Files" Output="SBDFile" Location="{NaviScanLoggingPath}" Filter="*.sbd" Timeout="60000" IncludeSubDir="true"> 
@@ -38,11 +43,50 @@
 
 			<SetTitleTask po="11" name="Set WorkFlow Title" title="Monitoring for SBD Files - NAVISCAN\05_{PlatformName}\{Level1Folder}{SBDSubFolder}" size="25" red="255" green="255" blue="0" />
 				
-				<SbdImportTask po="12" name="{SBDFile.Filename} - Import into JobPlanner" logKeyword="{SBDFile.Filename}" output="SBDSQLBlockID" OnError="Restart">
+				<SbdImportTask po="12" name="{SBDFile.Filename} - Import into NaviEdit" logKeyword="{SBDFile.Filename}" output="SBDSQLBlockID" OnError="Restart">
 					<NaviEditTask version="1.0">
-						<Input xml="{SqlServer}"/>
-						<Input xml="{DatabaseName}"/>
-						<Geodesy useSbdGeodesy="yes">
+						<SqlServer>{SqlServer}</SqlServer>
+						<DatabaseName>{DatabaseName}</DatabaseName>
+						<Geodesy useSbdGeodesy="no">
+							<Source>
+								<Ellipsoid epsg="7022" name="International 1924">
+									<SemiMajorAxis>6378388.0</SemiMajorAxis>
+									<InverseFlattening>297.0</InverseFlattening>
+								</Ellipsoid>
+								<Projection epsg="32631" name="UTM zone 31N">
+									<EivaType>5</EivaType>
+									<FalseEasting>500000</FalseEasting>
+									<FalseNorthing>0</FalseNorthing>
+									<FirstParallel>0</FirstParallel>
+									<SecondParallel></SecondParallel>
+									<Scale>0.9996</Scale>
+									<OrigLatitude>0</OrigLatitude>
+									<OrigLongitude>3</OrigLongitude>
+									<Zone>31</Zone>
+								</Projection>
+							</Source>
+							<Destination>
+								<Ellipsoid epsg="7022" name="International 1924">
+									<SemiMajorAxis>6378388.0</SemiMajorAxis>
+									<InverseFlattening>297.0</InverseFlattening>
+								</Ellipsoid>
+								<Projection epsg="32631" name="UTM zone 31N">
+									<EivaType>5</EivaType>
+									<FalseEasting>500000</FalseEasting>
+									<FalseNorthing>0</FalseNorthing>
+									<FirstParallel>0</FirstParallel>
+									<SecondParallel></SecondParallel>
+									<Scale>0.9996</Scale>
+									<OrigLatitude>0</OrigLatitude>
+									<OrigLongitude>3</OrigLongitude>
+									<Zone>31</Zone>
+								</Projection>
+							</Destination>
+							<Shift type="0" method="0" name="No shift">
+								<Translation X="0" Y="0" Z="0"/>
+								<Rotation X="0" Y="0" Z="0"/>
+								<ScaleFactor ppm="0"/>
+							</Shift>
 						</Geodesy>
 						<SbdInterpreter version="1.0">
 							<Destination matchFolder="yes" importSVP="no" linkSVP="no">
@@ -54,12 +98,27 @@
 								</FileList>
 							</Source>
 							<Filters>
-								<MBEQuality setDeletedFlag="no" qualityThreshold="0"/>
+								<MBEQuality setDeletedFlag="no" qualityThreshold="12"/>
 							</Filters>
-							<Options disableBathy="no" useOnlineSV="no" onlineSVStart="-1.1" onlineSVEnd="15.5" scanReductionImportEvery="1" />
+							<Options disableBathy="no" useOnlineSV="no" onlineSVStart="-1.1" onlineSVEnd="15.5" scanReductionImportEvery="1" skipScansWithoutMotion="false"/>
 						</SbdInterpreter>
 					</NaviEditTask>
 				</SbdImportTask>
+
+				<!-- Apply block settings after import -->
+				<BlockSettingsTask po="13" name="{SBDFile.Filename} - Apply Block Settings" logKeyword="{SBDFile.Filename}">
+					<NaviEditTask version="1.0">
+						<SqlServer>{SqlServer}</SqlServer>
+						<DatabaseName>{DatabaseName}</DatabaseName>
+						<BlockSettings version="1.0">
+							<BlockId>
+								{SBDSQLBlockID}
+							</BlockId>
+							<Options skipScansWithoutMotion="no" disableBathy="no" useHeave="yes" induceHeave="no"/>
+							<QualityThreshold quality="12"/>
+						</BlockSettings>
+					</NaviEditTask>
+				</BlockSettingsTask>
         </GroupTask>
         </GroupTask>
         </FileWatcherTask>

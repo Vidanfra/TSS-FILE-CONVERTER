@@ -1090,7 +1090,7 @@ tss3_entry.insert(0, COLUMN_COIL_3_DEFAULT)  # Default value
 tk.Label(root, text="Output File Name:", font=font).grid(row=8, column=0, padx=10, pady=5, sticky=tk.W)
 output_entry = tk.Entry(root, width=50, font=font)
 output_entry.grid(row=8, column=1, padx=10, pady=5, sticky=tk.W)
-output_entry.insert(0, "BOSSE_XXX_A.txt")  # Default value
+output_entry.insert(0, "TARGET_XXX_AF.txt")  # Default value
 
 tk.Button(root, text="Heading QC", command=lambda: show_heading(), font=font_bold).grid(row=9, column=0, columnspan=3, pady=10, sticky=tk.W)
 tk.Button(root, text="Process Files", command=lambda: process(), font=font_bold).grid(row=10, column=0, columnspan=3, pady=10, sticky=tk.W)
