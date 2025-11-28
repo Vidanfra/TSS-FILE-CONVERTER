@@ -1,0 +1,493 @@
+<?xml version="1.0"?>
+<!--
+    ================================================================================
+    EIVA WORKFLOW MANAGER - EXPORT SCRIPT
+    ================================================================================
+-->
+<Setup StateDatabaseLocation="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\LOGS_WFM_600090_import_export\1_WFM_export.db">
+    <Log TimingLog="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\LOGS_WFM_600090_import_export\2_Timing_WFM_export.csv"/>
+	<Log ErrorLog="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\LOGS_WFM_600090_import_export\3_Error_WFM_export.csv"/>
+	<Log InfoLogFile="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\LOGS_WFM_600090_import_export\4_InfoLogFile_WFM_export.txt"/>	
+				
+	<GroupTask name="Export PTR and VisualSoft Nav">
+
+        <SqlServer>localhost</SqlServer>
+        <DatabaseName>600090_GOEL_WindMultiplikator</DatabaseName>
+
+        <GroupTask po="1" name="Data selection and setup">
+            <!-- Job Name/Path is passed from Python via {NEPath} -->
+            
+            <!-- Output Directory -->
+            <SetPropertyTask po="5" name="Set Output Directory" input="Z:\600090_WindMultiplikator_Bard\04_PROC_DATA\01_GOEL\18_SID_OR LINE_BASED_DATA\SIT\As-Found_corrected_offsets" output="OutputDirectory" level="2"/>
+            <!-- <SetPropertyTask po="6" name="Define output directory" input="{OutputDirectory}" output="OutputDirectory" level="2"/> -->
+        </GroupTask>
+
+        <GroupTask po="2" name="Define Variable Inputs">
+            <SetPropertyTask po="1" name="CRP ID" input="1" output="crp_id" level="2"/>        <!-- Common Reference Point -->
+            <SetPropertyTask po="2" name="PORT ID" input="2" output="port_id" level="2"/>      <!-- Port side coil/sensor -->
+            <SetPropertyTask po="3" name="CENTER ID" input="3" output="center_id" level="2"/>  <!-- Center coil/sensor -->
+            <SetPropertyTask po="4" name="STBD ID" input="4" output="stbd_id" level="2"/>      <!-- Starboard coil/sensor -->
+        </GroupTask>
+
+        <!-- Find Blocks in the specified Job (Folder) -->
+        <GroupTask po="4" name="Export Block_77">
+                
+                <SetTitleTask po="1" name="Set WorkFlow Title" title="Exporting: Block_77" size="25" red="0" green="255" blue="0" />
+
+                <!-- ==================== EXPORT VISUALSOFT NAV - CRP ==================== -->
+                <ExportAsciiTask po="11" name="Block_77 - Export Visualsoft Nav CRP" logKeyword="NAVxport" output=" ">
+                    <NaviEditTask version="1.0">
+                        <SqlServer>{SqlServer}</SqlServer>
+                        <DatabaseName>{DatabaseName}</DatabaseName>
+                        <Export type="xyvsoftvev">
+                            <BlockId>
+                                77
+                            </BlockId>
+
+                            <Output>
+                                <Location outputMethod="0" prefixKPRange="no" combineFiles="no" sortCombined="no">
+                                    <Path>{OutputDirectory}</Path>
+                                    <AppendPath></AppendPath>
+                                </Location>
+
+                                <DbFolderUsage createSubdir="no" prefixFileName="no" useAsFilename="no"/>
+                                <Options writeHeader="yes" selectionMethod="0" reduceMethod="0" sortKP="no" interval="10.0"/>
+                            </Output>
+                            <Units depthScale="1.0" posScale="1.0"/>
+                            <Settings addRunlineName="no">
+                                <Selection object="{crp_id}"/> 
+                                <Singlebeam maxInterpolDist="-1" interpolateDepth="yes"/>
+                                <Multibeam averagingWindow="1.0"/> 
+                                <NoOfDecimals position="3" depth="3" />
+                                <Options downsampleFactor="0" downsampleMinDist="0.0" timeFormat="0" />
+                            </Settings>
+                        </Export>
+                    </NaviEditTask>
+                </ExportAsciiTask>
+
+                <!-- ==================== EXPORT VISUALSOFT NAV - PORT ==================== -->
+                <ExportAsciiTask po="12" name="Block_77 - Export Visualsoft Nav PORT Coil" logKeyword="NAVxport" output=" ">
+                    <NaviEditTask version="1.0">
+                        <SqlServer>{SqlServer}</SqlServer>
+                        <DatabaseName>{DatabaseName}</DatabaseName>
+                        <Export type="xyvsoftvev">
+                            <BlockId>
+                                77
+                            </BlockId>
+
+                            <Output>
+                                <Location outputMethod="0" prefixKPRange="no" combineFiles="no" sortCombined="no">
+                                    <Path>{OutputDirectory}</Path>
+                                    <AppendPath></AppendPath>
+                                </Location>
+
+                                <DbFolderUsage createSubdir="no" prefixFileName="no" useAsFilename="no"/>
+                                <Options writeHeader="yes" selectionMethod="0" reduceMethod="0" sortKP="no" interval="10.0"/>
+                            </Output>
+                            <Units depthScale="1.0" posScale="1.0"/>
+                            <Settings addRunlineName="no">
+                                <Selection object="{port_id}"/> 
+                                <Singlebeam maxInterpolDist="-1" interpolateDepth="yes"/>
+                                <Multibeam averagingWindow="1.0"/> 
+                                <NoOfDecimals position="3" depth="3" />
+                                <Options downsampleFactor="0" downsampleMinDist="0.0" timeFormat="0" />
+                            </Settings>
+                        </Export>
+                    </NaviEditTask>
+                </ExportAsciiTask>
+
+                <!-- ==================== EXPORT VISUALSOFT NAV - CENTER ==================== -->
+                <ExportAsciiTask po="13" name="Block_77 - Export Visualsoft Nav CENTER Coil" logKeyword="NAVxport" output=" ">
+                    <NaviEditTask version="1.0">
+                        <SqlServer>{SqlServer}</SqlServer>
+                        <DatabaseName>{DatabaseName}</DatabaseName>
+                        <Export type="xyvsoftvev">
+                            <BlockId>
+                                77
+                            </BlockId>
+
+                            <Output>
+                                <Location outputMethod="0" prefixKPRange="no" combineFiles="no" sortCombined="no">
+                                    <Path>{OutputDirectory}</Path>
+                                    <AppendPath></AppendPath>
+                                </Location>
+
+                                <DbFolderUsage createSubdir="no" prefixFileName="no" useAsFilename="no"/>
+                                <Options writeHeader="yes" selectionMethod="0" reduceMethod="0" sortKP="no" interval="10.0"/>
+                            </Output>
+                            <Units depthScale="1.0" posScale="1.0"/>
+                            <Settings addRunlineName="no">
+                                <Selection object="{center_id}"/> 
+                                <Singlebeam maxInterpolDist="-1" interpolateDepth="yes"/>
+                                <Multibeam averagingWindow="1.0"/> 
+                                <NoOfDecimals position="3" depth="3" />
+                                <Options downsampleFactor="0" downsampleMinDist="0.0" timeFormat="0" />
+                            </Settings>
+                        </Export>
+                    </NaviEditTask>
+                </ExportAsciiTask>
+
+                <!-- ==================== EXPORT VISUALSOFT NAV - STARBOARD ==================== -->
+                <ExportAsciiTask po="14" name="Block_77 - Export Visualsoft Nav STARBOARD Coil" logKeyword="NAVxport" output=" ">
+                    <NaviEditTask version="1.0">
+                        <SqlServer>{SqlServer}</SqlServer>
+                        <DatabaseName>{DatabaseName}</DatabaseName>
+                        <Export type="xyvsoftvev">
+                            <BlockId>
+                                77
+                            </BlockId>
+
+                            <Output>
+                                <Location outputMethod="0" prefixKPRange="no" combineFiles="no" sortCombined="no">
+                                    <Path>{OutputDirectory}</Path>
+                                    <AppendPath></AppendPath>
+                                </Location>
+
+                                <DbFolderUsage createSubdir="no" prefixFileName="no" useAsFilename="no"/>
+                                <Options writeHeader="yes" selectionMethod="0" reduceMethod="0" sortKP="no" interval="10.0"/>
+                            </Output>
+                            <Units depthScale="1.0" posScale="1.0"/>
+                            <Settings addRunlineName="no">
+                                <Selection object="{stbd_id}"/> 
+                                <Singlebeam maxInterpolDist="-1" interpolateDepth="yes"/>
+                                <Multibeam averagingWindow="1.0"/> 
+                                <NoOfDecimals position="3" depth="3" />
+                                <Options downsampleFactor="0" downsampleMinDist="0.0" timeFormat="0" />
+                            </Settings>
+                        </Export>
+                    </NaviEditTask>
+                </ExportAsciiTask>
+
+                <!-- ==================== EXPORT PTR ==================== -->
+                <ExportAsciiTask po="15" name="Block_77 - Export PTR" logKeyword="PTRxport">
+                    <NaviEditTask version="1.0">
+                        <SqlServer>{SqlServer}</SqlServer>
+                        <DatabaseName>{DatabaseName}</DatabaseName>
+                        <Export type="xyp_ptr">
+                            <BlockId>
+                                77
+                            </BlockId>
+
+                            <Output>
+                                <Location outputMethod="0" prefixKPRange="no" combineFiles="no" sortCombined="no">
+                                    <Path>{OutputDirectory}</Path>
+                                    <AppendPath></AppendPath>
+                                </Location>
+
+                                <DbFolderUsage createSubdir="no" prefixFileName="no" useAsFilename="no"/>
+                                <Options writeHeader="yes" sortKP="no" reduceMethod="0" selectionMethod="0" interval="1.0"/>
+                            </Output>
+                            <Units posScale="1.0" depthScale="1.0"/>
+                        </Export>
+                    </NaviEditTask>
+                </ExportAsciiTask>
+
+            </GroupTask>
+<GroupTask po="5" name="Export Block_78">
+                
+                <SetTitleTask po="1" name="Set WorkFlow Title" title="Exporting: Block_78" size="25" red="0" green="255" blue="0" />
+
+                <!-- ==================== EXPORT VISUALSOFT NAV - CRP ==================== -->
+                <ExportAsciiTask po="11" name="Block_78 - Export Visualsoft Nav CRP" logKeyword="NAVxport" output=" ">
+                    <NaviEditTask version="1.0">
+                        <SqlServer>{SqlServer}</SqlServer>
+                        <DatabaseName>{DatabaseName}</DatabaseName>
+                        <Export type="xyvsoftvev">
+                            <BlockId>
+                                78
+                            </BlockId>
+
+                            <Output>
+                                <Location outputMethod="0" prefixKPRange="no" combineFiles="no" sortCombined="no">
+                                    <Path>{OutputDirectory}</Path>
+                                    <AppendPath></AppendPath>
+                                </Location>
+
+                                <DbFolderUsage createSubdir="no" prefixFileName="no" useAsFilename="no"/>
+                                <Options writeHeader="yes" selectionMethod="0" reduceMethod="0" sortKP="no" interval="10.0"/>
+                            </Output>
+                            <Units depthScale="1.0" posScale="1.0"/>
+                            <Settings addRunlineName="no">
+                                <Selection object="{crp_id}"/> 
+                                <Singlebeam maxInterpolDist="-1" interpolateDepth="yes"/>
+                                <Multibeam averagingWindow="1.0"/> 
+                                <NoOfDecimals position="3" depth="3" />
+                                <Options downsampleFactor="0" downsampleMinDist="0.0" timeFormat="0" />
+                            </Settings>
+                        </Export>
+                    </NaviEditTask>
+                </ExportAsciiTask>
+
+                <!-- ==================== EXPORT VISUALSOFT NAV - PORT ==================== -->
+                <ExportAsciiTask po="12" name="Block_78 - Export Visualsoft Nav PORT Coil" logKeyword="NAVxport" output=" ">
+                    <NaviEditTask version="1.0">
+                        <SqlServer>{SqlServer}</SqlServer>
+                        <DatabaseName>{DatabaseName}</DatabaseName>
+                        <Export type="xyvsoftvev">
+                            <BlockId>
+                                78
+                            </BlockId>
+
+                            <Output>
+                                <Location outputMethod="0" prefixKPRange="no" combineFiles="no" sortCombined="no">
+                                    <Path>{OutputDirectory}</Path>
+                                    <AppendPath></AppendPath>
+                                </Location>
+
+                                <DbFolderUsage createSubdir="no" prefixFileName="no" useAsFilename="no"/>
+                                <Options writeHeader="yes" selectionMethod="0" reduceMethod="0" sortKP="no" interval="10.0"/>
+                            </Output>
+                            <Units depthScale="1.0" posScale="1.0"/>
+                            <Settings addRunlineName="no">
+                                <Selection object="{port_id}"/> 
+                                <Singlebeam maxInterpolDist="-1" interpolateDepth="yes"/>
+                                <Multibeam averagingWindow="1.0"/> 
+                                <NoOfDecimals position="3" depth="3" />
+                                <Options downsampleFactor="0" downsampleMinDist="0.0" timeFormat="0" />
+                            </Settings>
+                        </Export>
+                    </NaviEditTask>
+                </ExportAsciiTask>
+
+                <!-- ==================== EXPORT VISUALSOFT NAV - CENTER ==================== -->
+                <ExportAsciiTask po="13" name="Block_78 - Export Visualsoft Nav CENTER Coil" logKeyword="NAVxport" output=" ">
+                    <NaviEditTask version="1.0">
+                        <SqlServer>{SqlServer}</SqlServer>
+                        <DatabaseName>{DatabaseName}</DatabaseName>
+                        <Export type="xyvsoftvev">
+                            <BlockId>
+                                78
+                            </BlockId>
+
+                            <Output>
+                                <Location outputMethod="0" prefixKPRange="no" combineFiles="no" sortCombined="no">
+                                    <Path>{OutputDirectory}</Path>
+                                    <AppendPath></AppendPath>
+                                </Location>
+
+                                <DbFolderUsage createSubdir="no" prefixFileName="no" useAsFilename="no"/>
+                                <Options writeHeader="yes" selectionMethod="0" reduceMethod="0" sortKP="no" interval="10.0"/>
+                            </Output>
+                            <Units depthScale="1.0" posScale="1.0"/>
+                            <Settings addRunlineName="no">
+                                <Selection object="{center_id}"/> 
+                                <Singlebeam maxInterpolDist="-1" interpolateDepth="yes"/>
+                                <Multibeam averagingWindow="1.0"/> 
+                                <NoOfDecimals position="3" depth="3" />
+                                <Options downsampleFactor="0" downsampleMinDist="0.0" timeFormat="0" />
+                            </Settings>
+                        </Export>
+                    </NaviEditTask>
+                </ExportAsciiTask>
+
+                <!-- ==================== EXPORT VISUALSOFT NAV - STARBOARD ==================== -->
+                <ExportAsciiTask po="14" name="Block_78 - Export Visualsoft Nav STARBOARD Coil" logKeyword="NAVxport" output=" ">
+                    <NaviEditTask version="1.0">
+                        <SqlServer>{SqlServer}</SqlServer>
+                        <DatabaseName>{DatabaseName}</DatabaseName>
+                        <Export type="xyvsoftvev">
+                            <BlockId>
+                                78
+                            </BlockId>
+
+                            <Output>
+                                <Location outputMethod="0" prefixKPRange="no" combineFiles="no" sortCombined="no">
+                                    <Path>{OutputDirectory}</Path>
+                                    <AppendPath></AppendPath>
+                                </Location>
+
+                                <DbFolderUsage createSubdir="no" prefixFileName="no" useAsFilename="no"/>
+                                <Options writeHeader="yes" selectionMethod="0" reduceMethod="0" sortKP="no" interval="10.0"/>
+                            </Output>
+                            <Units depthScale="1.0" posScale="1.0"/>
+                            <Settings addRunlineName="no">
+                                <Selection object="{stbd_id}"/> 
+                                <Singlebeam maxInterpolDist="-1" interpolateDepth="yes"/>
+                                <Multibeam averagingWindow="1.0"/> 
+                                <NoOfDecimals position="3" depth="3" />
+                                <Options downsampleFactor="0" downsampleMinDist="0.0" timeFormat="0" />
+                            </Settings>
+                        </Export>
+                    </NaviEditTask>
+                </ExportAsciiTask>
+
+                <!-- ==================== EXPORT PTR ==================== -->
+                <ExportAsciiTask po="15" name="Block_78 - Export PTR" logKeyword="PTRxport">
+                    <NaviEditTask version="1.0">
+                        <SqlServer>{SqlServer}</SqlServer>
+                        <DatabaseName>{DatabaseName}</DatabaseName>
+                        <Export type="xyp_ptr">
+                            <BlockId>
+                                78
+                            </BlockId>
+
+                            <Output>
+                                <Location outputMethod="0" prefixKPRange="no" combineFiles="no" sortCombined="no">
+                                    <Path>{OutputDirectory}</Path>
+                                    <AppendPath></AppendPath>
+                                </Location>
+
+                                <DbFolderUsage createSubdir="no" prefixFileName="no" useAsFilename="no"/>
+                                <Options writeHeader="yes" sortKP="no" reduceMethod="0" selectionMethod="0" interval="1.0"/>
+                            </Output>
+                            <Units posScale="1.0" depthScale="1.0"/>
+                        </Export>
+                    </NaviEditTask>
+                </ExportAsciiTask>
+
+            </GroupTask>
+<GroupTask po="6" name="Export Block_79">
+                
+                <SetTitleTask po="1" name="Set WorkFlow Title" title="Exporting: Block_79" size="25" red="0" green="255" blue="0" />
+
+                <!-- ==================== EXPORT VISUALSOFT NAV - CRP ==================== -->
+                <ExportAsciiTask po="11" name="Block_79 - Export Visualsoft Nav CRP" logKeyword="NAVxport" output=" ">
+                    <NaviEditTask version="1.0">
+                        <SqlServer>{SqlServer}</SqlServer>
+                        <DatabaseName>{DatabaseName}</DatabaseName>
+                        <Export type="xyvsoftvev">
+                            <BlockId>
+                                79
+                            </BlockId>
+
+                            <Output>
+                                <Location outputMethod="0" prefixKPRange="no" combineFiles="no" sortCombined="no">
+                                    <Path>{OutputDirectory}</Path>
+                                    <AppendPath></AppendPath>
+                                </Location>
+
+                                <DbFolderUsage createSubdir="no" prefixFileName="no" useAsFilename="no"/>
+                                <Options writeHeader="yes" selectionMethod="0" reduceMethod="0" sortKP="no" interval="10.0"/>
+                            </Output>
+                            <Units depthScale="1.0" posScale="1.0"/>
+                            <Settings addRunlineName="no">
+                                <Selection object="{crp_id}"/> 
+                                <Singlebeam maxInterpolDist="-1" interpolateDepth="yes"/>
+                                <Multibeam averagingWindow="1.0"/> 
+                                <NoOfDecimals position="3" depth="3" />
+                                <Options downsampleFactor="0" downsampleMinDist="0.0" timeFormat="0" />
+                            </Settings>
+                        </Export>
+                    </NaviEditTask>
+                </ExportAsciiTask>
+
+                <!-- ==================== EXPORT VISUALSOFT NAV - PORT ==================== -->
+                <ExportAsciiTask po="12" name="Block_79 - Export Visualsoft Nav PORT Coil" logKeyword="NAVxport" output=" ">
+                    <NaviEditTask version="1.0">
+                        <SqlServer>{SqlServer}</SqlServer>
+                        <DatabaseName>{DatabaseName}</DatabaseName>
+                        <Export type="xyvsoftvev">
+                            <BlockId>
+                                79
+                            </BlockId>
+
+                            <Output>
+                                <Location outputMethod="0" prefixKPRange="no" combineFiles="no" sortCombined="no">
+                                    <Path>{OutputDirectory}</Path>
+                                    <AppendPath></AppendPath>
+                                </Location>
+
+                                <DbFolderUsage createSubdir="no" prefixFileName="no" useAsFilename="no"/>
+                                <Options writeHeader="yes" selectionMethod="0" reduceMethod="0" sortKP="no" interval="10.0"/>
+                            </Output>
+                            <Units depthScale="1.0" posScale="1.0"/>
+                            <Settings addRunlineName="no">
+                                <Selection object="{port_id}"/> 
+                                <Singlebeam maxInterpolDist="-1" interpolateDepth="yes"/>
+                                <Multibeam averagingWindow="1.0"/> 
+                                <NoOfDecimals position="3" depth="3" />
+                                <Options downsampleFactor="0" downsampleMinDist="0.0" timeFormat="0" />
+                            </Settings>
+                        </Export>
+                    </NaviEditTask>
+                </ExportAsciiTask>
+
+                <!-- ==================== EXPORT VISUALSOFT NAV - CENTER ==================== -->
+                <ExportAsciiTask po="13" name="Block_79 - Export Visualsoft Nav CENTER Coil" logKeyword="NAVxport" output=" ">
+                    <NaviEditTask version="1.0">
+                        <SqlServer>{SqlServer}</SqlServer>
+                        <DatabaseName>{DatabaseName}</DatabaseName>
+                        <Export type="xyvsoftvev">
+                            <BlockId>
+                                79
+                            </BlockId>
+
+                            <Output>
+                                <Location outputMethod="0" prefixKPRange="no" combineFiles="no" sortCombined="no">
+                                    <Path>{OutputDirectory}</Path>
+                                    <AppendPath></AppendPath>
+                                </Location>
+
+                                <DbFolderUsage createSubdir="no" prefixFileName="no" useAsFilename="no"/>
+                                <Options writeHeader="yes" selectionMethod="0" reduceMethod="0" sortKP="no" interval="10.0"/>
+                            </Output>
+                            <Units depthScale="1.0" posScale="1.0"/>
+                            <Settings addRunlineName="no">
+                                <Selection object="{center_id}"/> 
+                                <Singlebeam maxInterpolDist="-1" interpolateDepth="yes"/>
+                                <Multibeam averagingWindow="1.0"/> 
+                                <NoOfDecimals position="3" depth="3" />
+                                <Options downsampleFactor="0" downsampleMinDist="0.0" timeFormat="0" />
+                            </Settings>
+                        </Export>
+                    </NaviEditTask>
+                </ExportAsciiTask>
+
+                <!-- ==================== EXPORT VISUALSOFT NAV - STARBOARD ==================== -->
+                <ExportAsciiTask po="14" name="Block_79 - Export Visualsoft Nav STARBOARD Coil" logKeyword="NAVxport" output=" ">
+                    <NaviEditTask version="1.0">
+                        <SqlServer>{SqlServer}</SqlServer>
+                        <DatabaseName>{DatabaseName}</DatabaseName>
+                        <Export type="xyvsoftvev">
+                            <BlockId>
+                                79
+                            </BlockId>
+
+                            <Output>
+                                <Location outputMethod="0" prefixKPRange="no" combineFiles="no" sortCombined="no">
+                                    <Path>{OutputDirectory}</Path>
+                                    <AppendPath></AppendPath>
+                                </Location>
+
+                                <DbFolderUsage createSubdir="no" prefixFileName="no" useAsFilename="no"/>
+                                <Options writeHeader="yes" selectionMethod="0" reduceMethod="0" sortKP="no" interval="10.0"/>
+                            </Output>
+                            <Units depthScale="1.0" posScale="1.0"/>
+                            <Settings addRunlineName="no">
+                                <Selection object="{stbd_id}"/> 
+                                <Singlebeam maxInterpolDist="-1" interpolateDepth="yes"/>
+                                <Multibeam averagingWindow="1.0"/> 
+                                <NoOfDecimals position="3" depth="3" />
+                                <Options downsampleFactor="0" downsampleMinDist="0.0" timeFormat="0" />
+                            </Settings>
+                        </Export>
+                    </NaviEditTask>
+                </ExportAsciiTask>
+
+                <!-- ==================== EXPORT PTR ==================== -->
+                <ExportAsciiTask po="15" name="Block_79 - Export PTR" logKeyword="PTRxport">
+                    <NaviEditTask version="1.0">
+                        <SqlServer>{SqlServer}</SqlServer>
+                        <DatabaseName>{DatabaseName}</DatabaseName>
+                        <Export type="xyp_ptr">
+                            <BlockId>
+                                79
+                            </BlockId>
+
+                            <Output>
+                                <Location outputMethod="0" prefixKPRange="no" combineFiles="no" sortCombined="no">
+                                    <Path>{OutputDirectory}</Path>
+                                    <AppendPath></AppendPath>
+                                </Location>
+
+                                <DbFolderUsage createSubdir="no" prefixFileName="no" useAsFilename="no"/>
+                                <Options writeHeader="yes" sortKP="no" reduceMethod="0" selectionMethod="0" interval="1.0"/>
+                            </Output>
+                            <Units posScale="1.0" depthScale="1.0"/>
+                        </Export>
+                    </NaviEditTask>
+                </ExportAsciiTask>
+
+            </GroupTask>
+    </GroupTask>
+</Setup>

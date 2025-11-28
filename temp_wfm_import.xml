@@ -1,0 +1,121 @@
+<?xml version="1.0"?>
+<!--
+    ================================================================================
+    EIVA WORKFLOW MANAGER - SBD IMPORT SCRIPT
+    ================================================================================
+-->
+<Setup StateDatabaseLocation="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\LOGS_WFM_600090_import_export\1_WFM_import.db">
+    <Log TimingLog="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\LOGS_WFM_600090_import_export\2_Timing_WFM_import.csv"/>
+	<Log ErrorLog="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\LOGS_WFM_600090_import_export\3_Error_WFM_import.csv"/>
+	<Log InfoLogFile="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\LOGS_WFM_600090_import_export\4_InfoLogFile_WFM_import.txt"/>	
+				
+	<GroupTask name="Import SBD">
+
+        <SqlServer>localhost</SqlServer>
+        <DatabaseName>600090_GOEL_WindMultiplikator</DatabaseName>
+
+        <GroupTask po="1" name="Data selection and setup">
+            <SetPropertyTask po="1" name="Set Input Directory" input="Z:\600090_WindMultiplikator_Bard\03_RAW_DATA\01_GOEL\04_NAVISCAN\TESTS\SIT\As_Found" output="InputDirectory" level="2"/>
+            <SetPropertyTask po="2" name="Define input directory" input="{InputDirectory}" output="NaviScanLoggingPath" level="2"/>
+            
+            <!-- NE Path is now passed from Python as a property -->
+            <SetPropertyTask po="3" name="Define NaviEdit Destination Folder" input="04_NAVISCAN\TESTS\SIT\As_Found" output="NaviEditDestFolder" level="2"/>
+        </GroupTask>
+
+        <GroupTask po="2" name="Define Variable Inputs">
+			<GetParentFolderNamesTask po="5" name="Extract Project Name" path="{NaviScanLoggingPath}" output="ProjectFolderName" indexes="1" countfromtheleft="true" directoryseperator="\"/>
+			<SplitVariablesTask po="6" name="Isolate Project Name" Input="{ProjectFolderName}" Seperator="\" Output0="blank1" Output1="ProjectName" Output2="blank2" />
+			<SetPropertyTask po="7" name="Define Project Name" input="{ProjectName}" output="Proj_Name" level="2" />
+        </GroupTask>
+
+        <FileWatcherTask po="2" name="Detect and Process SBD Files" logKeyword="Detect and Process SBD Files" output="SBDFile" location="{NaviScanLoggingPath}" Filter="*.sbd" Timeout="60000" IncludeSubDir="true"> 
+        <GroupTask po="1" name="Process_{SBDFile.Filename}_Data">
+
+		<GroupTask po="1" name="{SBDFile.Filename}">
+						
+			<OverwritePropertyTask po="1" name="{SBDFile.Filename} - Define SBD File Name" logKeyword="{SBDFile.Filename}" input="{SBDFile.NameWithoutExtension}" output="SBDFileName" level="2" />							
+			<OverwritePropertyTask po="2" name="{SBDFile.Filename} - Define SBD Platform Name" logKeyword="{SBDFile.Filename}" input="PROV_WROV" output="PlatformName" level="2" />
+
+			<SetTitleTask po="8" name="Set WorkFlow Title" title="Importing SBD: {SBDFileName}" size="25" red="255" green="255" blue="0" />
+				
+            <SbdImportTask po="9" name="{SBDFile.Filename} - Import into NaviEdit" logKeyword="{SBDFile.Filename}" output="SBDSQLBlockID" OnError="Restart">
+                <NaviEditTask version="1.0">
+                    <SqlServer>{SqlServer}</SqlServer>
+                    <DatabaseName>{DatabaseName}</DatabaseName>
+                    <Geodesy useSbdGeodesy="no">
+                        <Source>
+                            <Ellipsoid epsg="16032" name="GRS 1980">
+                                <SemiMajorAxis>6378137.00</SemiMajorAxis>
+                                <InverseFlattening>298.257222101</InverseFlattening>
+                            </Ellipsoid>
+                            <Projection epsg="25832" name="UTM zone 32N">
+                                <EivaType>5</EivaType>
+                                <FalseEasting>500000</FalseEasting>
+                                <FalseNorthing>0</FalseNorthing>
+                                <FirstParallel>0</FirstParallel>
+                                <SecondParallel></SecondParallel>
+                                <Scale>0.9996</Scale>
+                                <OrigLatitude>0</OrigLatitude>
+                                <OrigLongitude>9</OrigLongitude>
+                                <Zone>32</Zone>
+                            </Projection>
+                        </Source>
+                        <Destination>
+                            <Ellipsoid epsg="16032" name="GRS 1980">
+                                <SemiMajorAxis>6378137.00</SemiMajorAxis>
+                                <InverseFlattening>298.257222101</InverseFlattening>
+                            </Ellipsoid>
+                            <Projection epsg="25832" name="UTM zone 32N">
+                                <EivaType>5</EivaType>
+                                <FalseEasting>500000</FalseEasting>
+                                <FalseNorthing>0</FalseNorthing>
+                                <FirstParallel>0</FirstParallel>
+                                <SecondParallel></SecondParallel>
+                                <Scale>0.9996</Scale>
+                                <OrigLatitude>0</OrigLatitude>
+                                <OrigLongitude>9</OrigLongitude>
+                                <Zone>32</Zone>
+                            </Projection>
+                        </Destination>
+                        <Shift type="1" method="1" name="ITRF2020 to ETRS89 epoch 2026.0 (Central Europe)">
+                            <Translation X="0.10551" Y="0.05439" Z="-0.14074"/>
+                            <Rotation X="0.002695" Y="0.015977" Z="-0.029049"/>
+                            <ScaleFactor ppm="0.002748"/>
+                        </Shift>
+                    </Geodesy>
+                    <SbdInterpreter version="1.0">
+                        <Destination matchFolder="no" importSVP="no" linkSVP="no">
+                            <Folder>\{NaviEditDestFolder}</Folder>
+                        </Destination>
+                        <Source>
+                            <FileList>
+                                {SBDFile} 
+                            </FileList>
+                        </Source>
+                        <Filters>
+                            <MBEQuality setDeletedFlag="no" qualityThreshold="0"/>
+                        </Filters>
+                        <Options disableBathy="no" useOnlineSV="no" onlineSVStart="-1.1" onlineSVEnd="15.5" scanReductionImportEvery="1" skipScansWithoutMotion="false"/>
+                    </SbdInterpreter>
+                </NaviEditTask>
+            </SbdImportTask>
+
+            <BlockSettingsTask po="10" name="{SBDFile.Filename} - Apply Block Settings" logKeyword="{SBDFile.Filename}">
+                <NaviEditTask version="1.0">
+                    <SqlServer>{SqlServer}</SqlServer>
+                    <DatabaseName>{DatabaseName}</DatabaseName>
+                    <BlockSettings version="1.0">
+                        <BlockId>
+                            {SBDSQLBlockID}
+                        </BlockId>
+                        <Options skipScansWithoutMotion="no" disableBathy="no" useHeave="yes" induceHeave="no"/>
+                        <QualityThreshold quality="12"/>
+                    </BlockSettings>
+                </NaviEditTask>
+            </BlockSettingsTask>
+
+        </GroupTask>
+        </GroupTask>
+        </FileWatcherTask>
+    </GroupTask>
+</Setup>

@@ -1,14 +1,14 @@
 {
-    "folder_path": "Z:/600090_WindMultiplikator_Bard/04_PROC_DATA/01_GOEL/18_SID_OR LINE_BASED_DATA/GEODESY_TEST_WFM",
-    "sbd_folder_path": "Z:/600090_WindMultiplikator_Bard/03_RAW_DATA/01_GOEL/04_NAVISCAN/GEODESY_TEST",
+    "folder_path": "Z:/600090_WindMultiplikator_Bard/04_PROC_DATA/01_GOEL/18_SID_OR LINE_BASED_DATA/SIT/As-Found_corrected_offsets",
+    "sbd_folder_path": "Z:/600090_WindMultiplikator_Bard/03_RAW_DATA/01_GOEL/04_NAVISCAN/TESTS/SIT/As_Found",
     "tss1_col": "10",
     "tss2_col": "11",
     "tss3_col": "12",
-    "output_file": "GEODESY_TEST_WFM_AF.txt",
-    "coil1_suffix": "_Coil_port.csv",
-    "coil2_suffix": "_Coil_center.csv",
-    "coil3_suffix": "_Coil_stbd.csv",
+    "output_file": "SIT_AsFound_corrected.txt",
+    "coil_port_suffix": "_Coil_port.csv",
+    "coil_center_suffix": "_Coil_center.csv",
+    "coil_stbd_suffix": "_Coil_stbd.csv",
     "crp_suffix": "_CRP.csv",
     "cell_size": "0.5",
-    "use_crp": false
+    "use_crp": true
 }

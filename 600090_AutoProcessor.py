@@ -12,6 +12,8 @@ import logging
 import json
 import generate_heatmap as heatmaps
 import subprocess
+import threading
+import re
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -20,7 +22,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 matplotlib.use('TkAgg')  # Use a non-GUI backend for script execution
 
 # Name of the script version
-SCRIPT_VERSION = "TSS Converter v4.6 - 600090 Wind Multiplikator Special Edition"
+SCRIPT_VERSION = "600090_AutoProcessor v.1"
 
 # Maximum time difference in seconds
 MAX_TIME_DIFF_SEC = 0.25
@@ -41,9 +43,9 @@ MAX_ANGLE_ERROR = 20
 MIN_FILE_ROWS = 10
 
 # File suffix conventions for navigation CSV files
-COIL_1_SUFFIX = "_Coil_port.csv"      # Port coil (NaviEdit convention: Coil 1 = PORT)
-COIL_2_SUFFIX = "_Coil_center.csv"    # Center coil
-COIL_3_SUFFIX = "_Coil_stbd.csv"      # Starboard coil (NaviEdit convention: Coil 3 = STARBOARD)
+COIL_PORT_SUFFIX = "_Coil_port.csv"      # Port coil (NaviEdit convention: Coil 1 = PORT)
+COIL_CENTER_SUFFIX = "_Coil_center.csv"    # Center coil
+COIL_STBD_SUFFIX = "_Coil_stbd.csv"      # Starboard coil (NaviEdit convention: Coil 3 = STARBOARD)
 CRP_SUFFIX = "_CRP.csv"               # ROV CRP navigation
 
 def convert_to_datetime(time_str, format_str='%H%M%S%f'):
@@ -271,12 +273,12 @@ def extractData(folder_path, tss1_col, tss2_col, tss3_col, use_crp=True):
             only_name = filename.removesuffix('.ptr')
             missing_files_coils = []
             
-            if not (only_name + COIL_1_SUFFIX) in os.listdir(folder_path):
-                missing_files_coils.append("Coil 1")
-            if not (only_name + COIL_2_SUFFIX) in os.listdir(folder_path):
-                missing_files_coils.append("Coil 2")
-            if not (only_name + COIL_3_SUFFIX) in os.listdir(folder_path):
-                missing_files_coils.append("Coil 3")
+            if not (only_name + COIL_PORT_SUFFIX) in os.listdir(folder_path):
+                missing_files_coils.append("Coil Port")
+            if not (only_name + COIL_CENTER_SUFFIX) in os.listdir(folder_path):
+                missing_files_coils.append("Coil Center")
+            if not (only_name + COIL_STBD_SUFFIX) in os.listdir(folder_path):
+                missing_files_coils.append("Coil Stbd")
             if use_crp and not (only_name + CRP_SUFFIX) in os.listdir(folder_path):
                 missing_files_coils.append("CRP")
 
@@ -291,12 +293,12 @@ def extractData(folder_path, tss1_col, tss2_col, tss3_col, use_crp=True):
                 if crp_missing and use_crp:
                     logging.warning(f"Missing CRP navigation file for PTR file: {filename} - CRP data will not be included")
         
-        if filename.endswith(COIL_1_SUFFIX) or filename.endswith(COIL_2_SUFFIX) or filename.endswith(COIL_3_SUFFIX) or (use_crp and filename.endswith(CRP_SUFFIX)):
-            only_name = filename.removesuffix(COIL_1_SUFFIX).removesuffix(COIL_2_SUFFIX).removesuffix(COIL_3_SUFFIX).removesuffix(CRP_SUFFIX)
+        if filename.endswith(COIL_PORT_SUFFIX) or filename.endswith(COIL_CENTER_SUFFIX) or filename.endswith(COIL_STBD_SUFFIX) or (use_crp and filename.endswith(CRP_SUFFIX)):
+            only_name = filename.removesuffix(COIL_PORT_SUFFIX).removesuffix(COIL_CENTER_SUFFIX).removesuffix(COIL_STBD_SUFFIX).removesuffix(CRP_SUFFIX)
             if not (only_name + '.ptr') in os.listdir(folder_path):
                 error_messages.append(f"Missing PTR file for the CSV Navigation file: {filename}")
             # Check for required coil files (CRP is optional)
-            if not (only_name + COIL_1_SUFFIX) in os.listdir(folder_path) or not (only_name + COIL_2_SUFFIX) in os.listdir(folder_path) or not (only_name + COIL_3_SUFFIX) in os.listdir(folder_path):
+            if not (only_name + COIL_PORT_SUFFIX) in os.listdir(folder_path) or not (only_name + COIL_CENTER_SUFFIX) in os.listdir(folder_path) or not (only_name + COIL_STBD_SUFFIX) in os.listdir(folder_path):
                 error_messages.append(f"Missing the other necessary CSV Navigation files for this file: {filename}")
     
     # Show all errors in a single message box at the end
@@ -314,7 +316,7 @@ def extractData(folder_path, tss1_col, tss2_col, tss3_col, use_crp=True):
         if filename.endswith('.ptr'):           
             only_name = filename.removesuffix('.ptr')
              # Check if all required coil files exist (CRP is optional)
-            required_files = {f"{only_name}{COIL_1_SUFFIX}", f"{only_name}{COIL_2_SUFFIX}", f"{only_name}{COIL_3_SUFFIX}"}
+            required_files = {f"{only_name}{COIL_PORT_SUFFIX}", f"{only_name}{COIL_CENTER_SUFFIX}", f"{only_name}{COIL_STBD_SUFFIX}"}
 
             if not required_files.issubset(existing_files):
                 logging.warning(f"Skipping PTR file {filename} due to missing navigation files")
@@ -358,53 +360,53 @@ def extractData(folder_path, tss1_col, tss2_col, tss3_col, use_crp=True):
                 logging.error(f"Invalid column index in {filename}")
                 continue
 
-        if filename.endswith(COIL_1_SUFFIX): # NaviEdit User Offsets coils numbers convention: COIL 1 = PORT
+        if filename.endswith(COIL_PORT_SUFFIX): # NaviEdit User Offsets coils numbers convention: COIL 1 = PORT
             try:
-                only_name = filename.removesuffix(COIL_1_SUFFIX)
-                if not (only_name + '.ptr') in os.listdir(folder_path) or not (only_name + COIL_2_SUFFIX) in os.listdir(folder_path) or not (only_name + COIL_3_SUFFIX) in os.listdir(folder_path):
+                only_name = filename.removesuffix(COIL_PORT_SUFFIX)
+                if not (only_name + '.ptr') in os.listdir(folder_path) or not (only_name + COIL_CENTER_SUFFIX) in os.listdir(folder_path) or not (only_name + COIL_STBD_SUFFIX) in os.listdir(folder_path):
                     continue # Skip this iteration if any of the PTR or navigation required files is missing
                 nav1_df = read_csv_file(file_path, ',')
                 if len(nav1_df) < MIN_FILE_ROWS:
-                    messagebox.showwarning("Warning", f"Coil 1 navigation file has less than 10 lines: {filename}")
-                    logging.warning(f"Coil 1 navigation file has less than 10 lines: {filename}")
+                    messagebox.showwarning("Warning", f"Coil Port navigation file has less than 10 lines: {filename}")
+                    logging.warning(f"Coil Port navigation file has less than 10 lines: {filename}")
                 nav_coil1_dataframe.append(nav1_df)
             except Exception as e:
-                logging.error(f"Error reading coil 1 navigation file {file_path}: {e}")
+                logging.error(f"Error reading coil port navigation file {file_path}: {e}")
                 continue
 
-        if filename.endswith(COIL_2_SUFFIX): # NaviEdit User Offsets coils numbers convention: COIL 2 = CENTER
+        if filename.endswith(COIL_CENTER_SUFFIX): # NaviEdit User Offsets coils numbers convention: COIL 2 = CENTER
             try:
-                only_name = filename.removesuffix(COIL_2_SUFFIX)
-                if not (only_name + '.ptr') in os.listdir(folder_path) or not (only_name + COIL_1_SUFFIX) in os.listdir(folder_path) or not (only_name + COIL_3_SUFFIX) in os.listdir(folder_path):
+                only_name = filename.removesuffix(COIL_CENTER_SUFFIX)
+                if not (only_name + '.ptr') in os.listdir(folder_path) or not (only_name + COIL_PORT_SUFFIX) in os.listdir(folder_path) or not (only_name + COIL_STBD_SUFFIX) in os.listdir(folder_path):
                     continue # Skip this iteration if any of the PTR or navigation required files is missing
                 nav2_df = read_csv_file(file_path, ',')
                 if len(nav2_df) < MIN_FILE_ROWS:
-                    messagebox.showwarning("Warning", f"Coil 2 navigation file has less than 10 lines: {filename}")
-                    logging.warning(f"Coil 2 navigation file has less than 10 lines: {filename}")
+                    messagebox.showwarning("Warning", f"Coil Center navigation file has less than 10 lines: {filename}")
+                    logging.warning(f"Coil Center navigation file has less than 10 lines: {filename}")
                 nav_coil2_dataframe.append(nav2_df)
             except Exception as e:
-                logging.error(f"Error reading coil 2 navigation file {file_path}: {e}")
+                logging.error(f"Error reading coil center navigation file {file_path}: {e}")
                 continue
 
 
-        if filename.endswith(COIL_3_SUFFIX): # NaviEdit User Offsets coils numbers convention: COIL 3 = STARBOARD
+        if filename.endswith(COIL_STBD_SUFFIX): # NaviEdit User Offsets coils numbers convention: COIL 3 = STARBOARD
             try:
-                only_name = filename.removesuffix(COIL_3_SUFFIX)
-                if not (only_name + '.ptr') in os.listdir(folder_path) or not (only_name + COIL_1_SUFFIX) in os.listdir(folder_path) or not (only_name + COIL_2_SUFFIX) in os.listdir(folder_path):
+                only_name = filename.removesuffix(COIL_STBD_SUFFIX)
+                if not (only_name + '.ptr') in os.listdir(folder_path) or not (only_name + COIL_PORT_SUFFIX) in os.listdir(folder_path) or not (only_name + COIL_CENTER_SUFFIX) in os.listdir(folder_path):
                     continue # Skip this iteration if any of the PTR or navigation required files is missing
                 nav3_df = read_csv_file(file_path, ',')
                 if len(nav3_df) < MIN_FILE_ROWS:
-                    messagebox.showwarning("Warning", f"Coil 3 navigation file has less than 10 lines: {filename}")
-                    logging.warning(f"Coil 3 navigation file has less than 10 lines: {filename}")
+                    messagebox.showwarning("Warning", f"Coil Stbd navigation file has less than 10 lines: {filename}")
+                    logging.warning(f"Coil Stbd navigation file has less than 10 lines: {filename}")
                 nav_coil3_dataframe.append(nav3_df)
             except Exception as e:
-                logging.error(f"Error reading coil 3 navigation file {file_path}: {e}")
+                logging.error(f"Error reading coil stbd navigation file {file_path}: {e}")
                 continue
 
         if use_crp and filename.endswith(CRP_SUFFIX): # ROV CRP (Center Reference Point) navigation
             try:
                 only_name = filename.removesuffix(CRP_SUFFIX)
-                if not (only_name + '.ptr') in os.listdir(folder_path) or not (only_name + COIL_1_SUFFIX) in os.listdir(folder_path) or not (only_name + COIL_2_SUFFIX) in os.listdir(folder_path) or not (only_name + COIL_3_SUFFIX) in os.listdir(folder_path):
+                if not (only_name + '.ptr') in os.listdir(folder_path) or not (only_name + COIL_PORT_SUFFIX) in os.listdir(folder_path) or not (only_name + COIL_CENTER_SUFFIX) in os.listdir(folder_path) or not (only_name + COIL_STBD_SUFFIX) in os.listdir(folder_path):
                     continue # Skip this iteration if any of the PTR or navigation required files is missing
                 crp_df = read_csv_file(file_path, ',')
                 if len(crp_df) < MIN_FILE_ROWS:
@@ -991,9 +993,9 @@ def load_settings():
         "tss2_col": COLUMN_COIL_2_DEFAULT,
         "tss3_col": COLUMN_COIL_3_DEFAULT,
         "output_file": "TARGET_XXX_AF.txt",
-        "coil1_suffix": COIL_1_SUFFIX,
-        "coil2_suffix": COIL_2_SUFFIX,
-        "coil3_suffix": COIL_3_SUFFIX,
+        "coil_port_suffix": COIL_PORT_SUFFIX,
+        "coil_center_suffix": COIL_CENTER_SUFFIX,
+        "coil_stbd_suffix": COIL_STBD_SUFFIX,
         "crp_suffix": CRP_SUFFIX,
         "cell_size": 0.5,
         "use_crp": True
@@ -1015,9 +1017,9 @@ def save_settings():
         "tss2_col": tss2_entry.get(),
         "tss3_col": tss3_entry.get(),
         "output_file": output_entry.get(),
-        "coil1_suffix": coil1_suffix_entry.get(),
-        "coil2_suffix": coil2_suffix_entry.get(),
-        "coil3_suffix": coil3_suffix_entry.get(),
+        "coil_port_suffix": coil_port_suffix_entry.get(),
+        "coil_center_suffix": coil_center_suffix_entry.get(),
+        "coil_stbd_suffix": coil_stbd_suffix_entry.get(),
         "crp_suffix": crp_suffix_entry.get(),
         "cell_size": cell_size_entry.get(),
         "use_crp": use_crp_var.get()
@@ -1031,10 +1033,10 @@ def save_settings():
         logging.error(f"Error saving settings: {e}")
 
 def update_globals():
-    global COIL_1_SUFFIX, COIL_2_SUFFIX, COIL_3_SUFFIX, CRP_SUFFIX, CELL_SIZE
-    COIL_1_SUFFIX = coil1_suffix_entry.get()
-    COIL_2_SUFFIX = coil2_suffix_entry.get()
-    COIL_3_SUFFIX = coil3_suffix_entry.get()
+    global COIL_PORT_SUFFIX, COIL_CENTER_SUFFIX, COIL_STBD_SUFFIX, CRP_SUFFIX, CELL_SIZE
+    COIL_PORT_SUFFIX = coil_port_suffix_entry.get()
+    COIL_CENTER_SUFFIX = coil_center_suffix_entry.get()
+    COIL_STBD_SUFFIX = coil_stbd_suffix_entry.get()
     CRP_SUFFIX = crp_suffix_entry.get()
     try:
         CELL_SIZE = float(cell_size_entry.get())
@@ -1055,16 +1057,29 @@ def select_sbd_folder():
         sbd_folder_entry.insert(0, folder_path)
         logging.info(f"Selected SBD folder path: {folder_path}")
 
-def run_wfm_script():
+def run_import_script():
     sbd_path = sbd_folder_entry.get().replace('/', '\\')
-    output_path = folder_entry.get().replace('/', '\\')
     
-    if not sbd_path or not output_path:
-        messagebox.showerror("Error", "Please select both SBD Input folder and Output folder.")
+    if not sbd_path:
+        messagebox.showerror("Error", "Please select SBD Input folder.")
         return
 
+    # Calculate NE Path
+    ne_path = ""
+    keyword = "04_NAVISCAN"
+    if keyword in sbd_path:
+        idx = sbd_path.find(keyword)
+        ne_path = sbd_path[idx:]
+        ne_path = ne_path.rstrip('\\') # Remove trailing slash to avoid XML issues
+        
+        logging.info(f"Detected NaviEdit Path: {ne_path}")
+    else:
+        # Fallback: Use the last folder name if keyword not found
+        ne_path = os.path.basename(sbd_path.rstrip('\\'))
+        logging.warning(f"Keyword '{keyword}' not found. Using folder name: {ne_path}")
+
     # Path to the XML template
-    xml_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config', '600090_WFM_AutoProcessor.xml')
+    xml_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config', '600090_WFM_Import.xml')
     
     if not os.path.exists(xml_path):
         messagebox.showerror("Error", f"WFM XML template not found at {xml_path}")
@@ -1075,16 +1090,166 @@ def run_wfm_script():
             xml_content = f.read()
             
         # Replace InputTask with SetPropertyTask for InputDirectory
-        # We replace the InputTask line with a SetPropertyTask line
-        # Target: <InputTask po="1" name="Select INPUT folder (SBD files location)" output="InputDirectory" AskForInput="true" Message="Select INPUT folder (SBD files location)"/>
-        
         target_input_str = 'name="Select INPUT folder (SBD files location)" output="InputDirectory" AskForInput="true" Message="Select INPUT folder (SBD files location)"/>'
         replacement_input_str = f'name="Set Input Directory" input="{sbd_path}" output="InputDirectory" level="2"/>'
         
         if target_input_str in xml_content:
             xml_content = xml_content.replace(f'<InputTask po="1" {target_input_str}', f'<SetPropertyTask po="1" {replacement_input_str}')
         
-        # Target: <InputTask po="5" name="Select OUTPUT folder (for PTR and Nav exports)" output="OutputDirectory" AskForInput="true" Message="Select OUTPUT folder (for PTR and Nav exports)"/>
+        # Replace NEPath property
+        # Target: <SetPropertyTask po="3" name="Define NaviEdit Destination Folder" input="{NEPath}" output="NaviEditDestFolder" level="2"/>
+        target_nepath_str = 'name="Define NaviEdit Destination Folder" input="{NEPath}" output="NaviEditDestFolder" level="2"/>'
+        replacement_nepath_str = f'name="Define NaviEdit Destination Folder" input="{ne_path}" output="NaviEditDestFolder" level="2"/>'
+        
+        if target_nepath_str in xml_content:
+            xml_content = xml_content.replace(f'<SetPropertyTask po="3" {target_nepath_str}', f'<SetPropertyTask po="3" {replacement_nepath_str}')
+
+        # Replace {NEPath} placeholder
+        if '{NEPath}' in xml_content:
+            xml_content = xml_content.replace('{NEPath}', ne_path)
+
+        # Replace relative log paths with absolute paths to ensure WFM finds them
+        logs_dir = os.path.join(os.getcwd(), "LOGS_WFM_600090_import_export")
+        if not os.path.exists(logs_dir):
+            try:
+                os.makedirs(logs_dir)
+            except Exception as e:
+                logging.warning(f"Could not create logs directory: {e}")
+
+        xml_content = xml_content.replace(r'.\LOGS_WFM_600090_import_export', logs_dir)
+
+        # Save to temp file
+        temp_xml_path = os.path.join(os.getcwd(), "temp_wfm_import.xml")
+        with open(temp_xml_path, "w") as f:
+            f.write(xml_content)
+            
+        # Run WFM
+        wfm_exe = r"C:\Eiva\WorkFlowManager\WorkflowManager.exe"
+        if not os.path.exists(wfm_exe):
+             messagebox.showerror("Error", f"Workflow Manager executable not found at {wfm_exe}")
+             return
+        
+        # Clear the log file before running to ensure we capture only new IDs
+        log_path = os.path.join(os.getcwd(), "LOGS_WFM_600090_import_export", "4_InfoLogFile_WFM_import.txt")
+        if os.path.exists(log_path):
+            try:
+                with open(log_path, 'w') as f:
+                    f.write("") # Clear file
+            except Exception as e:
+                logging.warning(f"Could not clear log file: {e}")
+
+        def run_wfm_thread():
+            try:
+                # Run WFM and wait for it to finish
+                process = subprocess.Popen([wfm_exe, "-run", temp_xml_path])
+                process.wait()
+                
+                # After finish, parse the log file for Block IDs
+                if os.path.exists(log_path):
+                    with open(log_path, 'r') as f:
+                        log_content = f.read()
+                    
+                    # Look for SBDSQLBlockID in the log
+                    # Pattern might vary, but usually WFM logs variable changes like:
+                    # "Variable 'SBDSQLBlockID' set to '123'" or similar.
+                    # Or we can look for the output of the SbdImportTask.
+                    # Let's try a regex that catches the variable assignment.
+                    # Assuming standard WFM logging for output variables.
+                    
+                    # If we can't be sure of the format, we might need to inspect a real log.
+                    # But based on typical WFM logs:
+                    # "Task: ... - Import into NaviEdit ... Output: SBDSQLBlockID = 55"
+                    
+                    # Let's try to find all numbers assigned to SBDSQLBlockID
+                    # Regex: New block id: (\d+)
+                    ids = re.findall(r"New block id: (\d+)", log_content)
+                    
+                    if not ids:
+                        # Fallback to variable assignment if the above fails
+                        ids = re.findall(r"SBDSQLBlockID.*?(\d+)", log_content)
+                    
+                    if not ids:
+                        # Try another pattern if the first one fails
+                        # Maybe it's just logged as a property change
+                        ids = re.findall(r"Property 'SBDSQLBlockID' changed to '(\d+)'", log_content)
+                    
+                    if not ids:
+                         # Fallback: Look for just the number if it's logged near the task name
+                         # This is risky. Let's stick to the variable name.
+                         pass
+
+                    if ids:
+                        # Remove duplicates and sort
+                        unique_ids = sorted(list(set(map(int, ids))))
+                        ids_str = ", ".join(map(str, unique_ids))
+                        
+                        # Update GUI in the main thread
+                        def update_gui():
+                            ne_path_entry.delete(0, tk.END)
+                            ne_path_entry.insert(0, ids_str)
+                            logging.info(f"Import finished. Found Block IDs: {ids_str}")
+                            messagebox.showinfo("Import Finished", f"Import completed.\nFound Block IDs: {ids_str}")
+                        
+                        root.after(0, update_gui)
+                    else:
+                        logging.warning("Import finished but no Block IDs found in log.")
+                        root.after(0, lambda: messagebox.showwarning("Import Finished", "Import finished but no Block IDs could be extracted from the log."))
+                else:
+                    logging.warning("Log file not found after import.")
+            except Exception as e:
+                logging.error(f"Error in WFM thread: {e}")
+
+        # Start the thread
+        threading.Thread(target=run_wfm_thread, daemon=True).start()
+        
+        # messagebox.showinfo("Info", "Import Script started. Please wait for it to finish.")
+        
+    except Exception as e:
+        messagebox.showerror("Error", f"Failed to run Import script: {e}")
+
+def run_export_script():
+    output_path = folder_entry.get().replace('/', '\\')
+    block_ids_str = ne_path_entry.get()
+    
+    if not output_path:
+        messagebox.showerror("Error", "Please select Output folder.")
+        return
+    
+    if not block_ids_str:
+        messagebox.showerror("Error", "Please enter Block IDs.")
+        return
+
+    # Parse Block IDs
+    block_ids = []
+    try:
+        parts = [p.strip() for p in block_ids_str.split(',')]
+        for part in parts:
+            if '-' in part:
+                start, end = map(int, part.split('-'))
+                block_ids.extend(range(start, end + 1))
+            else:
+                block_ids.append(int(part))
+        block_ids = sorted(list(set(block_ids))) # Remove duplicates and sort
+    except ValueError:
+        messagebox.showerror("Error", "Invalid Block ID format. Use comma separated numbers or ranges (e.g. 100-105, 107).")
+        return
+
+    if not block_ids:
+        messagebox.showerror("Error", "No valid Block IDs found.")
+        return
+
+    # Path to the XML template
+    xml_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config', '600090_WFM_Export.xml')
+    
+    if not os.path.exists(xml_path):
+        messagebox.showerror("Error", f"WFM XML template not found at {xml_path}")
+        return
+
+    try:
+        with open(xml_path, 'r') as f:
+            xml_content = f.read()
+            
+        # Replace InputTask with SetPropertyTask for OutputDirectory
         target_output_str = 'name="Select OUTPUT folder (for PTR and Nav exports)" output="OutputDirectory" AskForInput="true" Message="Select OUTPUT folder (for PTR and Nav exports)"/>'
         replacement_output_str = f'name="Set Output Directory" input="{output_path}" output="OutputDirectory" level="2"/>'
         
@@ -1095,9 +1260,99 @@ def run_wfm_script():
         target_po6 = '<SetPropertyTask po="6" name="Define output directory" input="{OutputDirectory}" output="OutputDirectory" level="2"/>'
         if target_po6 in xml_content:
              xml_content = xml_content.replace(target_po6, f'<!-- {target_po6} -->')
+
+        # --- DYNAMICALLY GENERATE EXPORT TASKS FOR EACH BLOCK ID ---
         
+        # 1. Extract the template for a single block export (inside FindBlocksTask)
+        # We look for the content between <FindBlocksTask ...> and </FindBlocksTask>
+        # And specifically the <GroupTask ... name="Export {Block.name}"> part.
+        
+        start_marker = '<FindBlocksTask po="4" name="Iterate Blocks in Job" output="Block">'
+        end_marker = '</FindBlocksTask>'
+        
+        start_idx = xml_content.find(start_marker)
+        end_idx = xml_content.find(end_marker)
+        
+        if start_idx != -1 and end_idx != -1:
+            # Extract the inner content (the GroupTask)
+            # We need to find the start of the inner GroupTask
+            inner_content_start = xml_content.find('<GroupTask po="1" name="Export {Block.name}">', start_idx)
+            # The end of the inner content is before the end_marker (minus indentation/newlines)
+            # But simpler: just take the whole block and replace it with our generated list
+            
+            # Let's extract the template string for one block
+            # We assume the structure is consistent with the file we read
+            template_start = xml_content.find('<GroupTask po="1" name="Export {Block.name}">', start_idx)
+            # Find the matching closing tag for this GroupTask. 
+            # Since it's nested, we can't just search for </GroupTask>.
+            # However, we know it ends right before </FindBlocksTask>
+            template_end = end_idx 
+            
+            # Refine template_end to exclude the closing </FindBlocksTask> tag's indentation if possible, 
+            # but taking everything up to end_idx is safe enough if we strip trailing whitespace from the extracted part.
+            
+            # Actually, let's just grab the text and assume it's the last child.
+            # A safer way is to manually construct the string based on what we know is there, 
+            # OR use the file content we read.
+            
+            # Let's try to extract the exact string from the file content
+            block_template = xml_content[template_start:template_end].strip()
+            
+            # Remove the last </GroupTask> if it was captured (it should be part of the block template)
+            # Wait, the structure is:
+            # <FindBlocksTask>
+            #    <NaviEditTask>...</NaviEditTask>
+            #    <GroupTask ...> ... </GroupTask>
+            # </FindBlocksTask>
+            
+            # So we need to extract just the <GroupTask ...> ... </GroupTask> part.
+            # The <NaviEditTask> part is for FindBlocks, we don't need it for direct ID export.
+            
+            # Let's find the end of the GroupTask.
+            # It is the last </GroupTask> before </FindBlocksTask>
+            last_group_task_end = xml_content.rfind('</GroupTask>', start_idx, end_idx) + len('</GroupTask>')
+            
+            block_template = xml_content[template_start:last_group_task_end]
+            
+            # Generate the new XML block
+            generated_tasks = []
+            for i, bid in enumerate(block_ids):
+                # Create a modified copy of the template
+                task_xml = block_template
+                
+                # Replace placeholders
+                # {Block.id} -> The actual ID
+                task_xml = task_xml.replace('{Block.id}', str(bid))
+                
+                # {Block.name} -> "Block_ID" (since we don't have the name)
+                task_xml = task_xml.replace('{Block.name}', f'Block_{bid}')
+                
+                # Update the 'po' (process order) attribute of the GroupTask to be sequential
+                # The original is po="1". We can change it to i+4 to avoid conflict with previous tasks (po=1, po=2)
+                task_xml = task_xml.replace('po="1" name="Export', f'po="{i+4}" name="Export')
+                
+                generated_tasks.append(task_xml)
+            
+            # Join all generated tasks
+            new_content_block = '\n'.join(generated_tasks)
+            
+            # Replace the entire FindBlocksTask block with the new content
+            # We replace from start_marker to end_marker + len(end_marker)
+            full_match_string = xml_content[start_idx:end_idx + len(end_marker)]
+            xml_content = xml_content.replace(full_match_string, new_content_block)
+
+        # Replace relative log paths with absolute paths
+        logs_dir = os.path.join(os.getcwd(), "LOGS_WFM_600090_import_export")
+        if not os.path.exists(logs_dir):
+            try:
+                os.makedirs(logs_dir)
+            except Exception as e:
+                logging.warning(f"Could not create logs directory: {e}")
+
+        xml_content = xml_content.replace(r'.\LOGS_WFM_600090_import_export', logs_dir)
+
         # Save to temp file
-        temp_xml_path = os.path.join(os.getcwd(), "temp_wfm_script.xml")
+        temp_xml_path = os.path.join(os.getcwd(), "temp_wfm_export.xml")
         with open(temp_xml_path, "w") as f:
             f.write(xml_content)
             
@@ -1108,10 +1363,10 @@ def run_wfm_script():
              return
     
         subprocess.Popen([wfm_exe, "-run", temp_xml_path])
-        messagebox.showinfo("Info", "WFM Script started. Please wait for it to finish before processing files.")
+        # messagebox.showinfo("Info", f"Export Script started for Block IDs: {block_ids}. Please wait for it to finish.")
         
     except Exception as e:
-        messagebox.showerror("Error", f"Failed to run WFM script: {e}")
+        messagebox.showerror("Error", f"Failed to run Export script: {e}")
 
 def validate_inputs(folder_path, tss1_col, tss2_col, tss3_col, output_file=None):
     if not folder_path:
@@ -1238,7 +1493,7 @@ logging.info(f"{SCRIPT_VERSION} started.")
 # Create the main window
 root = tk.Tk()
 root.title(SCRIPT_VERSION)
-root.geometry("1200x650")
+root.geometry("1200x700")
 
 # Load settings
 settings = load_settings()
@@ -1278,71 +1533,80 @@ sbd_folder_entry.grid(row=1, column=0, sticky="ew", padx=(0, 5), pady=2)
 sbd_folder_entry.insert(0, settings.get("sbd_folder_path", ""))
 ttk.Button(left_frame, text="Browse", command=select_sbd_folder).grid(row=1, column=1, sticky="e", pady=2)
 
+# Run Import Button
+ttk.Button(left_frame, text="Run Import Script", command=run_import_script).grid(row=2, column=0, columnspan=2, sticky="ew", pady=(0, 10))
+
+# NaviEdit Path Entry (New)
+ttk.Label(left_frame, text="Block IDs (e.g. 100-105, 107):").grid(row=3, column=0, sticky=tk.W, pady=(5, 2))
+ne_path_entry = ttk.Entry(left_frame)
+ne_path_entry.grid(row=4, column=0, columnspan=2, sticky="ew", padx=(0, 5), pady=2)
+ne_path_entry.insert(0, settings.get("ne_path", ""))
+
 # Folder Selection (Existing - shifted down)
-ttk.Label(left_frame, text="Select Processed Data Folder:").grid(row=2, column=0, sticky=tk.W, pady=(5, 2))
+ttk.Label(left_frame, text="Select Processed Data Folder:").grid(row=5, column=0, sticky=tk.W, pady=(5, 2))
 folder_entry = ttk.Entry(left_frame)
-folder_entry.grid(row=3, column=0, sticky="ew", padx=(0, 5), pady=2)
+folder_entry.grid(row=6, column=0, sticky="ew", padx=(0, 5), pady=2)
 folder_entry.insert(0, settings["folder_path"])
-ttk.Button(left_frame, text="Browse", command=select_folder).grid(row=3, column=1, sticky="e", pady=2)
+ttk.Button(left_frame, text="Browse", command=select_folder).grid(row=6, column=1, sticky="e", pady=2)
 left_frame.columnconfigure(0, weight=1) # Make entry expand
 
-# Run WFM Button
-ttk.Button(left_frame, text="Run WFM script", command=run_wfm_script).grid(row=4, column=0, columnspan=2, sticky="ew", pady=5)
+# Run Export Button
+ttk.Button(left_frame, text="Run Export Script", command=run_export_script).grid(row=7, column=0, columnspan=2, sticky="ew", pady=(0, 10))
 
 # Column Settings
-ttk.Label(left_frame, text="Coil 1 (Starboard) Column:").grid(row=5, column=0, sticky=tk.W, pady=2)
+ttk.Label(left_frame, text="Coil 1 (Starboard) Column:").grid(row=8, column=0, sticky=tk.W, pady=2)
 tss1_entry = ttk.Entry(left_frame, width=10)
-tss1_entry.grid(row=5, column=1, sticky=tk.W, pady=2)
+tss1_entry.grid(row=8, column=1, sticky=tk.W, pady=2)
 tss1_entry.insert(0, settings["tss1_col"])
 
-ttk.Label(left_frame, text="Coil 2 (Center) Column:").grid(row=6, column=0, sticky=tk.W, pady=2)
+ttk.Label(left_frame, text="Coil 2 (Center) Column:").grid(row=9, column=0, sticky=tk.W, pady=2)
 tss2_entry = ttk.Entry(left_frame, width=10)
-tss2_entry.grid(row=6, column=1, sticky=tk.W, pady=2)
+tss2_entry.grid(row=9, column=1, sticky=tk.W, pady=2)
 tss2_entry.insert(0, settings["tss2_col"])
 
-ttk.Label(left_frame, text="Coil 3 (Port) Column:").grid(row=7, column=0, sticky=tk.W, pady=2)
+ttk.Label(left_frame, text="Coil 3 (Port) Column:").grid(row=10, column=0, sticky=tk.W, pady=2)
 tss3_entry = ttk.Entry(left_frame, width=10)
-tss3_entry.grid(row=7, column=1, sticky=tk.W, pady=2)
+tss3_entry.grid(row=10, column=1, sticky=tk.W, pady=2)
 tss3_entry.insert(0, settings["tss3_col"])
 
 # Suffix Settings
-ttk.Separator(left_frame, orient='horizontal').grid(row=8, column=0, columnspan=2, sticky="ew", pady=10)
-ttk.Label(left_frame, text="File Suffixes:").grid(row=9, column=0, sticky=tk.W, pady=2)
+ttk.Separator(left_frame, orient='horizontal').grid(row=11, column=0, columnspan=2, sticky="ew", pady=10)
+ttk.Label(left_frame, text="File Suffixes:").grid(row=12, column=0, sticky=tk.W, pady=2)
 
-ttk.Label(left_frame, text="Coil 1 Suffix:").grid(row=10, column=0, sticky=tk.W, pady=2)
-coil1_suffix_entry = ttk.Entry(left_frame, width=20)
-coil1_suffix_entry.grid(row=10, column=1, sticky=tk.W, pady=2)
-coil1_suffix_entry.insert(0, settings["coil1_suffix"])
+ttk.Label(left_frame, text="Coil Port Suffix:").grid(row=13, column=0, sticky=tk.W, pady=2)
+coil_port_suffix_entry = ttk.Entry(left_frame, width=20)
+coil_port_suffix_entry.grid(row=13, column=1, sticky=tk.W, pady=2)
+coil_port_suffix_entry.insert(0, settings["coil_port_suffix"])
 
-ttk.Label(left_frame, text="Coil 2 Suffix:").grid(row=11, column=0, sticky=tk.W, pady=2)
-coil2_suffix_entry = ttk.Entry(left_frame, width=20)
-coil2_suffix_entry.grid(row=11, column=1, sticky=tk.W, pady=2)
-coil2_suffix_entry.insert(0, settings["coil2_suffix"])
+ttk.Label(left_frame, text="Coil Center Suffix:").grid(row=14, column=0, sticky=tk.W, pady=2)
+coil_center_suffix_entry = ttk.Entry(left_frame, width=20)
+coil_center_suffix_entry.grid(row=14, column=1, sticky=tk.W, pady=2)
+coil_center_suffix_entry.insert(0, settings["coil_center_suffix"])
 
-ttk.Label(left_frame, text="Coil 3 Suffix:").grid(row=12, column=0, sticky=tk.W, pady=2)
-coil3_suffix_entry = ttk.Entry(left_frame, width=20)
-coil3_suffix_entry.grid(row=12, column=1, sticky=tk.W, pady=2)
-coil3_suffix_entry.insert(0, settings["coil3_suffix"])
+ttk.Label(left_frame, text="Coil Stbd Suffix:").grid(row=15, column=0, sticky=tk.W, pady=2)
+coil_stbd_suffix_entry = ttk.Entry(left_frame, width=20)
+coil_stbd_suffix_entry.grid(row=15, column=1, sticky=tk.W, pady=2)
+coil_stbd_suffix_entry.insert(0, settings["coil_stbd_suffix"])
 
-ttk.Label(left_frame, text="CRP Suffix:").grid(row=13, column=0, sticky=tk.W, pady=2)
+ttk.Label(left_frame, text="CRP Suffix:").grid(row=16, column=0, sticky=tk.W, pady=2)
 crp_suffix_entry = ttk.Entry(left_frame, width=20)
-crp_suffix_entry.grid(row=13, column=1, sticky=tk.W, pady=2)
+crp_suffix_entry.grid(row=16, column=1, sticky=tk.W, pady=2)
 crp_suffix_entry.insert(0, settings["crp_suffix"])
 
 # CRP Checkbox
 use_crp_var = tk.BooleanVar(value=settings.get("use_crp", True))
-ttk.Checkbutton(left_frame, text="Include CRP Navigation", variable=use_crp_var).grid(row=14, column=0, columnspan=2, sticky=tk.W, pady=5)
+ttk.Checkbutton(left_frame, text="Include CRP Navigation", variable=use_crp_var).grid(row=17, column=0, columnspan=2, sticky=tk.W, pady=5)
 
 # Output Settings
-ttk.Separator(left_frame, orient='horizontal').grid(row=15, column=0, columnspan=2, sticky="ew", pady=10)
-ttk.Label(left_frame, text="Output File Name:").grid(row=16, column=0, sticky=tk.W, pady=2)
+ttk.Separator(left_frame, orient='horizontal').grid(row=18, column=0, columnspan=2, sticky="ew", pady=10)
+ttk.Label(left_frame, text="Output File Name:").grid(row=19, column=0, sticky=tk.W, pady=2)
 output_entry = ttk.Entry(left_frame, width=40)
-output_entry.grid(row=17, column=0, columnspan=2, sticky="ew", pady=2)
+output_entry.grid(row=20, column=0, columnspan=2, sticky="ew", pady=2)
 output_entry.insert(0, settings["output_file"])
 
-ttk.Label(left_frame, text="Heatmap Cell Size (m):").grid(row=18, column=0, sticky=tk.W, pady=2)
+ttk.Label(left_frame, text="Heatmap Cell Size (m):").grid(row=21, column=0, sticky=tk.W, pady=2)
 cell_size_entry = ttk.Entry(left_frame, width=10)
-cell_size_entry.grid(row=18, column=1, sticky=tk.W, pady=2)
+cell_size_entry.grid(row=21, column=1, sticky=tk.W, pady=2)
 cell_size_entry.insert(0, settings["cell_size"])
 
 
