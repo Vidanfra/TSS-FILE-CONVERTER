@@ -40,9 +40,9 @@ MAX_ANGLE_ERROR = 20
 MIN_FILE_ROWS = 10
 
 # File suffix conventions for navigation CSV files
-COIL_1_SUFFIX = "_Coil_port.csv"      # Port coil (NaviEdit convention: Coil 1 = PORT)
-COIL_2_SUFFIX = "_Coil_center.csv"    # Center coil
-COIL_3_SUFFIX = "_Coil_stbd.csv"      # Starboard coil (NaviEdit convention: Coil 3 = STARBOARD)
+COIL_PORT_SUFFIX = "_Coil_port.csv"      # Port coil (NaviEdit convention: Coil 1 = PORT)
+COIL_CENTER_SUFFIX = "_Coil_center.csv"    # Center coil
+COIL_STBD_SUFFIX = "_Coil_stbd.csv"      # Starboard coil (NaviEdit convention: Coil 3 = STARBOARD)
 CRP_SUFFIX = "_CRP.csv"               # ROV CRP navigation
 
 def convert_to_datetime(time_str, format_str='%H%M%S%f'):
@@ -270,12 +270,12 @@ def extractData(folder_path, tss1_col, tss2_col, tss3_col, use_crp=True):
             only_name = filename.removesuffix('.ptr')
             missing_files_coils = []
             
-            if not (only_name + COIL_1_SUFFIX) in os.listdir(folder_path):
-                missing_files_coils.append("Coil 1")
-            if not (only_name + COIL_2_SUFFIX) in os.listdir(folder_path):
-                missing_files_coils.append("Coil 2")
-            if not (only_name + COIL_3_SUFFIX) in os.listdir(folder_path):
-                missing_files_coils.append("Coil 3")
+            if not (only_name + COIL_PORT_SUFFIX) in os.listdir(folder_path):
+                missing_files_coils.append("Coil Port")
+            if not (only_name + COIL_CENTER_SUFFIX) in os.listdir(folder_path):
+                missing_files_coils.append("Coil Center")
+            if not (only_name + COIL_STBD_SUFFIX) in os.listdir(folder_path):
+                missing_files_coils.append("Coil Stbd")
             if use_crp and not (only_name + CRP_SUFFIX) in os.listdir(folder_path):
                 missing_files_coils.append("CRP")
 
@@ -290,12 +290,12 @@ def extractData(folder_path, tss1_col, tss2_col, tss3_col, use_crp=True):
                 if crp_missing and use_crp:
                     logging.warning(f"Missing CRP navigation file for PTR file: {filename} - CRP data will not be included")
         
-        if filename.endswith(COIL_1_SUFFIX) or filename.endswith(COIL_2_SUFFIX) or filename.endswith(COIL_3_SUFFIX) or (use_crp and filename.endswith(CRP_SUFFIX)):
-            only_name = filename.removesuffix(COIL_1_SUFFIX).removesuffix(COIL_2_SUFFIX).removesuffix(COIL_3_SUFFIX).removesuffix(CRP_SUFFIX)
+        if filename.endswith(COIL_PORT_SUFFIX) or filename.endswith(COIL_CENTER_SUFFIX) or filename.endswith(COIL_STBD_SUFFIX) or (use_crp and filename.endswith(CRP_SUFFIX)):
+            only_name = filename.removesuffix(COIL_PORT_SUFFIX).removesuffix(COIL_CENTER_SUFFIX).removesuffix(COIL_STBD_SUFFIX).removesuffix(CRP_SUFFIX)
             if not (only_name + '.ptr') in os.listdir(folder_path):
                 error_messages.append(f"Missing PTR file for the CSV Navigation file: {filename}")
             # Check for required coil files (CRP is optional)
-            if not (only_name + COIL_1_SUFFIX) in os.listdir(folder_path) or not (only_name + COIL_2_SUFFIX) in os.listdir(folder_path) or not (only_name + COIL_3_SUFFIX) in os.listdir(folder_path):
+            if not (only_name + COIL_PORT_SUFFIX) in os.listdir(folder_path) or not (only_name + COIL_CENTER_SUFFIX) in os.listdir(folder_path) or not (only_name + COIL_STBD_SUFFIX) in os.listdir(folder_path):
                 error_messages.append(f"Missing the other necessary CSV Navigation files for this file: {filename}")
     
     # Show all errors in a single message box at the end
@@ -313,7 +313,7 @@ def extractData(folder_path, tss1_col, tss2_col, tss3_col, use_crp=True):
         if filename.endswith('.ptr'):           
             only_name = filename.removesuffix('.ptr')
              # Check if all required coil files exist (CRP is optional)
-            required_files = {f"{only_name}{COIL_1_SUFFIX}", f"{only_name}{COIL_2_SUFFIX}", f"{only_name}{COIL_3_SUFFIX}"}
+            required_files = {f"{only_name}{COIL_PORT_SUFFIX}", f"{only_name}{COIL_CENTER_SUFFIX}", f"{only_name}{COIL_STBD_SUFFIX}"}
 
             if not required_files.issubset(existing_files):
                 logging.warning(f"Skipping PTR file {filename} due to missing navigation files")
@@ -357,53 +357,53 @@ def extractData(folder_path, tss1_col, tss2_col, tss3_col, use_crp=True):
                 logging.error(f"Invalid column index in {filename}")
                 continue
 
-        if filename.endswith(COIL_1_SUFFIX): # NaviEdit User Offsets coils numbers convention: COIL 1 = PORT
+        if filename.endswith(COIL_PORT_SUFFIX): # NaviEdit User Offsets coils numbers convention: COIL 1 = PORT
             try:
-                only_name = filename.removesuffix(COIL_1_SUFFIX)
-                if not (only_name + '.ptr') in os.listdir(folder_path) or not (only_name + COIL_2_SUFFIX) in os.listdir(folder_path) or not (only_name + COIL_3_SUFFIX) in os.listdir(folder_path):
+                only_name = filename.removesuffix(COIL_PORT_SUFFIX)
+                if not (only_name + '.ptr') in os.listdir(folder_path) or not (only_name + COIL_CENTER_SUFFIX) in os.listdir(folder_path) or not (only_name + COIL_STBD_SUFFIX) in os.listdir(folder_path):
                     continue # Skip this iteration if any of the PTR or navigation required files is missing
                 nav1_df = read_csv_file(file_path, ',')
                 if len(nav1_df) < MIN_FILE_ROWS:
-                    messagebox.showwarning("Warning", f"Coil 1 navigation file has less than 10 lines: {filename}")
-                    logging.warning(f"Coil 1 navigation file has less than 10 lines: {filename}")
+                    messagebox.showwarning("Warning", f"Coil Port navigation file has less than 10 lines: {filename}")
+                    logging.warning(f"Coil Port navigation file has less than 10 lines: {filename}")
                 nav_coil1_dataframe.append(nav1_df)
             except Exception as e:
-                logging.error(f"Error reading coil 1 navigation file {file_path}: {e}")
+                logging.error(f"Error reading coil Port navigation file {file_path}: {e}")
                 continue
 
-        if filename.endswith(COIL_2_SUFFIX): # NaviEdit User Offsets coils numbers convention: COIL 2 = CENTER
+        if filename.endswith(COIL_CENTER_SUFFIX): # NaviEdit User Offsets coils numbers convention: COIL 2 = CENTER
             try:
-                only_name = filename.removesuffix(COIL_2_SUFFIX)
-                if not (only_name + '.ptr') in os.listdir(folder_path) or not (only_name + COIL_1_SUFFIX) in os.listdir(folder_path) or not (only_name + COIL_3_SUFFIX) in os.listdir(folder_path):
+                only_name = filename.removesuffix(COIL_CENTER_SUFFIX)
+                if not (only_name + '.ptr') in os.listdir(folder_path) or not (only_name + COIL_PORT_SUFFIX) in os.listdir(folder_path) or not (only_name + COIL_STBD_SUFFIX) in os.listdir(folder_path):
                     continue # Skip this iteration if any of the PTR or navigation required files is missing
                 nav2_df = read_csv_file(file_path, ',')
                 if len(nav2_df) < MIN_FILE_ROWS:
-                    messagebox.showwarning("Warning", f"Coil 2 navigation file has less than 10 lines: {filename}")
-                    logging.warning(f"Coil 2 navigation file has less than 10 lines: {filename}")
+                    messagebox.showwarning("Warning", f"Coil Center navigation file has less than 10 lines: {filename}")
+                    logging.warning(f"Coil Center navigation file has less than 10 lines: {filename}")
                 nav_coil2_dataframe.append(nav2_df)
             except Exception as e:
-                logging.error(f"Error reading coil 2 navigation file {file_path}: {e}")
+                logging.error(f"Error reading coil Center navigation file {file_path}: {e}")
                 continue
 
 
-        if filename.endswith(COIL_3_SUFFIX): # NaviEdit User Offsets coils numbers convention: COIL 3 = STARBOARD
+        if filename.endswith(COIL_STBD_SUFFIX): # NaviEdit User Offsets coils numbers convention: COIL 3 = STARBOARD
             try:
-                only_name = filename.removesuffix(COIL_3_SUFFIX)
-                if not (only_name + '.ptr') in os.listdir(folder_path) or not (only_name + COIL_1_SUFFIX) in os.listdir(folder_path) or not (only_name + COIL_2_SUFFIX) in os.listdir(folder_path):
+                only_name = filename.removesuffix(COIL_STBD_SUFFIX)
+                if not (only_name + '.ptr') in os.listdir(folder_path) or not (only_name + COIL_PORT_SUFFIX) in os.listdir(folder_path) or not (only_name + COIL_CENTER_SUFFIX) in os.listdir(folder_path):
                     continue # Skip this iteration if any of the PTR or navigation required files is missing
                 nav3_df = read_csv_file(file_path, ',')
                 if len(nav3_df) < MIN_FILE_ROWS:
-                    messagebox.showwarning("Warning", f"Coil 3 navigation file has less than 10 lines: {filename}")
-                    logging.warning(f"Coil 3 navigation file has less than 10 lines: {filename}")
+                    messagebox.showwarning("Warning", f"Coil Stbd navigation file has less than 10 lines: {filename}")
+                    logging.warning(f"Coil Stbd navigation file has less than 10 lines: {filename}")
                 nav_coil3_dataframe.append(nav3_df)
             except Exception as e:
-                logging.error(f"Error reading coil 3 navigation file {file_path}: {e}")
+                logging.error(f"Error reading coil Stbd navigation file {file_path}: {e}")
                 continue
 
         if use_crp and filename.endswith(CRP_SUFFIX): # ROV CRP (Center Reference Point) navigation
             try:
                 only_name = filename.removesuffix(CRP_SUFFIX)
-                if not (only_name + '.ptr') in os.listdir(folder_path) or not (only_name + COIL_1_SUFFIX) in os.listdir(folder_path) or not (only_name + COIL_2_SUFFIX) in os.listdir(folder_path) or not (only_name + COIL_3_SUFFIX) in os.listdir(folder_path):
+                if not (only_name + '.ptr') in os.listdir(folder_path) or not (only_name + COIL_PORT_SUFFIX) in os.listdir(folder_path) or not (only_name + COIL_CENTER_SUFFIX) in os.listdir(folder_path) or not (only_name + COIL_STBD_SUFFIX) in os.listdir(folder_path):
                     continue # Skip this iteration if any of the PTR or navigation required files is missing
                 crp_df = read_csv_file(file_path, ',')
                 if len(crp_df) < MIN_FILE_ROWS:
@@ -989,9 +989,9 @@ def load_settings():
         "tss2_col": COLUMN_COIL_2_DEFAULT,
         "tss3_col": COLUMN_COIL_3_DEFAULT,
         "output_file": "TARGET_XXX_AF.txt",
-        "coil1_suffix": COIL_1_SUFFIX,
-        "coil2_suffix": COIL_2_SUFFIX,
-        "coil3_suffix": COIL_3_SUFFIX,
+        "coil1_suffix": COIL_PORT_SUFFIX,
+        "coil2_suffix": COIL_CENTER_SUFFIX,
+        "coil3_suffix": COIL_STBD_SUFFIX,
         "crp_suffix": CRP_SUFFIX,
         "cell_size": 0.5,
         "use_crp": True
@@ -1028,10 +1028,10 @@ def save_settings():
         logging.error(f"Error saving settings: {e}")
 
 def update_globals():
-    global COIL_1_SUFFIX, COIL_2_SUFFIX, COIL_3_SUFFIX, CRP_SUFFIX, CELL_SIZE
-    COIL_1_SUFFIX = coil1_suffix_entry.get()
-    COIL_2_SUFFIX = coil2_suffix_entry.get()
-    COIL_3_SUFFIX = coil3_suffix_entry.get()
+    global COIL_PORT_SUFFIX, COIL_CENTER_SUFFIX, COIL_STBD_SUFFIX, CRP_SUFFIX, CELL_SIZE
+    COIL_PORT_SUFFIX = coil1_suffix_entry.get()
+    COIL_CENTER_SUFFIX = coil2_suffix_entry.get()
+    COIL_STBD_SUFFIX = coil3_suffix_entry.get()
     CRP_SUFFIX = crp_suffix_entry.get()
     try:
         CELL_SIZE = float(cell_size_entry.get())
@@ -1231,17 +1231,17 @@ tss3_entry.insert(0, settings["tss3_col"])
 ttk.Separator(left_frame, orient='horizontal').grid(row=5, column=0, columnspan=2, sticky="ew", pady=10)
 ttk.Label(left_frame, text="File Suffixes:").grid(row=6, column=0, sticky=tk.W, pady=2)
 
-ttk.Label(left_frame, text="Coil 1 Suffix:").grid(row=7, column=0, sticky=tk.W, pady=2)
+ttk.Label(left_frame, text="Coil Port Suffix:").grid(row=7, column=0, sticky=tk.W, pady=2)
 coil1_suffix_entry = ttk.Entry(left_frame, width=20)
 coil1_suffix_entry.grid(row=7, column=1, sticky=tk.W, pady=2)
 coil1_suffix_entry.insert(0, settings["coil1_suffix"])
 
-ttk.Label(left_frame, text="Coil 2 Suffix:").grid(row=8, column=0, sticky=tk.W, pady=2)
+ttk.Label(left_frame, text="Coil Center Suffix:").grid(row=8, column=0, sticky=tk.W, pady=2)
 coil2_suffix_entry = ttk.Entry(left_frame, width=20)
 coil2_suffix_entry.grid(row=8, column=1, sticky=tk.W, pady=2)
 coil2_suffix_entry.insert(0, settings["coil2_suffix"])
 
-ttk.Label(left_frame, text="Coil 3 Suffix:").grid(row=9, column=0, sticky=tk.W, pady=2)
+ttk.Label(left_frame, text="Coil Stbd Suffix:").grid(row=9, column=0, sticky=tk.W, pady=2)
 coil3_suffix_entry = ttk.Entry(left_frame, width=20)
 coil3_suffix_entry.grid(row=9, column=1, sticky=tk.W, pady=2)
 coil3_suffix_entry.insert(0, settings["coil3_suffix"])

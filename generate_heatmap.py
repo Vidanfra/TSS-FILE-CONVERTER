@@ -68,12 +68,25 @@ def generate_TSS_heatmap(output_folder, filename, df, class_id, cell_size, color
     northing = df['Northing']
     tss_intensity = df['TSS']
     
-    # Create a regular grid in UTM space
-    margin = cell_size  # Add a margin to the grid
-    grid_x, grid_y = np.mgrid[ # interpolate scattered data onto a structured grid
-        min(easting) - margin: max(easting) + margin: 500j,  # X-axis grid (Easting)
-        max(northing) + margin: min(northing) - margin: 500j  # Y-axis grid (Northing)
-    ]
+    # Define grid based on cell_size
+    margin = cell_size
+    west = min(easting) - margin
+    north = max(northing) + margin
+    
+    # Calculate dimensions based on data extent and cell size
+    width_m = (max(easting) + margin) - west
+    height_m = north - (min(northing) - margin)
+    
+    nx = int(np.ceil(width_m / cell_size))
+    ny = int(np.ceil(height_m / cell_size))
+    
+    # Generate coordinates for pixel centers
+    # X: Left to Right
+    x_coords = np.linspace(west + cell_size/2, west + cell_size/2 + (nx-1)*cell_size, nx)
+    # Y: Top to Bottom (North to South)
+    y_coords = np.linspace(north - cell_size/2, north - cell_size/2 - (ny-1)*cell_size, ny)
+    
+    grid_x, grid_y = np.meshgrid(x_coords, y_coords)
 
     # Interpolate intensity values onto the grid
     grid_z = griddata((easting, northing), tss_intensity, (grid_x, grid_y), "nearest") # Options: 'linear', 'nearest', 'cubic'
@@ -111,8 +124,13 @@ def generate_TSS_heatmap(output_folder, filename, df, class_id, cell_size, color
     # Ensure square figure for YOLO (640x640)
     fig, ax = plt.subplots(figsize=(6.4, 6.4), dpi=100)  # 640x640 pixels
 
+    # Calculate actual extent of the grid for plotting
+    east_grid = west + nx * cell_size
+    south_grid = north - ny * cell_size
+
     # Plot heatmap
-    ax.imshow(grid_z_masked.T, extent=(min(easting), max(easting), min(northing), max(northing)), cmap=cmap_faded, norm=norm_faded)
+    # grid_z_masked is (Y, X) from meshgrid, so no transpose needed
+    ax.imshow(grid_z_masked, extent=(west, east_grid, south_grid, north), cmap=cmap_faded, norm=norm_faded)
     ax.axis('off')
 
     # Ensure the directory exists in the user-specified output folder
@@ -132,20 +150,10 @@ def generate_TSS_heatmap(output_folder, filename, df, class_id, cell_size, color
     peaks_name = os.path.join(peaks_dir, filename.removesuffix(".txt") + "_TSS.png")
     
     # Save GeoTIFF
-    # Transpose to get (Y, X)
-    data_grid = grid_z_masked.T
+    # Data is already (Y, X) from meshgrid
+    data_grid = grid_z_masked
     
-    # Calculate transform
-    west = min(easting) - margin
-    north = max(northing) + margin
-    
-    width_m = (max(easting) + margin) - (min(easting) - margin)
-    height_m = (max(northing) + margin) - (min(northing) - margin)
-    
-    pixel_width = width_m / 500
-    pixel_height = height_m / 500
-    
-    transform = from_origin(west, north, pixel_width, pixel_height)
+    transform = from_origin(west, north, cell_size, cell_size)
     
     # Convert to RGBA
     rgba = cmap_faded(norm_faded(data_grid))
@@ -236,12 +244,25 @@ def generate_ALT_heatmap(output_folder, filename, df, class_id, cell_size, color
     northing = df['Northing']
     altitude = df['Alt']
     
-    # Create a regular grid in UTM space
-    margin = cell_size  # Add a margin to the grid
-    grid_x, grid_y = np.mgrid[ # interpolate scattered data onto a structured grid
-        min(easting) - margin: max(easting) + margin: 500j,  # X-axis grid (Easting)
-        max(northing) + margin: min(northing) - margin: 500j  # Y-axis grid (Northing)
-    ]
+    # Define grid based on cell_size
+    margin = cell_size
+    west = min(easting) - margin
+    north = max(northing) + margin
+    
+    # Calculate dimensions based on data extent and cell size
+    width_m = (max(easting) + margin) - west
+    height_m = north - (min(northing) - margin)
+    
+    nx = int(np.ceil(width_m / cell_size))
+    ny = int(np.ceil(height_m / cell_size))
+    
+    # Generate coordinates for pixel centers
+    # X: Left to Right
+    x_coords = np.linspace(west + cell_size/2, west + cell_size/2 + (nx-1)*cell_size, nx)
+    # Y: Top to Bottom (North to South)
+    y_coords = np.linspace(north - cell_size/2, north - cell_size/2 - (ny-1)*cell_size, ny)
+    
+    grid_x, grid_y = np.meshgrid(x_coords, y_coords)
 
     # Interpolate intensity values onto the grid
     grid_z = griddata((easting, northing), altitude, (grid_x, grid_y), "nearest") # Options: 'linear', 'nearest', 'cubic'
@@ -279,8 +300,13 @@ def generate_ALT_heatmap(output_folder, filename, df, class_id, cell_size, color
     # Ensure square figure for YOLO (640x640)
     fig, ax = plt.subplots(figsize=(6.4, 6.4), dpi=100)  # 640x640 pixels
 
+    # Calculate actual extent of the grid for plotting
+    east_grid = west + nx * cell_size
+    south_grid = north - ny * cell_size
+
     # Plot heatmap
-    ax.imshow(grid_z_masked.T, extent=(min(easting), max(easting), min(northing), max(northing)), cmap=cmap_faded, norm=norm_faded)
+    # grid_z_masked is (Y, X) from meshgrid, so no transpose needed
+    ax.imshow(grid_z_masked, extent=(west, east_grid, south_grid, north), cmap=cmap_faded, norm=norm_faded)
     ax.axis('off')
 
     # Ensure the directory exists in the user-specified output folder
@@ -300,20 +326,10 @@ def generate_ALT_heatmap(output_folder, filename, df, class_id, cell_size, color
     peaks_name = os.path.join(peaks_dir, filename.removesuffix(".txt") + "_ALT.png")
     
     # Save GeoTIFF
-    # Transpose to get (Y, X)
-    data_grid = grid_z_masked.T
+    # Data is already (Y, X) from meshgrid
+    data_grid = grid_z_masked
     
-    # Calculate transform
-    west = min(easting) - margin
-    north = max(northing) + margin
-    
-    width_m = (max(easting) + margin) - (min(easting) - margin)
-    height_m = (max(northing) + margin) - (min(northing) - margin)
-    
-    pixel_width = width_m / 500
-    pixel_height = height_m / 500
-    
-    transform = from_origin(west, north, pixel_width, pixel_height)
+    transform = from_origin(west, north, cell_size, cell_size)
     
     # Convert to RGBA
     rgba = cmap_faded(norm_faded(data_grid))
