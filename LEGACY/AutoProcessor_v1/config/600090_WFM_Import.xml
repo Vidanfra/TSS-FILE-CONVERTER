@@ -4,10 +4,10 @@
     EIVA WORKFLOW MANAGER - SBD IMPORT SCRIPT
     ================================================================================
 -->
-<Setup StateDatabaseLocation="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\LOGS_WFM_600090_import_export\1_WFM_import.db">
-    <Log TimingLog="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\LOGS_WFM_600090_import_export\2_Timing_WFM_import.csv"/>
-	<Log ErrorLog="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\LOGS_WFM_600090_import_export\3_Error_WFM_import.csv"/>
-	<Log InfoLogFile="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\LOGS_WFM_600090_import_export\4_InfoLogFile_WFM_import.txt"/>	
+<Setup StateDatabaseLocation=".\LOGS_WFM_600090_import_export\1_WFM_import.db">
+    <Log TimingLog=".\LOGS_WFM_600090_import_export\2_Timing_WFM_import.csv"/>
+	<Log ErrorLog=".\LOGS_WFM_600090_import_export\3_Error_WFM_import.csv"/>
+	<Log InfoLogFile=".\LOGS_WFM_600090_import_export\4_InfoLogFile_WFM_import.txt"/>	
 				
 	<GroupTask name="Import SBD">
 
@@ -15,11 +15,11 @@
         <DatabaseName>600090_GOEL_WindMultiplikator</DatabaseName>
 
         <GroupTask po="1" name="Data selection and setup">
-            <SetPropertyTask po="1" name="Set Input Directory" input="Z:\600090_WindMultiplikator_Bard\03_RAW_DATA\01_GOEL\04_NAVISCAN\TESTS\SIT\As_Found" output="InputDirectory" level="2"/>
+            <InputTask po="1" name="Select INPUT folder (SBD files location)" output="InputDirectory" AskForInput="true" Message="Select INPUT folder (SBD files location)"/>
             <SetPropertyTask po="2" name="Define input directory" input="{InputDirectory}" output="NaviScanLoggingPath" level="2"/>
             
             <!-- NE Path is now passed from Python as a property -->
-            <SetPropertyTask po="3" name="Define NaviEdit Destination Folder" input="04_NAVISCAN\TESTS\SIT\As_Found" output="NaviEditDestFolder" level="2"/>
+            <SetPropertyTask po="3" name="Define NaviEdit Destination Folder" input="{NEPath}" output="NaviEditDestFolder" level="2"/>
         </GroupTask>
 
         <GroupTask po="2" name="Define Variable Inputs">

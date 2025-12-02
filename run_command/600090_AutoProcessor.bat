@@ -1,1 +1,0 @@
-python C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\600090_AutoProcessor.py

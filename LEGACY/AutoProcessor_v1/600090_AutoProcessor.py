@@ -1,0 +1,1641 @@
+import pandas as pd #pip install pandas
+import os
+import tkinter as tk
+from tkinter import filedialog, messagebox, ttk
+import matplotlib
+import matplotlib.pyplot as plt #pip install matplotlib
+import matplotlib.colors as mcolors
+import numpy as np
+import csv
+from datetime import datetime
+import logging
+import json
+import generate_heatmap as heatmaps
+import subprocess
+import threading
+import re
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+# Set the backend for matplotlib to avoid GUI tinker issues
+matplotlib.use('TkAgg')  # Use a non-GUI backend for script execution
+
+# Name of the script version
+SCRIPT_VERSION = "600090_AutoProcessor v.1"
+
+# Maximum time difference in seconds
+MAX_TIME_DIFF_SEC = 0.25
+
+# Column positions in the PTR file
+DATE_COLUMN_POS = 0
+TIME_COLUMN_POS = 1
+EAST_COLUMN_POS = 2
+NORTH_COLUMN_POS = 3
+COLUMN_COIL_1_DEFAULT = 10
+COLUMN_COIL_2_DEFAULT = 11
+COLUMN_COIL_3_DEFAULT = 12
+
+# Maximum angle error for heading and course in degrees
+MAX_ANGLE_ERROR = 20
+
+# Minimum amount of rows in a file to be considered valid
+MIN_FILE_ROWS = 10
+
+# File suffix conventions for navigation CSV files
+COIL_PORT_SUFFIX = "_Coil_port.csv"      # Port coil (NaviEdit convention: Coil 1 = PORT)
+COIL_CENTER_SUFFIX = "_Coil_center.csv"    # Center coil
+COIL_STBD_SUFFIX = "_Coil_stbd.csv"      # Starboard coil (NaviEdit convention: Coil 3 = STARBOARD)
+CRP_SUFFIX = "_CRP.csv"               # ROV CRP navigation
+
+# Color map and boundaries for TSS heatmaps
+COLORS_TSS = ['blue', 'dodgerblue', 'green', 'lime', 'yellow', 'orange', 'red', 'purple', 'pink']
+BOUNDARIES_TSS = [-500, -100, -25, 25, 50, 75, 150, 500, 5000, 10000]
+
+# Color map and boundaries for Alt heatmaps
+COLORS_ALT = ['black', 'darkblue', 'green', 'limegreen','lime', 'yellow', 'orange', 'red','magenta']
+BOUNDARIES_ALT = [-0.5, -0.25, 0, 0.25, 0.5, 0.75, 1.0, 1.5, 2.0, 2.5]  
+
+def convert_to_datetime(time_str, format_str='%H%M%S%f'):
+    try:
+        return datetime.strptime(str(time_str), format_str)
+    except ValueError as e:
+        logging.error(f"Invalid time format: {time_str}. Error: {e}")
+        return None
+
+def read_csv_file(file_path, delimiter=','):
+    try:
+        return pd.read_csv(file_path, delimiter=delimiter)
+    except Exception as e:
+        logging.error(f"Error reading CSV file {file_path}: {e}")
+        return pd.DataFrame()
+
+def normalize_nav_time_column(df):
+    """
+    Normalize the time column name in navigation dataframes.
+    Handles both old NaviEdit header 'Time' and new header 'HH:MM:SS.SSS'.
+    Returns the dataframe with the time column renamed to 'Time' if needed.
+    """
+    if 'Time' in df.columns:
+        return df  # Already has the standard 'Time' column
+    elif 'HH:MM:SS.SSS' in df.columns:
+        df = df.rename(columns={'HH:MM:SS.SSS': 'Time'})
+        logging.info("Renamed 'HH:MM:SS.SSS' column to 'Time' (new NaviEdit format detected)")
+        return df
+    else:
+        logging.warning(f"Time column not found. Available columns: {df.columns.tolist()}")
+        return df
+
+def get_target_path(folder_path):
+    # Normalize path for cross-platform compatibility
+    folder_path = os.path.normpath(folder_path)
+
+    # Split path into parts
+    path_parts = folder_path.split(os.sep)
+
+    # Find the index of the first part containing "As"
+    for i, part in enumerate(path_parts):
+        if "As" in part:
+            return os.sep.join(path_parts[i-1:])  # Extract from the previous folder onwards
+
+    return folder_path  # Return full path if "As" is not found
+
+def getCoilPeaks(merged_df):
+    coil_peaks = []
+    
+    if 'Filename' not in merged_df or 'TSS' not in merged_df:
+        logging.error("Missing required columns in DataFrame")
+        return coil_peaks
+    
+    for line in merged_df['Filename'].unique():
+        df = merged_df[merged_df['Filename'] == line]
+        
+        if df.empty:
+            continue
+        
+        max_index = df['TSS'].idxmax()
+        min_index = df['TSS'].idxmin()
+        
+        if abs(df.loc[max_index, 'TSS']) > abs(df.loc[min_index, 'TSS']): # Positive peak
+            abs_max_tss = df.loc[max_index, 'TSS']
+            coil = df.loc[max_index, 'Coil']
+            easting = df.loc[max_index, 'Easting']
+            northing = df.loc[max_index, 'Northing']
+        else: # Negative peak
+            abs_max_tss = df.loc[min_index, 'TSS']
+            coil = df.loc[min_index, 'Coil']
+            easting = df.loc[min_index, 'Easting']
+            northing = df.loc[min_index, 'Northing']
+
+        coil_peaks.append({
+            'PTR file': line,
+            'TSS peak value': abs_max_tss,
+            'TSS coil': coil,
+            'Easting': easting,
+            'Northing': northing
+        })
+        
+    return coil_peaks
+
+def circular_mean(angles):
+    # Computes the circular mean of angles in degrees
+    angles_rad = np.radians(angles)
+    mean_x = np.mean(np.cos(angles_rad))
+    mean_y = np.mean(np.sin(angles_rad))
+    mean_angle = np.degrees(np.arctan2(mean_y, mean_x)) % 360  # Ensure 0-360 range
+    return mean_angle
+
+def circular_std(angles):
+    """Compute circular standard deviation (degrees) without SciPy."""
+    if angles is None:
+        return np.nan
+
+    angles_series = pd.Series(angles).dropna()
+    if angles_series.empty:
+        return np.nan
+
+    angles_rad = np.radians(angles_series.to_numpy())
+    sin_sum = np.sin(angles_rad).sum()
+    cos_sum = np.cos(angles_rad).sum()
+    r = np.sqrt(sin_sum ** 2 + cos_sum ** 2) / len(angles_rad)
+
+    # Clamp r to avoid log(0) while preserving behaviour near 0
+    r = np.clip(r, 1e-12, 1.0)
+    std_rad = np.sqrt(-2.0 * np.log(r))
+    return np.degrees(std_rad)
+
+def calculateHeading(merged_df):
+    if merged_df.empty or not {'Filename', 'Coil', 'Easting', 'Northing', 'Gyro'}.issubset(merged_df.columns):
+        logging.error("Missing required columns in DataFrame")
+        return pd.DataFrame()
+    
+    attitude_list = []  # Use a list to store dictionaries
+
+    # Loop through unique filenames
+    for line in merged_df['Filename'].unique():
+        df = merged_df[merged_df['Filename'] == line].copy()  # Copy to avoid SettingWithCopyWarning
+        
+        if len(df) < 2:
+            continue  # If only one row, we cannot calculate diff()
+
+        # Filter the data for Coil 2
+        df_coil2 = df[df['Coil'] == 2]
+        if df_coil2.empty:
+            continue
+
+        # Compute differences for course calculation
+        easting_diff = df_coil2['Easting'].diff()
+        northing_diff = df_coil2['Northing'].diff()
+
+        # Compute course angle (in degrees) referenced to North:
+        # Using arctan2(easting_diff, northing_diff) returns the bearing with North as 0°.
+        course = (np.degrees(np.arctan2(easting_diff, northing_diff)) + 360) % 360
+        course = course.bfill()  # Handle NaN in first row
+
+        # Convert gyro heading to degrees (assumed already as compass North values)
+        heading_deg = df['Gyro'] % 360  # Ensure within 0-360
+
+        # Compute heading error (ensure result is between -180 and 180)
+        heading_error = (heading_deg - course + 180) % 360 - 180
+
+        # Use circular mean for headings and courses
+        heading_avg = circular_mean(heading_deg)
+        course_avg = circular_mean(course)
+        heading_error_avg = np.degrees(np.angle(np.exp(1j * np.radians(heading_avg - course_avg))))
+        line_direction = round(heading_avg / 5) * 5  # Round to nearest 5 degrees
+        
+        if line_direction == 360:
+            line_direction = 0  # Ensure 360 is converted to 0
+
+        # Compute circular standard deviation in degrees using NumPy-based helper
+        heading_std = circular_std(heading_deg)
+        course_std = circular_std(course)
+
+        # Store values in a dictionary
+        attitude_list.append({
+            'Filename': line,
+            'Line Direction': line_direction,
+            'Heading Avg': heading_avg,
+            'Course Avg': course_avg,
+            'Heading Error Avg': heading_error_avg,
+            'Heading Std': heading_std,
+            'Course Std': course_std,
+            'Heading Error Std': heading_error.std(),
+            'Heading': heading_deg.tolist(),
+            'Course': course.tolist(),
+            'Heading Error': heading_error.tolist(),     
+        })
+
+
+    # Convert list of dictionaries to a DataFrame
+    attitude_df = pd.DataFrame(attitude_list)
+
+    if not attitude_df.empty:
+        # Get the most frequent survey direction
+        survey_direction = attitude_df['Line Direction'].mode()
+        attitude_df['Survey Direction'] = survey_direction[0] if not survey_direction.empty else np.nan
+
+        # Calculate global averages using circular mean
+        attitude_df['Global Heading Avg'] = circular_mean(attitude_df['Heading Avg'])
+        attitude_df['Global Heading Error Avg'] = attitude_df['Heading Error Avg'].mean()
+
+    return attitude_df
+
+def extractData(folder_path, tss1_col, tss2_col, tss3_col, use_crp=True):
+    ptr_dataframe = []
+    nav_coil1_dataframe = []
+    nav_coil2_dataframe = []
+    nav_coil3_dataframe = []
+    nav_crp_dataframe = []
+
+    # Validate column numbers
+    try:
+        tss1_col = int(tss1_col)
+        tss2_col = int(tss2_col)
+        tss3_col = int(tss3_col)
+    except ValueError:
+        logging.error("Columns numbers must be integer numeric values")
+        messagebox.showerror("Error", "Columns numbers must be integer numeric values")
+        return
+
+    # Check if the folder exists
+    if not os.path.exists(folder_path):
+        logging.error(f"Folder {folder_path} does not exist")
+        messagebox.showerror("Error", f"Folder {folder_path} does not exist")
+        return
+
+    # Check if the folder is empty
+    if not os.listdir(folder_path):
+        logging.error(f"Folder {folder_path} is empty")
+        messagebox.showerror("Error", f"Folder {folder_path} is empty")
+        return
+    
+    #logging.info(f"Files in the folder: {os.listdir(folder_path)}") #DEBUG
+
+    # Check all the corresponding files in the folder
+    error_messages = []
+
+    for filename in os.listdir(folder_path):
+
+        if filename.endswith('.ptr'):
+            only_name = filename.removesuffix('.ptr')
+            missing_files_coils = []
+            
+            if not (only_name + COIL_PORT_SUFFIX) in os.listdir(folder_path):
+                missing_files_coils.append("Coil Port")
+            if not (only_name + COIL_CENTER_SUFFIX) in os.listdir(folder_path):
+                missing_files_coils.append("Coil Center")
+            if not (only_name + COIL_STBD_SUFFIX) in os.listdir(folder_path):
+                missing_files_coils.append("Coil Stbd")
+            if use_crp and not (only_name + CRP_SUFFIX) in os.listdir(folder_path):
+                missing_files_coils.append("CRP")
+
+            if len(missing_files_coils) == 4:
+                error_messages.append(f"Missing all CSV Navigation files for PTR file: {filename}")
+            elif missing_files_coils:
+                # CRP is optional - only warn, don't add to error messages
+                coil_missing = [c for c in missing_files_coils if c != "CRP"]
+                crp_missing = "CRP" in missing_files_coils
+                if coil_missing:
+                    error_messages.append(f"Missing CSV Navigation {', '.join(coil_missing)} files for PTR file: {filename}")
+                if crp_missing and use_crp:
+                    logging.warning(f"Missing CRP navigation file for PTR file: {filename} - CRP data will not be included")
+        
+        if filename.endswith(COIL_PORT_SUFFIX) or filename.endswith(COIL_CENTER_SUFFIX) or filename.endswith(COIL_STBD_SUFFIX) or (use_crp and filename.endswith(CRP_SUFFIX)):
+            only_name = filename.removesuffix(COIL_PORT_SUFFIX).removesuffix(COIL_CENTER_SUFFIX).removesuffix(COIL_STBD_SUFFIX).removesuffix(CRP_SUFFIX)
+            if not (only_name + '.ptr') in os.listdir(folder_path):
+                error_messages.append(f"Missing PTR file for the CSV Navigation file: {filename}")
+            # Check for required coil files (CRP is optional)
+            if not (only_name + COIL_PORT_SUFFIX) in os.listdir(folder_path) or not (only_name + COIL_CENTER_SUFFIX) in os.listdir(folder_path) or not (only_name + COIL_STBD_SUFFIX) in os.listdir(folder_path):
+                error_messages.append(f"Missing the other necessary CSV Navigation files for this file: {filename}")
+    
+    # Show all errors in a single message box at the end
+    if error_messages:
+        logging.error("\n".join(error_messages))
+        messagebox.showerror("Error", "\n".join(error_messages))
+    
+    # Get all files in the folder (store in a set for efficient lookup)
+    existing_files = set(os.listdir(folder_path))
+
+    # Loop through all files in the folder and extract the required data
+    for filename in  existing_files:
+        file_path = os.path.join(folder_path, filename)
+
+        if filename.endswith('.ptr'):           
+            only_name = filename.removesuffix('.ptr')
+             # Check if all required coil files exist (CRP is optional)
+            required_files = {f"{only_name}{COIL_PORT_SUFFIX}", f"{only_name}{COIL_CENTER_SUFFIX}", f"{only_name}{COIL_STBD_SUFFIX}"}
+
+            if not required_files.issubset(existing_files):
+                logging.warning(f"Skipping PTR file {filename} due to missing navigation files")
+                continue  # Skip this iteration if any required navigation file is missing
+            
+            # Check if CRP file exists (optional)
+            crp_file = f"{only_name}{CRP_SUFFIX}"
+            if use_crp and crp_file not in existing_files:
+                logging.warning(f"CRP navigation file missing for {filename} - CRP data will not be included")
+            try:
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    first_line = f.readline().strip()
+
+                # Check if the first line contains text (headers)
+                if any(c.isalpha() for c in first_line):
+                    df = pd.read_csv(file_path, delimiter=';', skiprows=1, header=None)
+                else:
+                    df = pd.read_csv(file_path, delimiter=';', header=None)
+
+            except Exception as e:
+                logging.error(f"Error reading PTR file {file_path}: {e}")
+                continue
+
+            if len(df) < MIN_FILE_ROWS:
+                messagebox.showwarning("Warning", f"PTR file has less than 10 lines: {filename}")
+                logging.warning(f"PTR file has less than 10 lines: {filename}")
+
+            try:
+                df_extracted = pd.DataFrame({
+                    'Filename': filename,
+                    'Date_PTR': df.iloc[:, DATE_COLUMN_POS],
+                    'Time_PTR': df.iloc[:, TIME_COLUMN_POS],
+                    'Easting_PTR': df.iloc[:, EAST_COLUMN_POS],
+                    'Northing_PTR': df.iloc[:, NORTH_COLUMN_POS],
+                    'TSS1': df.iloc[:, tss1_col], # Teledyne TSS DeepView coils numbers convention: COIL 1 = STARBOARD
+                    'TSS2': df.iloc[:, tss2_col], # Teledyne TSS DeepView coils numbers convention: COIL 2 = CENTER
+                    'TSS3': df.iloc[:, tss3_col], # Teledyne TSS DeepView coils numbers convention: COIL 3 = PORT
+                })
+                ptr_dataframe.append(df_extracted)
+            except IndexError:
+                logging.error(f"Invalid column index in {filename}")
+                continue
+
+        if filename.endswith(COIL_PORT_SUFFIX): # NaviEdit User Offsets coils numbers convention: COIL 1 = PORT
+            try:
+                only_name = filename.removesuffix(COIL_PORT_SUFFIX)
+                if not (only_name + '.ptr') in os.listdir(folder_path) or not (only_name + COIL_CENTER_SUFFIX) in os.listdir(folder_path) or not (only_name + COIL_STBD_SUFFIX) in os.listdir(folder_path):
+                    continue # Skip this iteration if any of the PTR or navigation required files is missing
+                nav1_df = read_csv_file(file_path, ',')
+                if len(nav1_df) < MIN_FILE_ROWS:
+                    messagebox.showwarning("Warning", f"Coil Port navigation file has less than 10 lines: {filename}")
+                    logging.warning(f"Coil Port navigation file has less than 10 lines: {filename}")
+                nav_coil1_dataframe.append(nav1_df)
+            except Exception as e:
+                logging.error(f"Error reading coil port navigation file {file_path}: {e}")
+                continue
+
+        if filename.endswith(COIL_CENTER_SUFFIX): # NaviEdit User Offsets coils numbers convention: COIL 2 = CENTER
+            try:
+                only_name = filename.removesuffix(COIL_CENTER_SUFFIX)
+                if not (only_name + '.ptr') in os.listdir(folder_path) or not (only_name + COIL_PORT_SUFFIX) in os.listdir(folder_path) or not (only_name + COIL_STBD_SUFFIX) in os.listdir(folder_path):
+                    continue # Skip this iteration if any of the PTR or navigation required files is missing
+                nav2_df = read_csv_file(file_path, ',')
+                if len(nav2_df) < MIN_FILE_ROWS:
+                    messagebox.showwarning("Warning", f"Coil Center navigation file has less than 10 lines: {filename}")
+                    logging.warning(f"Coil Center navigation file has less than 10 lines: {filename}")
+                nav_coil2_dataframe.append(nav2_df)
+            except Exception as e:
+                logging.error(f"Error reading coil center navigation file {file_path}: {e}")
+                continue
+
+
+        if filename.endswith(COIL_STBD_SUFFIX): # NaviEdit User Offsets coils numbers convention: COIL 3 = STARBOARD
+            try:
+                only_name = filename.removesuffix(COIL_STBD_SUFFIX)
+                if not (only_name + '.ptr') in os.listdir(folder_path) or not (only_name + COIL_PORT_SUFFIX) in os.listdir(folder_path) or not (only_name + COIL_CENTER_SUFFIX) in os.listdir(folder_path):
+                    continue # Skip this iteration if any of the PTR or navigation required files is missing
+                nav3_df = read_csv_file(file_path, ',')
+                if len(nav3_df) < MIN_FILE_ROWS:
+                    messagebox.showwarning("Warning", f"Coil Stbd navigation file has less than 10 lines: {filename}")
+                    logging.warning(f"Coil Stbd navigation file has less than 10 lines: {filename}")
+                nav_coil3_dataframe.append(nav3_df)
+            except Exception as e:
+                logging.error(f"Error reading coil stbd navigation file {file_path}: {e}")
+                continue
+
+        if use_crp and filename.endswith(CRP_SUFFIX): # ROV CRP (Center Reference Point) navigation
+            try:
+                only_name = filename.removesuffix(CRP_SUFFIX)
+                if not (only_name + '.ptr') in os.listdir(folder_path) or not (only_name + COIL_PORT_SUFFIX) in os.listdir(folder_path) or not (only_name + COIL_CENTER_SUFFIX) in os.listdir(folder_path) or not (only_name + COIL_STBD_SUFFIX) in os.listdir(folder_path):
+                    continue # Skip this iteration if any of the PTR or navigation required files is missing
+                crp_df = read_csv_file(file_path, ',')
+                if len(crp_df) < MIN_FILE_ROWS:
+                    messagebox.showwarning("Warning", f"CRP navigation file has less than 10 lines: {filename}")
+                    logging.warning(f"CRP navigation file has less than 10 lines: {filename}")
+                nav_crp_dataframe.append(crp_df)
+            except Exception as e:
+                logging.error(f"Error reading CRP navigation file {file_path}: {e}")
+                continue
+
+    # Check if any PTR or Navigation files were found
+    if not ptr_dataframe:
+        logging.error("No PTR files extracted")
+        #messagebox.showerror("Error", "No PTR files extracted")
+        return
+    if not nav_coil1_dataframe or not nav_coil2_dataframe or not nav_coil3_dataframe:
+        logging.error("No Navigation files extracted")
+        #messagebox.showerror("Error", "No Navigation files extracted")
+        return
+    
+    # Check if CRP data is available
+    has_crp_data = len(nav_crp_dataframe) > 0
+    if use_crp and not has_crp_data:
+        logging.warning("No CRP navigation files found - CRP data will not be included in output")
+        messagebox.showwarning("Warning", "No CRP navigation files found - CRP data will not be included in output")
+    
+    # Concatenate data
+    ptr_df = pd.concat(ptr_dataframe, ignore_index=True)
+    nav_coil1_df = pd.concat(nav_coil1_dataframe, ignore_index=True)
+    nav_coil2_df = pd.concat(nav_coil2_dataframe, ignore_index=True)
+    nav_coil3_df = pd.concat(nav_coil3_dataframe, ignore_index=True)
+    nav_crp_df = pd.concat(nav_crp_dataframe, ignore_index=True) if has_crp_data else None
+
+    # Normalize the time column name for navigation dataframes (handles both old 'Time' and new 'HH:MM:SS.SSS' headers)
+    nav_coil1_df = normalize_nav_time_column(nav_coil1_df)
+    nav_coil2_df = normalize_nav_time_column(nav_coil2_df)
+    nav_coil3_df = normalize_nav_time_column(nav_coil3_df)
+    if has_crp_data:
+        nav_crp_df = normalize_nav_time_column(nav_crp_df)
+
+    # Ensure the Time PTR column is formatted correctly
+    ptr_df['Time_PTR'] = ptr_df['Time_PTR'].astype(str).str.zfill(9)  # Ensure the time string is 9 chars
+    ptr_df['Time_PTR'] = ptr_df['Time_PTR'].str[:6] + '.' + ptr_df['Time_PTR'].str[6:]  # Insert decimal before ms
+
+    # Convert the Time columns to datetime objects
+    ptr_df['Time_PTR'] = pd.to_datetime(ptr_df['Date_PTR'] + ' ' + ptr_df['Time_PTR'], format='%d.%m.%Y %H%M%S.%f')
+    nav_coil1_df['Time'] = pd.to_datetime(nav_coil1_df['Date'] + ' ' + nav_coil1_df['Time'], format='%d/%m/%Y %H:%M:%S.%f')
+    nav_coil2_df['Time'] = pd.to_datetime(nav_coil2_df['Date'] + ' ' + nav_coil2_df['Time'], format='%d/%m/%Y %H:%M:%S.%f')
+    nav_coil3_df['Time'] = pd.to_datetime(nav_coil3_df['Date'] + ' ' + nav_coil3_df['Time'], format='%d/%m/%Y %H:%M:%S.%f')
+    if has_crp_data:
+        nav_crp_df['Time'] = pd.to_datetime(nav_crp_df['Date'] + ' ' + nav_crp_df['Time'], format='%d/%m/%Y %H:%M:%S.%f')
+
+    # Ensure both DataFrames are sorted by the key columns
+    ptr_df = ptr_df.sort_values(by='Time_PTR')
+    nav_coil1_df = nav_coil1_df.sort_values(by='Time')
+    nav_coil2_df = nav_coil2_df.sort_values(by='Time')
+    nav_coil3_df = nav_coil3_df.sort_values(by='Time')
+    if has_crp_data:
+        nav_crp_df = nav_crp_df.sort_values(by='Time')
+    
+    # Swapping of COIL 1 and COIL 3 to match both coils numbers conventions. PTR files numbers convention will be used as reference.
+    # - PTR files: TSS DeepView coils numbers convention, Coil 1 = STARBOARD, Coil 2 = CENTRAL, Coil 3 = PORT [DEFAULT]
+    # - Navigation files: NaviEdit User Offsets coils numbers convention, Coil 1 = PORT, Coil 2 = CENTER, Coil 3 = STARBOARD
+    nav_coil1_df_swapped = nav_coil3_df.copy() # Swapped COIL 1 and COIL 3 to match PTR files numbers convention
+    nav_coil2_df_swapped = nav_coil2_df.copy()
+    nav_coil3_df_swapped = nav_coil1_df.copy() # Swapped COIL 3 and COIL 1 to match PTR files numbers convention
+    
+    # Merge the DataFrames based on the closest time in the navigation data to the PTR data
+    merged_coil1_df = pd.merge_asof(ptr_df, nav_coil1_df_swapped, left_on='Time_PTR', right_on='Time', direction='nearest') 
+    merged_coil2_df = pd.merge_asof(ptr_df, nav_coil2_df_swapped, left_on='Time_PTR', right_on='Time', direction='nearest')
+    merged_coil3_df = pd.merge_asof(ptr_df, nav_coil3_df_swapped, left_on='Time_PTR', right_on='Time', direction='nearest')
+    merged_crp_df = pd.merge_asof(ptr_df, nav_crp_df, left_on='Time_PTR', right_on='Time', direction='nearest') if has_crp_data else None 
+
+    # Check if time difference exceeds the allowed threshold
+    time_diff = (merged_coil1_df['Time_PTR'] - merged_coil1_df['Time']).dt.total_seconds()
+    merged_coil1_df['Time_diff'] = time_diff
+    high_time_diff = abs(time_diff) > MAX_TIME_DIFF_SEC
+    if (abs(time_diff) > MAX_TIME_DIFF_SEC).any():
+        logging.warning(f"Time difference between PTR and Navigation timestamp is too high in {high_time_diff.sum()} points. Max value :  {abs(time_diff).max():.3f} seconds")
+        messagebox.showwarning("Warning", f"Time difference between PTR and Navigation timestamp is too high in {high_time_diff.sum()} points. Max value :  {abs(time_diff).max():.3f} seconds")
+
+    time_diff = (merged_coil2_df['Time_PTR'] - merged_coil2_df['Time']).dt.total_seconds()
+    merged_coil2_df['Time_diff'] = time_diff
+    #if (abs(time_diff) > MAX_TIME_DIFF_SEC).any():
+        #messagebox.showerror("Error", f"Time difference between PTR and Coil 2 is too high: {abs(time_diff).max():.3f} seconds")
+
+    time_diff = (merged_coil3_df['Time_PTR'] - merged_coil3_df['Time']).dt.total_seconds()
+    merged_coil3_df['Time_diff'] = time_diff
+    #if (abs(time_diff) > MAX_TIME_DIFF_SEC).any():
+        #messagebox.showerror("Error", f"Time difference between PTR and Coil 3 is too high: {abs(time_diff).max():.3f} seconds")
+
+    if has_crp_data and merged_crp_df is not None:
+        time_diff = (merged_crp_df['Time_PTR'] - merged_crp_df['Time']).dt.total_seconds()
+        merged_crp_df['Time_diff'] = time_diff
+        high_time_diff_crp = abs(time_diff) > MAX_TIME_DIFF_SEC
+        if high_time_diff_crp.any():
+            logging.warning(f"Time difference between PTR and CRP Navigation timestamp is too high in {high_time_diff_crp.sum()} points. Max value: {abs(time_diff).max():.3f} seconds")
+
+    return merged_coil1_df, merged_coil2_df, merged_coil3_df, merged_crp_df
+
+def mergeData(merged_coil1_df, merged_coil2_df, merged_coil3_df, merged_crp_df):
+    # Helper function to clean up a coil dataframe
+    def cleanup_coil_df(df, coil_number, tss_column):
+        df['TSS'] = df[tss_column]
+        df['Coil'] = coil_number
+        # Remove individual TSS columns
+        for col in ['TSS1', 'TSS2', 'TSS3']:
+            if col in df.columns:
+                del df[col]
+        # Remove Date_PTR and Time_PTR (we keep Date and Time from navigation)
+        if 'Date_PTR' in df.columns:
+            del df['Date_PTR']
+        if 'Time_PTR' in df.columns:
+            del df['Time_PTR']
+        # Remove PTR position columns (we use ROV/Navigation Easting and Northing instead)
+        if 'Easting_PTR' in df.columns:
+            del df['Easting_PTR']
+        if 'Northing_PTR' in df.columns:
+            del df['Northing_PTR']
+        # Remove unnecessary columns
+        for col in ['NavQ', 'PipeZ', 'PipeX', 'Time_diff']:
+            if col in df.columns:
+                del df[col]
+        return df
+    
+    # Clean up each coil dataframe
+    merged_coil1_df = cleanup_coil_df(merged_coil1_df, 1, 'TSS1')
+    merged_coil2_df = cleanup_coil_df(merged_coil2_df, 2, 'TSS2')
+    merged_coil3_df = cleanup_coil_df(merged_coil3_df, 3, 'TSS3')
+
+    # Check if CRP data is available
+    has_crp_data = merged_crp_df is not None and not merged_crp_df.empty
+
+    # Ensure all dataframes have the same index length (if not, trim to the smallest length)
+    if has_crp_data:
+        min_length = min(len(merged_coil1_df), len(merged_coil2_df), len(merged_coil3_df), len(merged_crp_df))
+        merged_crp_df = merged_crp_df.iloc[:min_length].reset_index(drop=True)
+    else:
+        min_length = min(len(merged_coil1_df), len(merged_coil2_df), len(merged_coil3_df))
+
+    merged_coil1_df = merged_coil1_df.iloc[:min_length].copy()
+    merged_coil2_df = merged_coil2_df.iloc[:min_length].copy()
+    merged_coil3_df = merged_coil3_df.iloc[:min_length].copy()
+
+    # Add CRP columns to each coil dataframe before interleaving
+    if has_crp_data:
+        merged_coil1_df['Easting_CRP'] = merged_crp_df['Easting'].values
+        merged_coil1_df['Northing_CRP'] = merged_crp_df['Northing'].values
+        merged_coil2_df['Easting_CRP'] = merged_crp_df['Easting'].values
+        merged_coil2_df['Northing_CRP'] = merged_crp_df['Northing'].values
+        merged_coil3_df['Easting_CRP'] = merged_crp_df['Easting'].values
+        merged_coil3_df['Northing_CRP'] = merged_crp_df['Northing'].values
+
+    # Create an interleaved dataframe
+    interleaved_df = pd.concat([merged_coil1_df, merged_coil2_df, merged_coil3_df], axis=0).sort_index(kind='merge') # sort_index(kind='merge') interleaves the dataframes (first row of each df, then second row of each df, etc.)
+
+    # Reset index for a clean output
+    interleaved_df = interleaved_df.reset_index(drop=True)
+    
+    # Reorder columns: Filename, Date, Time, Easting, Northing, Coil, TSS, GeographicalEast, GeographicalNorth, then the rest, with Easting_CRP and Northing_CRP at the end
+    priority_columns = [
+        'Filename', 'Date', 'Time', 'Easting', 'Northing', 'Coil', 'TSS',
+        'GeographicalEast', 'GeographicalNorth'
+    ]
+    end_columns = ['Easting_CRP', 'Northing_CRP']
+    
+    # Get columns that exist in the dataframe
+    existing_priority = [col for col in priority_columns if col in interleaved_df.columns]
+    existing_end = [col for col in end_columns if col in interleaved_df.columns]
+    # Get remaining columns not in priority or end lists
+    remaining_columns = [col for col in interleaved_df.columns if col not in priority_columns and col not in end_columns]
+    # Combine in desired order: priority first, then remaining, then CRP at the end
+    ordered_columns = existing_priority + remaining_columns + existing_end
+    interleaved_df = interleaved_df[ordered_columns]
+
+    return interleaved_df
+
+def reorganizeData(merged_df):
+    """
+    Reorganizes the merged dataframe to have one row per timestamp with all three coils' data.
+    Keeps metadata from coil 2 (center coil).
+    """
+    if merged_df.empty:
+        logging.error("Input DataFrame is empty")
+        return pd.DataFrame()
+    
+    # Check if CRP data is available in the merged dataframe
+    has_crp_data = 'Easting_CRP' in merged_df.columns and 'Northing_CRP' in merged_df.columns
+    
+    # Separate data by coil
+    coil1_df = merged_df[merged_df['Coil'] == 1].copy()
+    coil2_df = merged_df[merged_df['Coil'] == 2].copy()
+    coil3_df = merged_df[merged_df['Coil'] == 3].copy()
+    
+    # Reset indices for proper alignment
+    coil1_df = coil1_df.reset_index(drop=True)
+    coil2_df = coil2_df.reset_index(drop=True)
+    coil3_df = coil3_df.reset_index(drop=True)
+    
+    # Ensure all dataframes have the same length
+    min_length = min(len(coil1_df), len(coil2_df), len(coil3_df))
+    
+    coil1_df = coil1_df.iloc[:min_length]
+    coil2_df = coil2_df.iloc[:min_length]
+    coil3_df = coil3_df.iloc[:min_length]
+    
+    # Create reorganized dataframe with coil 2 as base (to keep its metadata)
+    reorganized_df = pd.DataFrame({
+        'Filename': coil2_df['Filename'],
+        'Time_PTR': coil2_df['Time_PTR'],
+        
+        # Coil 1 (Starboard) position and TSS
+        'Easting_Coil1': coil1_df['Easting'],
+        'Northing_Coil1': coil1_df['Northing'],
+        'TSS_Coil1': coil1_df['TSS'],
+        
+        # Coil 2 (Center) position and TSS
+        'Easting_Coil2': coil2_df['Easting'],
+        'Northing_Coil2': coil2_df['Northing'],
+        'TSS_Coil2': coil2_df['TSS'],
+        
+        # Coil 3 (Port) position and TSS
+        'Easting_Coil3': coil3_df['Easting'],
+        'Northing_Coil3': coil3_df['Northing'],
+        'TSS_Coil3': coil3_df['TSS'],
+        
+        # Metadata from Coil 2
+        'Kp': coil2_df['Kp'],
+        'Dcc': coil2_df['Dcc'],
+        'Gyro': coil2_df['Gyro'],
+        'Alt': coil2_df['Alt'],
+        'Depth': coil2_df['Depth'],
+        'GeographicalEast': coil2_df['GeographicalEast'],
+        'GeographicalNorth': coil2_df['GeographicalNorth'],
+        'Tide': coil2_df['Tide'],
+    })
+    
+    # Add ROV CRP position columns if available (take from coil2 since all coils have the same CRP values)
+    if has_crp_data:
+        reorganized_df['Easting_CRP'] = coil2_df['Easting_CRP'].values
+        reorganized_df['Northing_CRP'] = coil2_df['Northing_CRP'].values
+    
+    return reorganized_df
+
+def plotMaps(folder_path, tss1_col, tss2_col, tss3_col, use_crp=True):
+    try:
+        # Extract the data from the PTR and Navigation files in the selected folder
+        coil1_df, coil2_df, coil3_df, crp_df = extractData(folder_path, tss1_col, tss2_col, tss3_col, use_crp)
+        merged_df = mergeData(coil1_df, coil2_df, coil3_df, crp_df)
+        
+        # Validate merged_df
+        required_columns = {'Easting', 'Northing', 'TSS', 'Alt'}
+        if not required_columns.issubset(merged_df.columns):
+            missing = required_columns - set(merged_df.columns)
+            logging.error(f"Missing required columns in merged data: {missing}")
+            raise ValueError(f"Missing required columns in merged data: {missing}")
+
+        # Calculate the average heading for each line
+        attitude_df = calculateHeading(merged_df)
+        
+        # Ensure survey direction data exists
+        if 'Survey Direction' not in attitude_df.columns or attitude_df.empty:
+            logging.error("Survey direction data is missing or could not be computed.")
+            raise ValueError("Survey direction data is missing or could not be computed.")
+        
+        survey_direction = attitude_df['Survey Direction'].iloc[0]
+        
+        # Get the target path for the output files
+        target_path = get_target_path(folder_path)
+
+        # Create a custom TSS colormap
+        cmap_tss = mcolors.ListedColormap(COLORS_TSS)
+        bounds_tss = BOUNDARIES_TSS
+        norm_tss = mcolors.BoundaryNorm(bounds_tss, cmap_tss.N)
+
+        # Create scatter plots for TSS values
+        plt.figure(num= target_path + " Magnetic", figsize=(7, 6))
+        scatter = plt.scatter(merged_df['Easting'], merged_df['Northing'], c=merged_df['TSS'], cmap=cmap_tss, norm=norm_tss, marker='o')
+        plt.colorbar(scatter, label="TSS [uV]", boundaries=bounds_tss, ticks=bounds_tss)
+        plt.xlabel("Easting [m]")
+        plt.ylabel("Northing [m]")
+        plt.suptitle(f"Heatmap of TSS Magnetic Values")
+        plt.title(f"Survey Direction: {survey_direction:.0f} º")
+        plt.gca().set_aspect('equal', adjustable='box')  # Set aspect ratio to 1:1
+        plt.grid(True)
+
+        # Create a custom Altitude colormap
+        cmap_alt = mcolors.ListedColormap(COLORS_ALT)
+        bounds_alt = BOUNDARIES_ALT
+        norm_alt = mcolors.BoundaryNorm(bounds_alt, cmap_alt.N)
+
+        # Create scatter plots for flying altitude
+        plt.figure(num=target_path + " Altitude", figsize=(7, 6))
+        scatter = plt.scatter(merged_df['Easting'], merged_df['Northing'], c=merged_df['Alt'], cmap=cmap_alt, norm=norm_alt, marker='o')
+        plt.colorbar(scatter, label="Altitude [m]", boundaries=bounds_alt, ticks=bounds_alt)
+        plt.xlabel("Easting [m]")
+        plt.ylabel("Northing [m]")
+        plt.suptitle(f'Heatmap of TSS Flying Altitude')
+        plt.title(f"Survey Direction: {survey_direction:.0f} º")
+        plt.gca().set_aspect('equal', adjustable='box')  # Set aspect ratio to 1:1
+        plt.grid(True)
+
+        plt.show()
+        
+        # Log success message
+        logging.info("Magnetic and altitude heatmaps plotted succesfully.")
+        
+    except Exception as e:
+        logging.error(f"Error plotting maps: {e}")
+        messagebox.showerror("Error", f"Error plotting maps: {e}")
+    
+def plotCoils(folder_path, tss1_col, tss2_col, tss3_col, use_crp=True):
+    try:
+        # Extract the data from the PTR and Navigation files in the selected folder
+        coil1_df, coil2_df, coil3_df, crp_df = extractData(folder_path, tss1_col, tss2_col, tss3_col, use_crp)
+        
+        # Validate extracted data
+        if coil1_df.empty or coil2_df.empty or coil3_df.empty:
+            logging.error("Extracted data is empty. Please check the input files.")
+            raise ValueError("Extracted data is empty. Please check the input files.")
+
+        required_columns = {'Filename', 'TSS1', 'TSS2', 'TSS3'}
+        for df in [coil1_df, coil2_df, coil3_df]:
+            if not required_columns.issubset(df.columns):             
+                missing = required_columns - set(df.columns)
+                logging.error(f"Missing required columns in extracted data: {missing}")
+                raise ValueError(f"Missing required columns in extracted data: {missing}")
+
+        # Split the data into individual line files
+        line_files = []
+        for filename in coil1_df['Filename'].unique():
+            line_files.append({
+                'filename': filename,
+                'TSS1': coil1_df[coil1_df['Filename'] == filename]['TSS1'],
+                'TSS2': coil2_df[coil2_df['Filename'] == filename]['TSS2'],
+                'TSS3': coil3_df[coil3_df['Filename'] == filename]['TSS3']
+            })
+
+        # Loop through all line files in the folder
+        for line in line_files: 
+            fig_name = line['filename'].removesuffix('.ptr')  
+             
+            plt.figure(num=fig_name,figsize=(10, 6))
+            plt.plot(line['TSS1'], color='r', label='Coil 1 - STBD')
+            plt.plot(line['TSS2'], color='b', label='Coil 2 - CENTER')
+            plt.plot(line['TSS3'], color='g', label='Coil 3 - PORT')
+
+            # Function to annotate min and max points
+            def annotate_peaks(tss_data, color, label):
+                max_idx = tss_data.idxmax()  # Index of max value
+                min_idx = tss_data.idxmin()  # Index of min value
+                max_val = tss_data[max_idx]  # Max value
+                min_val = tss_data[min_idx]  # Min value
+
+                # Annotate max
+                plt.annotate(f'Max: {max_val:.2f}', (max_idx, max_val),
+                            textcoords="offset points", xytext=(0,10), ha='center',
+                            color=color, fontsize=10, fontweight='bold')
+
+                # Annotate min
+                plt.annotate(f'Min: {min_val:.2f}', (min_idx, min_val),
+                            textcoords="offset points", xytext=(0,-15), ha='center',
+                            color=color, fontsize=10, fontweight='bold')
+
+            # Annotate peaks for each coil
+            annotate_peaks(line['TSS1'], 'r', 'Coil 1')
+            annotate_peaks(line['TSS2'], 'b', 'Coil 2')
+            annotate_peaks(line['TSS3'], 'g', 'Coil 3')
+            plt.xlabel("Time [sec]")
+            plt.ylabel("TSS values [uV]")
+            plt.title(f'TSS values for each coil - {line['filename']}')
+            plt.legend()
+            plt.grid(True)    
+        plt.show() 
+        
+        # Log success message
+        logging.info("Coil data plotted succesfully.")
+        
+    except Exception as e:
+        logging.error(f"Error plotting coil data: {e}")
+        messagebox.showerror("Error", f"Error plotting coil data: {e}")
+
+def plotHeading(folder_path, tss1_col, tss2_col, tss3_col, use_crp=True):
+    try:
+        # Extract the data from the PTR and Navigation files in the selected folder
+        coil1_df, coil2_df, coil3_df, crp_df = extractData(folder_path, tss1_col, tss2_col, tss3_col, use_crp)
+        
+        if coil1_df.empty or coil2_df.empty or coil3_df.empty:
+            logging.error("One or more extracted DataFrames are empty. Check input data.")
+            return
+
+        # Merge the DataFrames into a single DataFrame
+        merged_df = mergeData(coil1_df, coil2_df, coil3_df, crp_df)
+        if merged_df.empty:
+            logging.error("Merged DataFrame is empty. Exiting function.")
+            return
+        
+        # Calculate the average heading for each line
+        attitude_df = calculateHeading(merged_df)
+        if attitude_df.empty:
+            logging.error("Attitude DataFrame is empty. Exiting function.")
+            return
+
+        # Get the target path for the output files
+        target_path = get_target_path(folder_path)
+        
+        # Extract the survey direction
+        survey_direction = attitude_df['Survey Direction'].iloc[0]
+
+        # Scatter plot with color scale
+        headings_err = np.concatenate(attitude_df['Heading Error'].values)  # Flatten the list of lists into a 1D NumPy array
+        headings_err = pd.Series(headings_err)  # Convert back to a pandas Series for NaN handling
+        headings_err = headings_err.dropna()  # Drop NaN values
+        headings_err = pd.concat([headings_err, headings_err, headings_err], axis=0).sort_index(kind='merge')
+        headings_err = headings_err.abs()  # Take the absolute value
+        # Normalize the error to be between 0 and 90 degrees (for color scaling, not in the table)
+        headings_err = np.where(headings_err > 90, np.abs(180 - headings_err), headings_err)
+
+        # Scatter plot with color scale
+        fig, ax = plt.subplots(num= target_path + " Heading Error", figsize=(7, 6))
+        scatter = ax.scatter(merged_df['Easting'], merged_df['Northing'], c= headings_err, cmap='coolwarm', vmin=0, vmax= MAX_ANGLE_ERROR, edgecolors='k')
+
+        # Add colorbar
+        cbar = plt.colorbar(scatter, ax=ax)
+        cbar.set_label("Abs Heading Error [0º, 90º]", fontsize=12)
+
+        ax.set_xlabel("Easting [m]")
+        ax.set_ylabel("Northing [m]")
+        ax.set_aspect('equal', adjustable='box')  # Set aspect ratio to 1:1
+        fig.suptitle("Scatter Plot of Heading - Course Error")
+        ax.set_title(f"Survey Direction: {survey_direction:.0f} º")
+        ax.grid(True, linestyle='--', alpha=0.6)
+
+        # 🔹 Add arrows for each line
+        for line in merged_df['Filename'].unique():
+            df_line = merged_df[merged_df['Filename'] == line].copy()
+            
+            if len(df_line) < 2:
+                logging.warning("Adding arrows Heading QC heatmap: Skipping line %s due to insufficient data points.", line)
+                continue  # Skip if not enough points
+
+            # Get first two points
+            x1, y1 = df_line.iloc[1][['Easting', 'Northing']]
+            x2, y2 = df_line.iloc[len(df_line)-2][['Easting', 'Northing']]
+            dx = x2 - x1
+            dy = y2 - y1 
+
+            # Draw arrow at the first point
+            ax.arrow(x1, y1, dx, dy, head_width=0.5, head_length=0.5, fc='black', ec='black')
+
+        # Select the columns to display
+        columns_to_display = [
+            "Filename", 
+            "Line Direction",
+            "Heading Avg", 
+            "Course Avg", 
+            "Heading Error Avg", 
+            "Heading Std", 
+            "Course Std"
+        ]
+        table_data = attitude_df[columns_to_display].copy()
+
+        # Round numerical values for better readability
+        for col in columns_to_display[1:]:
+            table_data[col] = table_data[col].round(2)
+
+        # Define function for color scaling
+        def get_color(value, max_error_angle = MAX_ANGLE_ERROR):
+            """Returns a color based on the value (white near 0, red near ±X)."""
+            abs_val = min(abs(value), max_error_angle) 
+            red_intensity = int((abs_val / max_error_angle) * 255)
+            red = 255
+            green = 255 - red_intensity
+            blue = 255 - red_intensity
+            return f"#{red:02X}{green:02X}{blue:02X}"
+
+        # Create figure
+        num_rows = len(table_data)
+        fig, ax = plt.subplots(num= target_path + " Heading Stats",figsize=(10, num_rows * 0.5 + 2))
+        ax.axis('off')  # Hide the axes
+        ax.axis('tight')
+
+        # Create table
+        table = ax.table(
+            cellText=table_data.values,
+            colLabels=table_data.columns,
+            loc='center',
+            cellLoc='center',
+            cellColours=[["white"] * len(columns_to_display) for _ in range(num_rows)]  # Default colors
+        )
+
+        # Apply color formatting to specific columns
+        color_cols = ["Heading Error Avg", "Heading Std", "Course Std"]
+        for row_idx, row in table_data.iterrows():
+            for col_idx, col in enumerate(columns_to_display):
+                if col in color_cols:
+                    cell = table[row_idx + 1, col_idx]  # Row +1 because index 0 is for headers
+                    cell.set_facecolor(get_color(row[col]))
+
+        table.auto_set_font_size(False)
+        table.set_fontsize(10)
+        table.scale(1, 1.5)  # Adjust table scaling
+
+        plt.title("Heading and Course Statistics per Line [º]")
+
+        # Show plot
+        plt.show()
+        
+        # Log success message
+        logging.info("Heading QC stats and heatmap plotted succesfully.")
+        
+    except Exception as e:
+        logging.error(f"Error plotting heading: {e}")
+        messagebox.showerror("Error", f"Error plotting heading: {e}")
+
+def processFiles(folder_path, tss1_col, tss2_col, tss3_col, output_file, silent=False, use_crp=True):
+    try:
+        if not os.path.isdir(folder_path):
+            raise ValueError("Invalid folder path.")
+        
+        # Extract the data from the PTR and Navigation files in the selected folder
+        coil1_df, coil2_df, coil3_df, crp_df = extractData(folder_path, tss1_col, tss2_col, tss3_col, use_crp)
+        
+        if coil1_df.empty or coil2_df.empty or coil3_df.empty:
+            raise ValueError("Extracted data is empty. Check input files and column names.")
+        
+        # Merge the DataFrames into a single DataFrame
+        merged_df = mergeData(coil1_df, coil2_df, coil3_df, crp_df)
+        #merged_df = reorganizeData(merged_df) # Optional: reorganize data to have one row per timestamp with all three coils' data
+        
+        # Find the absolute maximum TSS value for each coil and its corresponding position
+        coil_peaks = getCoilPeaks(merged_df)
+        logging.info("Coil peak values computed successfully.")
+        
+        # Format datetime columns to 'HH:MM:SS.SSS' for better readability in output
+        output_df = merged_df.copy()
+        if 'Time_PTR' in output_df.columns:
+            output_df['Time_PTR'] = output_df['Time_PTR'].dt.strftime('%H:%M:%S.%f').str[:-3]  # Remove last 3 digits to get milliseconds
+        if 'Time' in output_df.columns:
+            output_df['Time'] = output_df['Time'].dt.strftime('%H:%M:%S.%f').str[:-3]  # Remove last 3 digits to get milliseconds
+        
+        # Remove unwanted columns from the output file
+        for col in ['Tide', 'Kp', 'Dcc']:
+            if col in output_df.columns:
+                output_df.drop(columns=[col], inplace=True)
+
+        # Save the merged DataFrame to a new CSV file
+        output_file_path = os.path.join(folder_path, output_file)
+        output_df.to_csv(output_file_path, index=False)
+        logging.info(f"Merged data saved to {output_file_path}")
+        
+        merged_df_TSS = merged_df[['Easting', 'Northing', 'TSS']]
+        merged_df_ALT = merged_df[['Easting', 'Northing', 'Alt']]
+        merged_df_TSS.to_csv(os.path.join(folder_path, os.path.splitext(output_file)[0] + '_TSS.txt'), index=False)
+        merged_df_ALT.to_csv(os.path.join(folder_path, os.path.splitext(output_file)[0] + '_ALT.txt'), index=False)
+        
+        # Save the coil peaks to a new CSV file
+        coil_peaks_file_path = os.path.splitext(output_file)[0] + '_coil_peaks.csv'
+        coil_peaks_file_path = os.path.join(folder_path, coil_peaks_file_path)
+        
+        with open(coil_peaks_file_path, 'w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(["PTR file", "TSS peak value", "TSS coil", "Easting", "Northing"])
+            for peak in coil_peaks:
+                writer.writerow([peak.get('PTR file', ''), peak.get('TSS peak value', ''), 
+                                 peak.get('TSS coil', ''), peak.get('Easting', ''), peak.get('Northing', '')])
+        logging.info(f"Coil peaks saved to {coil_peaks_file_path}")
+        
+        # Log and show success message
+        logging.info("Files processed successfully.")
+        if not silent:
+            messagebox.showinfo("Success", "Files processed successfully")
+        
+        return merged_df
+
+    except Exception as e:
+        logging.error(f"Error processing files: {e}")
+        messagebox.showerror("Error", f"Error processing files: {e}")
+        return None
+
+CONFIG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config', 'settings.json')
+CELL_SIZE = 0.5 # Default
+
+def load_settings():
+    defaults = {
+        "folder_path": os.getcwd(),
+        "sbd_folder_path": "",
+        "tss1_col": COLUMN_COIL_1_DEFAULT,
+        "tss2_col": COLUMN_COIL_2_DEFAULT,
+        "tss3_col": COLUMN_COIL_3_DEFAULT,
+        "output_file": "TARGET_XXX_AF.txt",
+        "coil_port_suffix": COIL_PORT_SUFFIX,
+        "coil_center_suffix": COIL_CENTER_SUFFIX,
+        "coil_stbd_suffix": COIL_STBD_SUFFIX,
+        "crp_suffix": CRP_SUFFIX,
+        "cell_size": 0.5,
+        "use_crp": True
+    }
+    if os.path.exists(CONFIG_FILE):
+        try:
+            with open(CONFIG_FILE, 'r') as f:
+                settings = json.load(f)
+                defaults.update(settings)
+        except Exception as e:
+            logging.error(f"Error loading settings: {e}")
+    return defaults
+
+def save_settings():
+    settings = {
+        "folder_path": folder_entry.get(),
+        "sbd_folder_path": sbd_folder_entry.get(),
+        "tss1_col": tss1_entry.get(),
+        "tss2_col": tss2_entry.get(),
+        "tss3_col": tss3_entry.get(),
+        "output_file": output_entry.get(),
+        "coil_port_suffix": coil_port_suffix_entry.get(),
+        "coil_center_suffix": coil_center_suffix_entry.get(),
+        "coil_stbd_suffix": coil_stbd_suffix_entry.get(),
+        "crp_suffix": crp_suffix_entry.get(),
+        "cell_size": cell_size_entry.get(),
+        "use_crp": use_crp_var.get()
+    }
+    try:
+        os.makedirs(os.path.dirname(CONFIG_FILE), exist_ok=True)
+        with open(CONFIG_FILE, 'w') as f:
+            json.dump(settings, f, indent=4)
+        logging.info("Settings saved.")
+    except Exception as e:
+        logging.error(f"Error saving settings: {e}")
+
+def update_globals():
+    global COIL_PORT_SUFFIX, COIL_CENTER_SUFFIX, COIL_STBD_SUFFIX, CRP_SUFFIX, CELL_SIZE
+    COIL_PORT_SUFFIX = coil_port_suffix_entry.get()
+    COIL_CENTER_SUFFIX = coil_center_suffix_entry.get()
+    COIL_STBD_SUFFIX = coil_stbd_suffix_entry.get()
+    CRP_SUFFIX = crp_suffix_entry.get()
+    try:
+        CELL_SIZE = float(cell_size_entry.get())
+    except ValueError:
+        CELL_SIZE = 0.5 # Default fallback
+
+def select_folder():
+    folder_path = filedialog.askdirectory(title="Select a folder")
+    if folder_path:
+        folder_entry.delete(0, tk.END)
+        folder_entry.insert(0, folder_path)
+        logging.info(f"Selected folder path: {folder_path}")
+
+def select_sbd_folder():
+    folder_path = filedialog.askdirectory(title="Select SBD Input Folder")
+    if folder_path:
+        sbd_folder_entry.delete(0, tk.END)
+        sbd_folder_entry.insert(0, folder_path)
+        logging.info(f"Selected SBD folder path: {folder_path}")
+
+def run_import_script():
+    sbd_path = sbd_folder_entry.get().replace('/', '\\')
+    
+    if not sbd_path:
+        messagebox.showerror("Error", "Please select SBD Input folder.")
+        return
+
+    # Calculate NE Path
+    ne_path = ""
+    keyword = "04_NAVISCAN"
+    if keyword in sbd_path:
+        idx = sbd_path.find(keyword)
+        ne_path = sbd_path[idx:]
+        ne_path = ne_path.rstrip('\\') # Remove trailing slash to avoid XML issues
+        
+        logging.info(f"Detected NaviEdit Path: {ne_path}")
+    else:
+        # Fallback: Use the last folder name if keyword not found
+        ne_path = os.path.basename(sbd_path.rstrip('\\'))
+        logging.warning(f"Keyword '{keyword}' not found. Using folder name: {ne_path}")
+
+    # Path to the XML template
+    xml_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config', '600090_WFM_Import.xml')
+    
+    if not os.path.exists(xml_path):
+        messagebox.showerror("Error", f"WFM XML template not found at {xml_path}")
+        return
+
+    try:
+        with open(xml_path, 'r') as f:
+            xml_content = f.read()
+            
+        # Replace InputTask with SetPropertyTask for InputDirectory
+        target_input_str = 'name="Select INPUT folder (SBD files location)" output="InputDirectory" AskForInput="true" Message="Select INPUT folder (SBD files location)"/>'
+        replacement_input_str = f'name="Set Input Directory" input="{sbd_path}" output="InputDirectory" level="2"/>'
+        
+        if target_input_str in xml_content:
+            xml_content = xml_content.replace(f'<InputTask po="1" {target_input_str}', f'<SetPropertyTask po="1" {replacement_input_str}')
+        
+        # Replace NEPath property
+        # Target: <SetPropertyTask po="3" name="Define NaviEdit Destination Folder" input="{NEPath}" output="NaviEditDestFolder" level="2"/>
+        target_nepath_str = 'name="Define NaviEdit Destination Folder" input="{NEPath}" output="NaviEditDestFolder" level="2"/>'
+        replacement_nepath_str = f'name="Define NaviEdit Destination Folder" input="{ne_path}" output="NaviEditDestFolder" level="2"/>'
+        
+        if target_nepath_str in xml_content:
+            xml_content = xml_content.replace(f'<SetPropertyTask po="3" {target_nepath_str}', f'<SetPropertyTask po="3" {replacement_nepath_str}')
+
+        # Replace {NEPath} placeholder
+        if '{NEPath}' in xml_content:
+            xml_content = xml_content.replace('{NEPath}', ne_path)
+
+        # Replace relative log paths with absolute paths to ensure WFM finds them
+        logs_dir = os.path.join(os.getcwd(), "LOGS_WFM_600090_import_export")
+        if not os.path.exists(logs_dir):
+            try:
+                os.makedirs(logs_dir)
+            except Exception as e:
+                logging.warning(f"Could not create logs directory: {e}")
+
+        xml_content = xml_content.replace(r'.\LOGS_WFM_600090_import_export', logs_dir)
+
+        # Save to temp file
+        temp_xml_path = os.path.join(os.getcwd(), "temp_wfm_import.xml")
+        with open(temp_xml_path, "w") as f:
+            f.write(xml_content)
+            
+        # Run WFM
+        wfm_exe = r"C:\Eiva\WorkFlowManager\WorkflowManager.exe"
+        if not os.path.exists(wfm_exe):
+             messagebox.showerror("Error", f"Workflow Manager executable not found at {wfm_exe}")
+             return
+        
+        # Clear the log file before running to ensure we capture only new IDs
+        log_path = os.path.join(os.getcwd(), "LOGS_WFM_600090_import_export", "4_InfoLogFile_WFM_import.txt")
+        if os.path.exists(log_path):
+            try:
+                with open(log_path, 'w') as f:
+                    f.write("") # Clear file
+            except Exception as e:
+                logging.warning(f"Could not clear log file: {e}")
+
+        def run_wfm_thread():
+            try:
+                # Run WFM and wait for it to finish
+                process = subprocess.Popen([wfm_exe, "-run", temp_xml_path])
+                process.wait()
+                
+                # After finish, parse the log file for Block IDs
+                if os.path.exists(log_path):
+                    with open(log_path, 'r') as f:
+                        log_content = f.read()
+                    
+                    # Look for SBDSQLBlockID in the log
+                    # Pattern might vary, but usually WFM logs variable changes like:
+                    # "Variable 'SBDSQLBlockID' set to '123'" or similar.
+                    # Or we can look for the output of the SbdImportTask.
+                    # Let's try a regex that catches the variable assignment.
+                    # Assuming standard WFM logging for output variables.
+                    
+                    # If we can't be sure of the format, we might need to inspect a real log.
+                    # But based on typical WFM logs:
+                    # "Task: ... - Import into NaviEdit ... Output: SBDSQLBlockID = 55"
+                    
+                    # Let's try to find all numbers assigned to SBDSQLBlockID
+                    # Regex: New block id: (\d+)
+                    ids = re.findall(r"New block id: (\d+)", log_content)
+                    
+                    if not ids:
+                        # Fallback to variable assignment if the above fails
+                        ids = re.findall(r"SBDSQLBlockID.*?(\d+)", log_content)
+                    
+                    if not ids:
+                        # Try another pattern if the first one fails
+                        # Maybe it's just logged as a property change
+                        ids = re.findall(r"Property 'SBDSQLBlockID' changed to '(\d+)'", log_content)
+                    
+                    if not ids:
+                         # Fallback: Look for just the number if it's logged near the task name
+                         # This is risky. Let's stick to the variable name.
+                         pass
+
+                    if ids:
+                        # Remove duplicates and sort
+                        unique_ids = sorted(list(set(map(int, ids))))
+                        ids_str = ", ".join(map(str, unique_ids))
+                        
+                        # Update GUI in the main thread
+                        def update_gui():
+                            ne_path_entry.delete(0, tk.END)
+                            ne_path_entry.insert(0, ids_str)
+                            logging.info(f"Import finished. Found Block IDs: {ids_str}")
+                            messagebox.showinfo("Import Finished", f"Import completed.\nFound Block IDs: {ids_str}")
+                        
+                        root.after(0, update_gui)
+                    else:
+                        logging.warning("Import finished but no Block IDs found in log.")
+                        root.after(0, lambda: messagebox.showwarning("Import Finished", "Import finished but no Block IDs could be extracted from the log."))
+                else:
+                    logging.warning("Log file not found after import.")
+            except Exception as e:
+                logging.error(f"Error in WFM thread: {e}")
+
+        # Start the thread
+        threading.Thread(target=run_wfm_thread, daemon=True).start()
+        
+        # messagebox.showinfo("Info", "Import Script started. Please wait for it to finish.")
+        
+    except Exception as e:
+        messagebox.showerror("Error", f"Failed to run Import script: {e}")
+
+def run_export_script():
+    output_path = folder_entry.get().replace('/', '\\')
+    block_ids_str = ne_path_entry.get()
+    
+    if not output_path:
+        messagebox.showerror("Error", "Please select Output folder.")
+        return
+    
+    if not block_ids_str:
+        messagebox.showerror("Error", "Please enter Block IDs.")
+        return
+
+    # Parse Block IDs
+    block_ids = []
+    try:
+        parts = [p.strip() for p in block_ids_str.split(',')]
+        for part in parts:
+            if '-' in part:
+                start, end = map(int, part.split('-'))
+                block_ids.extend(range(start, end + 1))
+            else:
+                block_ids.append(int(part))
+        block_ids = sorted(list(set(block_ids))) # Remove duplicates and sort
+    except ValueError:
+        messagebox.showerror("Error", "Invalid Block ID format. Use comma separated numbers or ranges (e.g. 100-105, 107).")
+        return
+
+    if not block_ids:
+        messagebox.showerror("Error", "No valid Block IDs found.")
+        return
+
+    # Path to the XML template
+    xml_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config', '600090_WFM_Export.xml')
+    
+    if not os.path.exists(xml_path):
+        messagebox.showerror("Error", f"WFM XML template not found at {xml_path}")
+        return
+
+    try:
+        with open(xml_path, 'r') as f:
+            xml_content = f.read()
+            
+        # Replace InputTask with SetPropertyTask for OutputDirectory
+        target_output_str = 'name="Select OUTPUT folder (for PTR and Nav exports)" output="OutputDirectory" AskForInput="true" Message="Select OUTPUT folder (for PTR and Nav exports)"/>'
+        replacement_output_str = f'name="Set Output Directory" input="{output_path}" output="OutputDirectory" level="2"/>'
+        
+        if target_output_str in xml_content:
+            xml_content = xml_content.replace(f'<InputTask po="5" {target_output_str}', f'<SetPropertyTask po="5" {replacement_output_str}')
+
+        # Comment out redundant SetPropertyTask po="6"
+        target_po6 = '<SetPropertyTask po="6" name="Define output directory" input="{OutputDirectory}" output="OutputDirectory" level="2"/>'
+        if target_po6 in xml_content:
+             xml_content = xml_content.replace(target_po6, f'<!-- {target_po6} -->')
+
+        # --- DYNAMICALLY GENERATE EXPORT TASKS FOR EACH BLOCK ID ---
+        
+        # 1. Extract the template for a single block export (inside FindBlocksTask)
+        # We look for the content between <FindBlocksTask ...> and </FindBlocksTask>
+        # And specifically the <GroupTask ... name="Export {Block.name}"> part.
+        
+        start_marker = '<FindBlocksTask po="4" name="Iterate Blocks in Job" output="Block">'
+        end_marker = '</FindBlocksTask>'
+        
+        start_idx = xml_content.find(start_marker)
+        end_idx = xml_content.find(end_marker)
+        
+        if start_idx != -1 and end_idx != -1:
+            # Extract the inner content (the GroupTask)
+            # We need to find the start of the inner GroupTask
+            inner_content_start = xml_content.find('<GroupTask po="1" name="Export {Block.name}">', start_idx)
+            # The end of the inner content is before the end_marker (minus indentation/newlines)
+            # But simpler: just take the whole block and replace it with our generated list
+            
+            # Let's extract the template string for one block
+            # We assume the structure is consistent with the file we read
+            template_start = xml_content.find('<GroupTask po="1" name="Export {Block.name}">', start_idx)
+            # Find the matching closing tag for this GroupTask. 
+            # Since it's nested, we can't just search for </GroupTask>.
+            # However, we know it ends right before </FindBlocksTask>
+            template_end = end_idx 
+            
+            # Refine template_end to exclude the closing </FindBlocksTask> tag's indentation if possible, 
+            # but taking everything up to end_idx is safe enough if we strip trailing whitespace from the extracted part.
+            
+            # Actually, let's just grab the text and assume it's the last child.
+            # A safer way is to manually construct the string based on what we know is there, 
+            # OR use the file content we read.
+            
+            # Let's try to extract the exact string from the file content
+            block_template = xml_content[template_start:template_end].strip()
+            
+            # Remove the last </GroupTask> if it was captured (it should be part of the block template)
+            # Wait, the structure is:
+            # <FindBlocksTask>
+            #    <NaviEditTask>...</NaviEditTask>
+            #    <GroupTask ...> ... </GroupTask>
+            # </FindBlocksTask>
+            
+            # So we need to extract just the <GroupTask ...> ... </GroupTask> part.
+            # The <NaviEditTask> part is for FindBlocks, we don't need it for direct ID export.
+            
+            # Let's find the end of the GroupTask.
+            # It is the last </GroupTask> before </FindBlocksTask>
+            last_group_task_end = xml_content.rfind('</GroupTask>', start_idx, end_idx) + len('</GroupTask>')
+            
+            block_template = xml_content[template_start:last_group_task_end]
+            
+            # Generate the new XML block
+            generated_tasks = []
+            for i, bid in enumerate(block_ids):
+                # Create a modified copy of the template
+                task_xml = block_template
+                
+                # Replace placeholders
+                # {Block.id} -> The actual ID
+                task_xml = task_xml.replace('{Block.id}', str(bid))
+                
+                # {Block.name} -> "Block_ID" (since we don't have the name)
+                task_xml = task_xml.replace('{Block.name}', f'Block_{bid}')
+                
+                # Update the 'po' (process order) attribute of the GroupTask to be sequential
+                # The original is po="1". We can change it to i+4 to avoid conflict with previous tasks (po=1, po=2)
+                task_xml = task_xml.replace('po="1" name="Export', f'po="{i+4}" name="Export')
+                
+                generated_tasks.append(task_xml)
+            
+            # Join all generated tasks
+            new_content_block = '\n'.join(generated_tasks)
+            
+            # Replace the entire FindBlocksTask block with the new content
+            # We replace from start_marker to end_marker + len(end_marker)
+            full_match_string = xml_content[start_idx:end_idx + len(end_marker)]
+            xml_content = xml_content.replace(full_match_string, new_content_block)
+
+        # Replace relative log paths with absolute paths
+        logs_dir = os.path.join(os.getcwd(), "LOGS_WFM_600090_import_export")
+        if not os.path.exists(logs_dir):
+            try:
+                os.makedirs(logs_dir)
+            except Exception as e:
+                logging.warning(f"Could not create logs directory: {e}")
+
+        xml_content = xml_content.replace(r'.\LOGS_WFM_600090_import_export', logs_dir)
+
+        # Save to temp file
+        temp_xml_path = os.path.join(os.getcwd(), "temp_wfm_export.xml")
+        with open(temp_xml_path, "w") as f:
+            f.write(xml_content)
+            
+        # Run WFM
+        wfm_exe = r"C:\Eiva\WorkFlowManager\WorkflowManager.exe"
+        if not os.path.exists(wfm_exe):
+             messagebox.showerror("Error", f"Workflow Manager executable not found at {wfm_exe}")
+             return
+    
+        subprocess.Popen([wfm_exe, "-run", temp_xml_path])
+        # messagebox.showinfo("Info", f"Export Script started for Block IDs: {block_ids}. Please wait for it to finish.")
+        
+    except Exception as e:
+        messagebox.showerror("Error", f"Failed to run Export script: {e}")
+
+def validate_inputs(folder_path, tss1_col, tss2_col, tss3_col, output_file=None):
+    if not folder_path:
+        raise ValueError("Missing folder path. Select it using the Browse button.")
+    if not all([tss1_col, tss2_col, tss3_col]):
+        raise ValueError("TSS column values are required.")
+    if output_file is not None and not output_file.strip():
+        raise ValueError("Output file name is required.")
+
+def show_heading():
+    try:
+        update_globals()
+        save_settings()
+        folder_path = folder_entry.get()
+        tss1_col, tss2_col, tss3_col = tss1_entry.get(), tss2_entry.get(), tss3_entry.get()
+        use_crp = use_crp_var.get()
+        validate_inputs(folder_path, tss1_col, tss2_col, tss3_col)
+        plotHeading(folder_path, tss1_col, tss2_col, tss3_col, use_crp)
+    except ValueError as e:
+        logging.error(f"Error plotting heading: {e}")
+        messagebox.showerror("Error", str(e))
+
+def show_maps():
+    try:
+        update_globals()
+        save_settings()
+        folder_path = folder_entry.get()
+        tss1_col, tss2_col, tss3_col = tss1_entry.get(), tss2_entry.get(), tss3_entry.get()
+        use_crp = use_crp_var.get()
+        validate_inputs(folder_path, tss1_col, tss2_col, tss3_col)
+        plotMaps(folder_path, tss1_col, tss2_col, tss3_col, use_crp)
+    except ValueError as e:
+        logging.error(f"Error plotting maps: {e}")
+        messagebox.showerror("Error", str(e))
+    
+def show_coils():
+    try:
+        update_globals()
+        save_settings()
+        folder_path = folder_entry.get()
+        tss1_col, tss2_col, tss3_col = tss1_entry.get(), tss2_entry.get(), tss3_entry.get()
+        use_crp = use_crp_var.get()
+        validate_inputs(folder_path, tss1_col, tss2_col, tss3_col)
+        plotCoils(folder_path, tss1_col, tss2_col, tss3_col, use_crp)
+    except ValueError as e:
+        logging.error(f"Error plotting coils: {e}")
+        messagebox.showerror("Error", str(e))
+        
+def close_plots():
+    try:
+        plt.close('all')  # Close all open plots
+    except Exception as e:
+        logging.error(f"Error closing plots: {e}")
+        messagebox.showerror("Error", f"Error closing plots: {e}")
+
+def process():
+    try:
+        update_globals()
+        save_settings()
+        folder_path = folder_entry.get()
+        tss1_col, tss2_col, tss3_col = tss1_entry.get(), tss2_entry.get(), tss3_entry.get()
+        output_file = output_entry.get()
+        use_crp = use_crp_var.get()
+        validate_inputs(folder_path, tss1_col, tss2_col, tss3_col, output_file)
+        processFiles(folder_path, tss1_col, tss2_col, tss3_col, output_file, use_crp=use_crp)
+    except ValueError as e:
+        logging.error(f"Error processing files: {e}")
+        messagebox.showerror("Error", str(e))
+
+def create_heatmaps_action():
+    try:
+        update_globals()
+        save_settings()
+        folder_path = folder_entry.get()
+        tss1_col, tss2_col, tss3_col = tss1_entry.get(), tss2_entry.get(), tss3_entry.get()
+        output_file = output_entry.get()
+        use_crp = use_crp_var.get()
+        validate_inputs(folder_path, tss1_col, tss2_col, tss3_col, output_file)
+        
+        # Run processFiles silently to get the dataframe
+        merged_df = processFiles(folder_path, tss1_col, tss2_col, tss3_col, output_file, silent=True, use_crp=use_crp)
+        
+        if merged_df is not None:
+            # Generate heatmaps
+            
+            output_file_path = os.path.join(folder_path, output_file)
+            filename = os.path.basename(output_file_path)
+            
+            # TSS heatmap generation
+            required_columns = {'Easting', 'Northing', 'TSS'}
+            if required_columns.issubset(merged_df.columns):
+                heatmaps.generate_TSS_heatmap(output_file_path, filename, merged_df, 0, CELL_SIZE, COLORS_TSS, BOUNDARIES_TSS)
+                logging.info(f"Generated TSS heatmap for {filename}")
+            else:
+                logging.warning(f"Skipping TSS heatmap for {filename}: Missing required columns.")
+
+            # Altitude heatmap generation
+            required_columns = {'Easting', 'Northing', 'Alt'}
+            if required_columns.issubset(merged_df.columns):
+                heatmaps.generate_ALT_heatmap(output_file_path, filename, merged_df, 0, CELL_SIZE, COLORS_ALT, BOUNDARIES_ALT)
+                logging.info(f"Generated Altitude heatmap for {filename}")
+            else:
+                logging.warning(f"Skipping Altitude heatmap for {filename}: Missing required columns.")
+            
+            messagebox.showinfo("Success", "Files processed and heatmaps generated successfully")
+
+    except ValueError as e:
+        logging.error(f"Error creating heatmaps: {e}")
+        messagebox.showerror("Error", str(e))
+    except Exception as e:
+        logging.error(f"Unexpected error creating heatmaps: {e}")
+        messagebox.showerror("Error", f"Unexpected error: {e}")
+
+# Main program
+logging.info(f"{SCRIPT_VERSION} started.")
+
+# Create the main window
+root = tk.Tk()
+root.title(SCRIPT_VERSION)
+root.geometry("1200x700")
+
+# Load settings
+settings = load_settings()
+
+# Style configuration
+style = ttk.Style()
+style.theme_use('clam') # 'clam', 'alt', 'default', 'classic'
+
+# Define colors
+bg_color = "#f5f6f7"
+accent_color = "#0078d7"
+text_color = "#333333"
+entry_bg = "#ffffff"
+
+root.configure(bg=bg_color)
+
+style.configure(".", background=bg_color, foreground=text_color, font=("Segoe UI", 10))
+style.configure("TLabel", background=bg_color, foreground=text_color)
+style.configure("TButton", font=("Segoe UI", 10, "bold"))
+style.configure("TEntry", fieldbackground=entry_bg)
+style.configure("TLabelframe", background=bg_color, foreground=accent_color)
+style.configure("TLabelframe.Label", background=bg_color, foreground=accent_color, font=("Segoe UI", 11, "bold"))
+style.configure("TCheckbutton", background=bg_color)
+
+# Main container
+main_frame = ttk.Frame(root, padding="10", style="TFrame")
+main_frame.pack(fill=tk.BOTH, expand=True)
+
+# --- Left Frame: Settings ---
+left_frame = ttk.LabelFrame(main_frame, text="Settings", padding="10")
+left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5, pady=5)
+
+# SBD Folder Selection (New)
+ttk.Label(left_frame, text="Select SBD Input Folder:").grid(row=0, column=0, sticky=tk.W, pady=(5, 2))
+sbd_folder_entry = ttk.Entry(left_frame)
+sbd_folder_entry.grid(row=1, column=0, sticky="ew", padx=(0, 5), pady=2)
+sbd_folder_entry.insert(0, settings.get("sbd_folder_path", ""))
+ttk.Button(left_frame, text="Browse", command=select_sbd_folder).grid(row=1, column=1, sticky="e", pady=2)
+
+# Run Import Button
+ttk.Button(left_frame, text="Run Import Script", command=run_import_script).grid(row=2, column=0, columnspan=2, sticky="ew", pady=(0, 10))
+
+# NaviEdit Path Entry (New)
+ttk.Label(left_frame, text="Block IDs (e.g. 100-105, 107):").grid(row=3, column=0, sticky=tk.W, pady=(5, 2))
+ne_path_entry = ttk.Entry(left_frame)
+ne_path_entry.grid(row=4, column=0, columnspan=2, sticky="ew", padx=(0, 5), pady=2)
+ne_path_entry.insert(0, settings.get("ne_path", ""))
+
+# Folder Selection (Existing - shifted down)
+ttk.Label(left_frame, text="Select Processed Data Folder:").grid(row=5, column=0, sticky=tk.W, pady=(5, 2))
+folder_entry = ttk.Entry(left_frame)
+folder_entry.grid(row=6, column=0, sticky="ew", padx=(0, 5), pady=2)
+folder_entry.insert(0, settings["folder_path"])
+ttk.Button(left_frame, text="Browse", command=select_folder).grid(row=6, column=1, sticky="e", pady=2)
+left_frame.columnconfigure(0, weight=1) # Make entry expand
+
+# Run Export Button
+ttk.Button(left_frame, text="Run Export Script", command=run_export_script).grid(row=7, column=0, columnspan=2, sticky="ew", pady=(0, 10))
+
+# Column Settings
+ttk.Label(left_frame, text="Coil 1 (Starboard) Column:").grid(row=8, column=0, sticky=tk.W, pady=2)
+tss1_entry = ttk.Entry(left_frame, width=10)
+tss1_entry.grid(row=8, column=1, sticky=tk.W, pady=2)
+tss1_entry.insert(0, settings["tss1_col"])
+
+ttk.Label(left_frame, text="Coil 2 (Center) Column:").grid(row=9, column=0, sticky=tk.W, pady=2)
+tss2_entry = ttk.Entry(left_frame, width=10)
+tss2_entry.grid(row=9, column=1, sticky=tk.W, pady=2)
+tss2_entry.insert(0, settings["tss2_col"])
+
+ttk.Label(left_frame, text="Coil 3 (Port) Column:").grid(row=10, column=0, sticky=tk.W, pady=2)
+tss3_entry = ttk.Entry(left_frame, width=10)
+tss3_entry.grid(row=10, column=1, sticky=tk.W, pady=2)
+tss3_entry.insert(0, settings["tss3_col"])
+
+# Suffix Settings
+ttk.Separator(left_frame, orient='horizontal').grid(row=11, column=0, columnspan=2, sticky="ew", pady=10)
+ttk.Label(left_frame, text="File Suffixes:").grid(row=12, column=0, sticky=tk.W, pady=2)
+
+ttk.Label(left_frame, text="Coil Port Suffix:").grid(row=13, column=0, sticky=tk.W, pady=2)
+coil_port_suffix_entry = ttk.Entry(left_frame, width=20)
+coil_port_suffix_entry.grid(row=13, column=1, sticky=tk.W, pady=2)
+coil_port_suffix_entry.insert(0, settings["coil_port_suffix"])
+
+ttk.Label(left_frame, text="Coil Center Suffix:").grid(row=14, column=0, sticky=tk.W, pady=2)
+coil_center_suffix_entry = ttk.Entry(left_frame, width=20)
+coil_center_suffix_entry.grid(row=14, column=1, sticky=tk.W, pady=2)
+coil_center_suffix_entry.insert(0, settings["coil_center_suffix"])
+
+ttk.Label(left_frame, text="Coil Stbd Suffix:").grid(row=15, column=0, sticky=tk.W, pady=2)
+coil_stbd_suffix_entry = ttk.Entry(left_frame, width=20)
+coil_stbd_suffix_entry.grid(row=15, column=1, sticky=tk.W, pady=2)
+coil_stbd_suffix_entry.insert(0, settings["coil_stbd_suffix"])
+
+ttk.Label(left_frame, text="CRP Suffix:").grid(row=16, column=0, sticky=tk.W, pady=2)
+crp_suffix_entry = ttk.Entry(left_frame, width=20)
+crp_suffix_entry.grid(row=16, column=1, sticky=tk.W, pady=2)
+crp_suffix_entry.insert(0, settings["crp_suffix"])
+
+# CRP Checkbox
+use_crp_var = tk.BooleanVar(value=settings.get("use_crp", True))
+ttk.Checkbutton(left_frame, text="Include CRP Navigation", variable=use_crp_var).grid(row=17, column=0, columnspan=2, sticky=tk.W, pady=5)
+
+# Output Settings
+ttk.Separator(left_frame, orient='horizontal').grid(row=18, column=0, columnspan=2, sticky="ew", pady=10)
+ttk.Label(left_frame, text="Output File Name:").grid(row=19, column=0, sticky=tk.W, pady=2)
+output_entry = ttk.Entry(left_frame, width=40)
+output_entry.grid(row=20, column=0, columnspan=2, sticky="ew", pady=2)
+output_entry.insert(0, settings["output_file"])
+
+ttk.Label(left_frame, text="Heatmap Cell Size (m):").grid(row=21, column=0, sticky=tk.W, pady=2)
+cell_size_entry = ttk.Entry(left_frame, width=10)
+cell_size_entry.grid(row=21, column=1, sticky=tk.W, pady=2)
+cell_size_entry.insert(0, settings["cell_size"])
+
+
+# --- Middle Frame: QC Tools ---
+middle_frame = ttk.LabelFrame(main_frame, text="QC Tools", padding="10")
+middle_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5, pady=5)
+
+ttk.Button(middle_frame, text="Heading QC", command=show_heading).pack(fill=tk.X, pady=5)
+ttk.Button(middle_frame, text="Show Map", command=show_maps).pack(fill=tk.X, pady=5)
+ttk.Button(middle_frame, text="Show Coils", command=show_coils).pack(fill=tk.X, pady=5)
+ttk.Separator(middle_frame, orient='horizontal').pack(fill=tk.X, pady=10)
+ttk.Button(middle_frame, text="Close Plots", command=close_plots).pack(fill=tk.X, pady=5)
+
+
+# --- Right Frame: Creation ---
+right_frame = ttk.LabelFrame(main_frame, text="Creation", padding="10")
+right_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5, pady=5)
+
+ttk.Button(right_frame, text="Process Files", command=process).pack(fill=tk.X, pady=5)
+ttk.Separator(right_frame, orient='horizontal').pack(fill=tk.X, pady=10)
+ttk.Button(right_frame, text="Create Heatmaps", command=create_heatmaps_action).pack(fill=tk.X, pady=5)
+
+logging.info("Graphic User Interface created. Main loop started.")
+
+# Run the main loop
+root.mainloop()

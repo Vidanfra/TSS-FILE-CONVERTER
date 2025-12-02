@@ -1,4 +1,4 @@
-import get_files as fileHandler
+import LEGACY.get_files as fileHandler
 import generate_heatmap as heatmaps
 import pandas as pd
 from datetime import datetime
