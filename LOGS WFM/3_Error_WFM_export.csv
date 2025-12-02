@@ -1,0 +1,2 @@
+Data;Time;TaskName;Logging Level;Message;Exception; 2025.12.02;04.36.17;[ExportAsciiTask];ERROR;No runline found.;;
+2025.12.02;04.36.17;[ExportAsciiTask];ERROR;Should the export continue with possible invalid KPs?;;

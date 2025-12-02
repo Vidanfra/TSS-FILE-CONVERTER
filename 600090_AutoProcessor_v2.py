@@ -1122,17 +1122,23 @@ def run_import_script():
             xml_content = xml_content.replace('{NEPath}', ne_path)
 
         # Replace relative log paths with absolute paths to ensure WFM finds them
-        logs_dir = os.path.join(os.getcwd(), "LOGS_WFM_600090_import_export")
+        logs_dir = os.path.join(os.getcwd(), "LOGS WFM")
+        temp_dir = os.path.join(logs_dir, "temp")
         if not os.path.exists(logs_dir):
             try:
                 os.makedirs(logs_dir)
             except Exception as e:
                 logging.warning(f"Could not create logs directory: {e}")
+        if not os.path.exists(temp_dir):
+            try:
+                os.makedirs(temp_dir)
+            except Exception as e:
+                logging.warning(f"Could not create temp directory: {e}")
 
         xml_content = xml_content.replace(r'.\LOGS_WFM_600090_import_export', logs_dir)
 
-        # Save to temp file
-        temp_xml_path = os.path.join(os.getcwd(), "temp_wfm_import.xml")
+        # Save to temp file in the temp subfolder
+        temp_xml_path = os.path.join(temp_dir, "temp_wfm_import.xml")
         with open(temp_xml_path, "w") as f:
             f.write(xml_content)
             
@@ -1143,7 +1149,7 @@ def run_import_script():
              return
         
         # Clear the log file before running to ensure we capture only new IDs
-        log_path = os.path.join(os.getcwd(), "LOGS_WFM_600090_import_export", "4_InfoLogFile_WFM_import.txt")
+        log_path = os.path.join(logs_dir, "4_InfoLogFile_WFM_import.txt")
         if os.path.exists(log_path):
             try:
                 with open(log_path, 'w') as f:
@@ -1355,17 +1361,23 @@ def run_export_script():
             xml_content = xml_content.replace(full_match_string, new_content_block)
 
         # Replace relative log paths with absolute paths
-        logs_dir = os.path.join(os.getcwd(), "LOGS_WFM_600090_import_export")
+        logs_dir = os.path.join(os.getcwd(), "LOGS WFM")
+        temp_dir = os.path.join(logs_dir, "temp")
         if not os.path.exists(logs_dir):
             try:
                 os.makedirs(logs_dir)
             except Exception as e:
                 logging.warning(f"Could not create logs directory: {e}")
+        if not os.path.exists(temp_dir):
+            try:
+                os.makedirs(temp_dir)
+            except Exception as e:
+                logging.warning(f"Could not create temp directory: {e}")
 
         xml_content = xml_content.replace(r'.\LOGS_WFM_600090_import_export', logs_dir)
 
-        # Save to temp file
-        temp_xml_path = os.path.join(os.getcwd(), "temp_wfm_export.xml")
+        # Save to temp file in the temp subfolder
+        temp_xml_path = os.path.join(temp_dir, "temp_wfm_export.xml")
         with open(temp_xml_path, "w") as f:
             f.write(xml_content)
             
