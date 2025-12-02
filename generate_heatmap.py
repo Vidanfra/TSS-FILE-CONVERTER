@@ -70,21 +70,32 @@ def generate_TSS_heatmap(output_folder, filename, df, class_id, cell_size, color
     
     # Define grid based on cell_size
     margin = cell_size
-    west = min(easting) - margin
-    north = max(northing) + margin
     
-    # Calculate dimensions based on data extent and cell size
-    width_m = (max(easting) + margin) - west
-    height_m = north - (min(northing) - margin)
+    # Snap grid boundaries to cell_size multiples to ensure consistent alignment
+    # regardless of data extent. This prevents color shifts when comparing
+    # heatmaps from lines with different lengths.
+    west = np.floor((min(easting) - margin) / cell_size) * cell_size
+    north = np.ceil((max(northing) + margin) / cell_size) * cell_size
+    east = np.ceil((max(easting) + margin) / cell_size) * cell_size
+    south = np.floor((min(northing) - margin) / cell_size) * cell_size
     
-    nx = int(np.ceil(width_m / cell_size))
-    ny = int(np.ceil(height_m / cell_size))
+    # Calculate grid dimensions
+    nx = int(round((east - west) / cell_size))
+    ny = int(round((north - south) / cell_size))
     
-    # Generate coordinates for pixel centers
+    # Generate coordinates for pixel centers using arange for exact spacing
     # X: Left to Right
-    x_coords = np.linspace(west + cell_size/2, west + cell_size/2 + (nx-1)*cell_size, nx)
-    # Y: Top to Bottom (North to South)
-    y_coords = np.linspace(north - cell_size/2, north - cell_size/2 - (ny-1)*cell_size, ny)
+    x_coords = np.arange(west + cell_size/2, east, cell_size)
+    # Y: Top to Bottom (North to South) - must be descending for image coordinates
+    y_coords = np.arange(north - cell_size/2, south, -cell_size)
+    
+    # Ensure we have the expected number of coordinates
+    nx = len(x_coords)
+    ny = len(y_coords)
+    
+    # Calculate actual grid extent
+    east_grid = west + nx * cell_size
+    south_grid = north - ny * cell_size
     
     grid_x, grid_y = np.meshgrid(x_coords, y_coords)
 
@@ -124,43 +135,40 @@ def generate_TSS_heatmap(output_folder, filename, df, class_id, cell_size, color
     # Ensure square figure for YOLO (640x640)
     fig, ax = plt.subplots(figsize=(6.4, 6.4), dpi=100)  # 640x640 pixels
 
-    # Calculate actual extent of the grid for plotting
-    east_grid = west + nx * cell_size
-    south_grid = north - ny * cell_size
-
     # Plot heatmap
     # grid_z_masked is (Y, X) from meshgrid, so no transpose needed
-    ax.imshow(grid_z_masked, extent=(west, east_grid, south_grid, north), cmap=cmap_faded, norm=norm_faded)
+    # Use interpolation='nearest' to prevent blurry output when grid resolution differs from image size
+    ax.imshow(grid_z_masked, extent=(west, east_grid, south_grid, north), cmap=cmap_faded, norm=norm_faded, interpolation='nearest')
     ax.axis('off')
 
     # Ensure the directory exists in the user-specified output folder
     if os.path.isfile(output_folder):
         output_folder = os.path.dirname(output_folder)
 
-    images_dir = os.path.join(output_folder, "heatmaps", "geotiffs")
-    #labels_dir = os.path.join(output_folder, "heatmaps", "labels")
+    rgb_geotiffs_dir = os.path.join(output_folder, "heatmaps", "RGBgeotiffs")
+    float32_geotiffs_dir = os.path.join(output_folder, "heatmaps", "32bitgeotiffs")
     peaks_dir = os.path.join(output_folder, "heatmaps", "pngs")
     
-    os.makedirs(images_dir, exist_ok=True)
-    #os.makedirs(labels_dir, exist_ok=True)
+    os.makedirs(rgb_geotiffs_dir, exist_ok=True)
+    os.makedirs(float32_geotiffs_dir, exist_ok=True)
     os.makedirs(peaks_dir, exist_ok=True)
     
-    tif_name = os.path.join(images_dir, filename.removesuffix(".txt") + "_TSS.tif")
-    #txt_name = os.path.join(labels_dir, filename)
+    rgb_tif_name = os.path.join(rgb_geotiffs_dir, filename.removesuffix(".txt") + "_TSS.tif")
+    float32_tif_name = os.path.join(float32_geotiffs_dir, filename.removesuffix(".txt") + "_TSS.tif")
     peaks_name = os.path.join(peaks_dir, filename.removesuffix(".txt") + "_TSS.png")
     
-    # Save GeoTIFF
+    # Save GeoTIFFs
     # Data is already (Y, X) from meshgrid
     data_grid = grid_z_masked
     
     transform = from_origin(west, north, cell_size, cell_size)
     
-    # Convert to RGBA
+    # Save RGB GeoTIFF (RGBA uint8)
     rgba = cmap_faded(norm_faded(data_grid))
     rgba_uint8 = (rgba * 255).astype(np.uint8)
     
     with rasterio.open(
-        tif_name,
+        rgb_tif_name,
         'w',
         driver='GTiff',
         height=data_grid.shape[0],
@@ -171,6 +179,26 @@ def generate_TSS_heatmap(output_folder, filename, df, class_id, cell_size, color
         transform=transform,
     ) as dst:
         dst.write(np.moveaxis(rgba_uint8, 2, 0))
+    
+    # Save 32-bit float GeoTIFF (actual TSS values)
+    # Replace NaN with nodata value for proper GeoTIFF handling
+    data_grid_float32 = data_grid.astype(np.float32)
+    nodata_value = -9999.0
+    data_grid_float32 = np.where(np.isnan(data_grid_float32), nodata_value, data_grid_float32)
+    
+    with rasterio.open(
+        float32_tif_name,
+        'w',
+        driver='GTiff',
+        height=data_grid.shape[0],
+        width=data_grid.shape[1],
+        count=1,
+        dtype='float32',
+        crs=None,
+        transform=transform,
+        nodata=nodata_value,
+    ) as dst:
+        dst.write(data_grid_float32, 1)
     
     # Compute bounding box for the peak
     min_x, max_x = min(easting), max(easting)
@@ -246,21 +274,32 @@ def generate_ALT_heatmap(output_folder, filename, df, class_id, cell_size, color
     
     # Define grid based on cell_size
     margin = cell_size
-    west = min(easting) - margin
-    north = max(northing) + margin
     
-    # Calculate dimensions based on data extent and cell size
-    width_m = (max(easting) + margin) - west
-    height_m = north - (min(northing) - margin)
+    # Snap grid boundaries to cell_size multiples to ensure consistent alignment
+    # regardless of data extent. This prevents color shifts when comparing
+    # heatmaps from lines with different lengths.
+    west = np.floor((min(easting) - margin) / cell_size) * cell_size
+    north = np.ceil((max(northing) + margin) / cell_size) * cell_size
+    east = np.ceil((max(easting) + margin) / cell_size) * cell_size
+    south = np.floor((min(northing) - margin) / cell_size) * cell_size
     
-    nx = int(np.ceil(width_m / cell_size))
-    ny = int(np.ceil(height_m / cell_size))
+    # Calculate grid dimensions
+    nx = int(round((east - west) / cell_size))
+    ny = int(round((north - south) / cell_size))
     
-    # Generate coordinates for pixel centers
+    # Generate coordinates for pixel centers using arange for exact spacing
     # X: Left to Right
-    x_coords = np.linspace(west + cell_size/2, west + cell_size/2 + (nx-1)*cell_size, nx)
-    # Y: Top to Bottom (North to South)
-    y_coords = np.linspace(north - cell_size/2, north - cell_size/2 - (ny-1)*cell_size, ny)
+    x_coords = np.arange(west + cell_size/2, east, cell_size)
+    # Y: Top to Bottom (North to South) - must be descending for image coordinates
+    y_coords = np.arange(north - cell_size/2, south, -cell_size)
+    
+    # Ensure we have the expected number of coordinates
+    nx = len(x_coords)
+    ny = len(y_coords)
+    
+    # Calculate actual grid extent
+    east_grid = west + nx * cell_size
+    south_grid = north - ny * cell_size
     
     grid_x, grid_y = np.meshgrid(x_coords, y_coords)
 
@@ -300,43 +339,40 @@ def generate_ALT_heatmap(output_folder, filename, df, class_id, cell_size, color
     # Ensure square figure for YOLO (640x640)
     fig, ax = plt.subplots(figsize=(6.4, 6.4), dpi=100)  # 640x640 pixels
 
-    # Calculate actual extent of the grid for plotting
-    east_grid = west + nx * cell_size
-    south_grid = north - ny * cell_size
-
     # Plot heatmap
     # grid_z_masked is (Y, X) from meshgrid, so no transpose needed
-    ax.imshow(grid_z_masked, extent=(west, east_grid, south_grid, north), cmap=cmap_faded, norm=norm_faded)
+    # Use interpolation='nearest' to prevent blurry output when grid resolution differs from image size
+    ax.imshow(grid_z_masked, extent=(west, east_grid, south_grid, north), cmap=cmap_faded, norm=norm_faded, interpolation='nearest')
     ax.axis('off')
 
     # Ensure the directory exists in the user-specified output folder
     if os.path.isfile(output_folder):
         output_folder = os.path.dirname(output_folder)
 
-    images_dir = os.path.join(output_folder, "heatmaps", "geotiffs")
-    #labels_dir = os.path.join(output_folder, "heatmaps", "labels")
+    rgb_geotiffs_dir = os.path.join(output_folder, "heatmaps", "RGBgeotiffs")
+    float32_geotiffs_dir = os.path.join(output_folder, "heatmaps", "32bitgeotiffs")
     peaks_dir = os.path.join(output_folder, "heatmaps", "pngs")
     
-    os.makedirs(images_dir, exist_ok=True)
-    #os.makedirs(labels_dir, exist_ok=True)
+    os.makedirs(rgb_geotiffs_dir, exist_ok=True)
+    os.makedirs(float32_geotiffs_dir, exist_ok=True)
     os.makedirs(peaks_dir, exist_ok=True)
     
-    tif_name = os.path.join(images_dir, filename.removesuffix(".txt") + "_ALT.tif")
-    #txt_name = os.path.join(labels_dir, filename)
+    rgb_tif_name = os.path.join(rgb_geotiffs_dir, filename.removesuffix(".txt") + "_ALT.tif")
+    float32_tif_name = os.path.join(float32_geotiffs_dir, filename.removesuffix(".txt") + "_ALT.tif")
     peaks_name = os.path.join(peaks_dir, filename.removesuffix(".txt") + "_ALT.png")
     
-    # Save GeoTIFF
+    # Save GeoTIFFs
     # Data is already (Y, X) from meshgrid
     data_grid = grid_z_masked
     
     transform = from_origin(west, north, cell_size, cell_size)
     
-    # Convert to RGBA
+    # Save RGB GeoTIFF (RGBA uint8)
     rgba = cmap_faded(norm_faded(data_grid))
     rgba_uint8 = (rgba * 255).astype(np.uint8)
     
     with rasterio.open(
-        tif_name,
+        rgb_tif_name,
         'w',
         driver='GTiff',
         height=data_grid.shape[0],
@@ -347,6 +383,26 @@ def generate_ALT_heatmap(output_folder, filename, df, class_id, cell_size, color
         transform=transform,
     ) as dst:
         dst.write(np.moveaxis(rgba_uint8, 2, 0))
+    
+    # Save 32-bit float GeoTIFF (actual Alt values)
+    # Replace NaN with nodata value for proper GeoTIFF handling
+    data_grid_float32 = data_grid.astype(np.float32)
+    nodata_value = -9999.0
+    data_grid_float32 = np.where(np.isnan(data_grid_float32), nodata_value, data_grid_float32)
+    
+    with rasterio.open(
+        float32_tif_name,
+        'w',
+        driver='GTiff',
+        height=data_grid.shape[0],
+        width=data_grid.shape[1],
+        count=1,
+        dtype='float32',
+        crs=None,
+        transform=transform,
+        nodata=nodata_value,
+    ) as dst:
+        dst.write(data_grid_float32, 1)
     
     # Compute bounding box for the peak
     min_x, max_x = min(easting), max(easting)
