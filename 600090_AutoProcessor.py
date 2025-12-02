@@ -48,6 +48,14 @@ COIL_CENTER_SUFFIX = "_Coil_center.csv"    # Center coil
 COIL_STBD_SUFFIX = "_Coil_stbd.csv"      # Starboard coil (NaviEdit convention: Coil 3 = STARBOARD)
 CRP_SUFFIX = "_CRP.csv"               # ROV CRP navigation
 
+# Color map and boundaries for TSS heatmaps
+COLORS_TSS = ['blue', 'dodgerblue', 'green', 'lime', 'yellow', 'orange', 'red', 'purple', 'pink']
+BOUNDARIES_TSS = [-500, -100, -25, 25, 50, 75, 150, 500, 5000, 10000]
+
+# Color map and boundaries for Alt heatmaps
+COLORS_ALT = ['black', 'darkblue', 'green', 'limegreen','lime', 'yellow', 'orange', 'red','magenta']
+BOUNDARIES_ALT = [-0.5, -0.25, 0, 0.25, 0.5, 0.75, 1.0, 1.5, 2.0, 2.5]  
+
 def convert_to_datetime(time_str, format_str='%H%M%S%f'):
     try:
         return datetime.strptime(str(time_str), format_str)
@@ -547,9 +555,9 @@ def mergeData(merged_coil1_df, merged_coil2_df, merged_coil3_df, merged_crp_df):
     else:
         min_length = min(len(merged_coil1_df), len(merged_coil2_df), len(merged_coil3_df))
 
-    merged_coil1_df = merged_coil1_df.iloc[:min_length]
-    merged_coil2_df = merged_coil2_df.iloc[:min_length]
-    merged_coil3_df = merged_coil3_df.iloc[:min_length]
+    merged_coil1_df = merged_coil1_df.iloc[:min_length].copy()
+    merged_coil2_df = merged_coil2_df.iloc[:min_length].copy()
+    merged_coil3_df = merged_coil3_df.iloc[:min_length].copy()
 
     # Add CRP columns to each coil dataframe before interleaving
     if has_crp_data:
@@ -678,14 +686,14 @@ def plotMaps(folder_path, tss1_col, tss2_col, tss3_col, use_crp=True):
         target_path = get_target_path(folder_path)
 
         # Create a custom TSS colormap
-        cmap_tss = mcolors.ListedColormap(['blue', 'green', 'lime', 'yellow', 'red', 'purple'])
-        bounds_tss = [-500, -25, 25, 50, 75, 500, 10000]
+        cmap_tss = mcolors.ListedColormap(COLORS_TSS)
+        bounds_tss = BOUNDARIES_TSS
         norm_tss = mcolors.BoundaryNorm(bounds_tss, cmap_tss.N)
 
         # Create scatter plots for TSS values
         plt.figure(num= target_path + " Magnetic", figsize=(7, 6))
         scatter = plt.scatter(merged_df['Easting'], merged_df['Northing'], c=merged_df['TSS'], cmap=cmap_tss, norm=norm_tss, marker='o')
-        plt.colorbar(scatter, label="TSS [uV]", boundaries=bounds_tss, ticks=[-500, -25, 0, 25, 50, 75, 500, 10000])
+        plt.colorbar(scatter, label="TSS [uV]", boundaries=bounds_tss, ticks=bounds_tss)
         plt.xlabel("Easting [m]")
         plt.ylabel("Northing [m]")
         plt.suptitle(f"Heatmap of TSS Magnetic Values")
@@ -694,14 +702,14 @@ def plotMaps(folder_path, tss1_col, tss2_col, tss3_col, use_crp=True):
         plt.grid(True)
 
         # Create a custom Altitude colormap
-        cmap_alt = mcolors.ListedColormap(['lime','pink','magenta', 'purple', 'blue', 'dodgerblue', 'gold', 'orange', 'red'])
-        bounds_alt = [-1, -0.5, -0.25, -0.1, 0, 0.25, 0.5, 0.75, 1]
+        cmap_alt = mcolors.ListedColormap(COLORS_ALT)
+        bounds_alt = BOUNDARIES_ALT
         norm_alt = mcolors.BoundaryNorm(bounds_alt, cmap_alt.N)
 
         # Create scatter plots for flying altitude
         plt.figure(num=target_path + " Altitude", figsize=(7, 6))
         scatter = plt.scatter(merged_df['Easting'], merged_df['Northing'], c=merged_df['Alt'], cmap=cmap_alt, norm=norm_alt, marker='o')
-        plt.colorbar(scatter, label="Altitude [m]", boundaries=bounds_alt, ticks=[-1, -0.5, -0.25, -0.1, 0, 0.25, 0.5, 0.75, 1])
+        plt.colorbar(scatter, label="Altitude [m]", boundaries=bounds_alt, ticks=bounds_alt)
         plt.xlabel("Easting [m]")
         plt.ylabel("Northing [m]")
         plt.suptitle(f'Heatmap of TSS Flying Altitude')
@@ -948,6 +956,11 @@ def processFiles(folder_path, tss1_col, tss2_col, tss3_col, output_file, silent=
         if 'Time' in output_df.columns:
             output_df['Time'] = output_df['Time'].dt.strftime('%H:%M:%S.%f').str[:-3]  # Remove last 3 digits to get milliseconds
         
+        # Remove unwanted columns from the output file
+        for col in ['Tide', 'Kp', 'Dcc']:
+            if col in output_df.columns:
+                output_df.drop(columns=[col], inplace=True)
+
         # Save the merged DataFrame to a new CSV file
         output_file_path = os.path.join(folder_path, output_file)
         output_df.to_csv(output_file_path, index=False)
@@ -1451,13 +1464,6 @@ def create_heatmaps_action():
         
         if merged_df is not None:
             # Generate heatmaps
-            # Color map and boundaries for TSS heatmaps
-            colorsTSS = ['blue', 'dodgerblue', 'green', 'lime', 'yellow', 'orange', 'red', 'purple', 'pink']
-            boundariesTSS = [-500, -100, -25, 25, 50, 75, 150, 500, 5000, 10000]  
-
-            # Color map and boundaries for Alt heatmaps
-            colorsALT = ['black', 'darkblue', 'green', 'lime', 'yellow', 'orange', 'red']
-            boundariesALT = [-0.5, -0.25, 0, 0.25, 0.5, 0.75, 1.0, 2.0]  
             
             output_file_path = os.path.join(folder_path, output_file)
             filename = os.path.basename(output_file_path)
@@ -1465,7 +1471,7 @@ def create_heatmaps_action():
             # TSS heatmap generation
             required_columns = {'Easting', 'Northing', 'TSS'}
             if required_columns.issubset(merged_df.columns):
-                heatmaps.generate_TSS_heatmap(output_file_path, filename, merged_df, 0, CELL_SIZE, colorsTSS, boundariesTSS)
+                heatmaps.generate_TSS_heatmap(output_file_path, filename, merged_df, 0, CELL_SIZE, COLORS_TSS, BOUNDARIES_TSS)
                 logging.info(f"Generated TSS heatmap for {filename}")
             else:
                 logging.warning(f"Skipping TSS heatmap for {filename}: Missing required columns.")
@@ -1473,7 +1479,7 @@ def create_heatmaps_action():
             # Altitude heatmap generation
             required_columns = {'Easting', 'Northing', 'Alt'}
             if required_columns.issubset(merged_df.columns):
-                heatmaps.generate_ALT_heatmap(output_file_path, filename, merged_df, 0, CELL_SIZE, colorsALT, boundariesALT)
+                heatmaps.generate_ALT_heatmap(output_file_path, filename, merged_df, 0, CELL_SIZE, COLORS_ALT, BOUNDARIES_ALT)
                 logging.info(f"Generated Altitude heatmap for {filename}")
             else:
                 logging.warning(f"Skipping Altitude heatmap for {filename}: Missing required columns.")
