@@ -1125,7 +1125,6 @@ def load_settings():
 def save_settings():
     settings = {
         "folder_path": folder_entry.get(),
-        "sbd_folder_path": sbd_folder_entry.get(),
         "tss1_col": tss1_entry.get(),
         "tss2_col": tss2_entry.get(),
         "tss3_col": tss3_entry.get(),
@@ -1343,169 +1342,6 @@ def select_folder():
         folder_entry.delete(0, tk.END)
         folder_entry.insert(0, folder_path)
         logging.info(f"Selected folder path: {folder_path}")
-
-def select_sbd_folder():
-    folder_path = filedialog.askdirectory(title="Select SBD Input Folder")
-    if folder_path:
-        sbd_folder_entry.delete(0, tk.END)
-        sbd_folder_entry.insert(0, folder_path)
-        logging.info(f"Selected SBD folder path: {folder_path}")
-
-def run_import_script():
-    sbd_path = sbd_folder_entry.get().replace('/', '\\')
-    
-    if not sbd_path:
-        messagebox.showerror("Error", "Please select SBD Input folder.")
-        return
-
-    # Calculate NE Path
-    ne_path = ""
-    keyword = "04_NAVISCAN"
-    if keyword in sbd_path:
-        idx = sbd_path.find(keyword)
-        ne_path = sbd_path[idx:]
-        ne_path = ne_path.rstrip('\\') # Remove trailing slash to avoid XML issues
-        
-        logging.info(f"Detected NaviEdit Path: {ne_path}")
-    else:
-        # Fallback: Use the last folder name if keyword not found
-        ne_path = os.path.basename(sbd_path.rstrip('\\'))
-        logging.warning(f"Keyword '{keyword}' not found. Using folder name: {ne_path}")
-
-    # Path to the XML template
-    xml_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config', '600090_WFM_Import.xml')
-    
-    if not os.path.exists(xml_path):
-        messagebox.showerror("Error", f"WFM XML template not found at {xml_path}")
-        return
-
-    try:
-        with open(xml_path, 'r') as f:
-            xml_content = f.read()
-            
-        # Replace InputTask with SetPropertyTask for InputDirectory
-        target_input_str = 'name="Select INPUT folder (SBD files location)" output="InputDirectory" AskForInput="true" Message="Select INPUT folder (SBD files location)"/>'
-        replacement_input_str = f'name="Set Input Directory" input="{sbd_path}" output="InputDirectory" level="2"/>'
-        
-        if target_input_str in xml_content:
-            xml_content = xml_content.replace(f'<InputTask po="1" {target_input_str}', f'<SetPropertyTask po="1" {replacement_input_str}')
-        
-        # Replace NEPath property
-        # Target: <SetPropertyTask po="3" name="Define NaviEdit Destination Folder" input="{NEPath}" output="NaviEditDestFolder" level="2"/>
-        target_nepath_str = 'name="Define NaviEdit Destination Folder" input="{NEPath}" output="NaviEditDestFolder" level="2"/>'
-        replacement_nepath_str = f'name="Define NaviEdit Destination Folder" input="{ne_path}" output="NaviEditDestFolder" level="2"/>'
-        
-        if target_nepath_str in xml_content:
-            xml_content = xml_content.replace(f'<SetPropertyTask po="3" {target_nepath_str}', f'<SetPropertyTask po="3" {replacement_nepath_str}')
-
-        # Replace {NEPath} placeholder
-        if '{NEPath}' in xml_content:
-            xml_content = xml_content.replace('{NEPath}', ne_path)
-
-        # Replace relative log paths with absolute paths to ensure WFM finds them
-        logs_dir = os.path.join(os.getcwd(), "LOGS WFM")
-        temp_dir = os.path.join(logs_dir, "temp")
-        if not os.path.exists(logs_dir):
-            try:
-                os.makedirs(logs_dir)
-            except Exception as e:
-                logging.warning(f"Could not create logs directory: {e}")
-        if not os.path.exists(temp_dir):
-            try:
-                os.makedirs(temp_dir)
-            except Exception as e:
-                logging.warning(f"Could not create temp directory: {e}")
-
-        xml_content = xml_content.replace(r'.\LOGS_WFM_600090_import_export', logs_dir)
-
-        # Save to temp file in the temp subfolder
-        temp_xml_path = os.path.join(temp_dir, "temp_wfm_import.xml")
-        with open(temp_xml_path, "w") as f:
-            f.write(xml_content)
-            
-        # Run WFM
-        wfm_exe = r"C:\Eiva\WorkFlowManager\WorkflowManager.exe"
-        if not os.path.exists(wfm_exe):
-             messagebox.showerror("Error", f"Workflow Manager executable not found at {wfm_exe}")
-             return
-        
-        # Clear the log file before running to ensure we capture only new IDs
-        log_path = os.path.join(logs_dir, "4_InfoLogFile_WFM_import.txt")
-        if os.path.exists(log_path):
-            try:
-                with open(log_path, 'w') as f:
-                    f.write("") # Clear file
-            except Exception as e:
-                logging.warning(f"Could not clear log file: {e}")
-
-        def run_wfm_thread():
-            try:
-                # Run WFM and wait for it to finish
-                process = subprocess.Popen([wfm_exe, "-run", temp_xml_path])
-                process.wait()
-                
-                # After finish, parse the log file for Block IDs
-                if os.path.exists(log_path):
-                    with open(log_path, 'r') as f:
-                        log_content = f.read()
-                    
-                    # Look for SBDSQLBlockID in the log
-                    # Pattern might vary, but usually WFM logs variable changes like:
-                    # "Variable 'SBDSQLBlockID' set to '123'" or similar.
-                    # Or we can look for the output of the SbdImportTask.
-                    # Let's try a regex that catches the variable assignment.
-                    # Assuming standard WFM logging for output variables.
-                    
-                    # If we can't be sure of the format, we might need to inspect a real log.
-                    # But based on typical WFM logs:
-                    # "Task: ... - Import into NaviEdit ... Output: SBDSQLBlockID = 55"
-                    
-                    # Let's try to find all numbers assigned to SBDSQLBlockID
-                    # Regex: New block id: (\d+)
-                    ids = re.findall(r"New block id: (\d+)", log_content)
-                    
-                    if not ids:
-                        # Fallback to variable assignment if the above fails
-                        ids = re.findall(r"SBDSQLBlockID.*?(\d+)", log_content)
-                    
-                    if not ids:
-                        # Try another pattern if the first one fails
-                        # Maybe it's just logged as a property change
-                        ids = re.findall(r"Property 'SBDSQLBlockID' changed to '(\d+)'", log_content)
-                    
-                    if not ids:
-                         # Fallback: Look for just the number if it's logged near the task name
-                         # This is risky. Let's stick to the variable name.
-                         pass
-
-                    if ids:
-                        # Remove duplicates and sort
-                        unique_ids = sorted(list(set(map(int, ids))))
-                        ids_str = ", ".join(map(str, unique_ids))
-                        
-                        # Update GUI in the main thread
-                        def update_gui():
-                            ne_path_entry.delete(0, tk.END)
-                            ne_path_entry.insert(0, ids_str)
-                            logging.info(f"Import finished. Found Block IDs: {ids_str}")
-                            messagebox.showinfo("Import Finished", f"Import completed.\nFound Block IDs: {ids_str}")
-                        
-                        root.after(0, update_gui)
-                    else:
-                        logging.warning("Import finished but no Block IDs found in log.")
-                        root.after(0, lambda: messagebox.showwarning("Import Finished", "Import finished but no Block IDs could be extracted from the log."))
-                else:
-                    logging.warning("Log file not found after import.")
-            except Exception as e:
-                logging.error(f"Error in WFM thread: {e}")
-
-        # Start the thread
-        threading.Thread(target=run_wfm_thread, daemon=True).start()
-        
-        # messagebox.showinfo("Info", "Import Script started. Please wait for it to finish.")
-        
-    except Exception as e:
-        messagebox.showerror("Error", f"Failed to run Import script: {e}")
 
 def run_export_script():
     output_path = folder_entry.get().replace('/', '\\')
@@ -1972,52 +1808,42 @@ main_frame.pack(fill=tk.BOTH, expand=True)
 left_frame = ttk.LabelFrame(main_frame, text="Settings", padding="10")
 left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5, pady=5)
 
-# SBD Folder Selection (New)
-ttk.Label(left_frame, text="Select SBD Input Folder:").grid(row=0, column=0, sticky=tk.W, pady=(5, 2))
-sbd_folder_entry = ttk.Entry(left_frame)
-sbd_folder_entry.grid(row=1, column=0, sticky="ew", padx=(0, 5), pady=2)
-sbd_folder_entry.insert(0, settings.get("sbd_folder_path", ""))
-ttk.Button(left_frame, text="Browse", command=select_sbd_folder).grid(row=1, column=1, sticky="e", pady=2)
-
-# Run Import Button
-ttk.Button(left_frame, text="Run Import Script", command=run_import_script).grid(row=2, column=0, columnspan=2, sticky="ew", pady=(0, 10))
-
-# NaviEdit Path Entry (New)
-ttk.Label(left_frame, text="Block IDs (e.g. 100-105, 107):").grid(row=3, column=0, sticky=tk.W, pady=(5, 2))
+# Block IDs Entry
+ttk.Label(left_frame, text="Block IDs (e.g. 100-105, 107):").grid(row=0, column=0, sticky=tk.W, pady=(5, 2))
 ne_path_entry = ttk.Entry(left_frame)
-ne_path_entry.grid(row=4, column=0, columnspan=2, sticky="ew", padx=(0, 5), pady=2)
+ne_path_entry.grid(row=1, column=0, columnspan=2, sticky="ew", padx=(0, 5), pady=2)
 ne_path_entry.insert(0, settings.get("ne_path", ""))
 
-# Folder Selection (Existing - shifted down)
-ttk.Label(left_frame, text="Select Processed Data Folder:").grid(row=5, column=0, sticky=tk.W, pady=(5, 2))
+# Folder Selection
+ttk.Label(left_frame, text="Select Processed Data Folder:").grid(row=2, column=0, sticky=tk.W, pady=(5, 2))
 folder_entry = ttk.Entry(left_frame)
-folder_entry.grid(row=6, column=0, sticky="ew", padx=(0, 5), pady=2)
+folder_entry.grid(row=3, column=0, sticky="ew", padx=(0, 5), pady=2)
 folder_entry.insert(0, settings["folder_path"])
-ttk.Button(left_frame, text="Browse", command=select_folder).grid(row=6, column=1, sticky="e", pady=2)
+ttk.Button(left_frame, text="Browse", command=select_folder).grid(row=3, column=1, sticky="e", pady=2)
 left_frame.columnconfigure(0, weight=1) # Make entry expand
 
 # Run Export Button
-ttk.Button(left_frame, text="Run Export Script", command=run_export_script).grid(row=7, column=0, columnspan=2, sticky="ew", pady=(0, 10))
+ttk.Button(left_frame, text="Run Export Script", command=run_export_script).grid(row=4, column=0, columnspan=2, sticky="ew", pady=(0, 10))
 
 # Column Settings
-ttk.Label(left_frame, text="Coil 1 (Starboard) Column:").grid(row=8, column=0, sticky=tk.W, pady=2)
+ttk.Label(left_frame, text="Coil 1 (Starboard) Column:").grid(row=5, column=0, sticky=tk.W, pady=2)
 tss1_entry = ttk.Entry(left_frame, width=10)
-tss1_entry.grid(row=8, column=1, sticky=tk.W, pady=2)
+tss1_entry.grid(row=5, column=1, sticky=tk.W, pady=2)
 tss1_entry.insert(0, settings["tss1_col"])
 
-ttk.Label(left_frame, text="Coil 2 (Center) Column:").grid(row=9, column=0, sticky=tk.W, pady=2)
+ttk.Label(left_frame, text="Coil 2 (Center) Column:").grid(row=6, column=0, sticky=tk.W, pady=2)
 tss2_entry = ttk.Entry(left_frame, width=10)
-tss2_entry.grid(row=9, column=1, sticky=tk.W, pady=2)
+tss2_entry.grid(row=6, column=1, sticky=tk.W, pady=2)
 tss2_entry.insert(0, settings["tss2_col"])
 
-ttk.Label(left_frame, text="Coil 3 (Port) Column:").grid(row=10, column=0, sticky=tk.W, pady=2)
+ttk.Label(left_frame, text="Coil 3 (Port) Column:").grid(row=7, column=0, sticky=tk.W, pady=2)
 tss3_entry = ttk.Entry(left_frame, width=10)
-tss3_entry.grid(row=10, column=1, sticky=tk.W, pady=2)
+tss3_entry.grid(row=7, column=1, sticky=tk.W, pady=2)
 tss3_entry.insert(0, settings["tss3_col"])
 
 # Suffix Settings
-ttk.Separator(left_frame, orient='horizontal').grid(row=11, column=0, columnspan=2, sticky="ew", pady=10)
-ttk.Label(left_frame, text="File Suffixes:").grid(row=12, column=0, sticky=tk.W, pady=2)
+ttk.Separator(left_frame, orient='horizontal').grid(row=8, column=0, columnspan=2, sticky="ew", pady=10)
+ttk.Label(left_frame, text="File Suffixes:").grid(row=9, column=0, sticky=tk.W, pady=2)
 
 ttk.Label(left_frame, text="Coil Port Suffix:").grid(row=13, column=0, sticky=tk.W, pady=2)
 coil_port_suffix_entry = ttk.Entry(left_frame, width=20)
