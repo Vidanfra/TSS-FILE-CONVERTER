@@ -1,7 +1,7 @@
 import pandas as pd #pip install pandas
 import os
 import tkinter as tk
-from tkinter import filedialog, messagebox, ttk
+from tkinter import filedialog, messagebox, ttk, colorchooser
 import matplotlib
 import matplotlib.pyplot as plt #pip install matplotlib
 import matplotlib.colors as mcolors
@@ -797,6 +797,92 @@ def plotCoils(folder_path, tss1_col, tss2_col, tss3_col, use_crp=True):
         logging.error(f"Error plotting coil data: {e}")
         messagebox.showerror("Error", f"Error plotting coil data: {e}")
 
+def plotAltitude(folder_path, tss1_col, tss2_col, tss3_col, use_crp=True):
+    try:
+        # Extract the data from the PTR and Navigation files in the selected folder
+        coil1_df, coil2_df, coil3_df, crp_df = extractData(folder_path, tss1_col, tss2_col, tss3_col, use_crp)
+        
+        # Validate extracted data
+        if coil1_df.empty or coil2_df.empty or coil3_df.empty:
+            logging.error("Extracted data is empty. Please check the input files.")
+            raise ValueError("Extracted data is empty. Please check the input files.")
+
+        required_columns = {'Filename', 'Alt'}
+        for df in [coil1_df, coil2_df, coil3_df]:
+            if not required_columns.issubset(df.columns):             
+                missing = required_columns - set(df.columns)
+                logging.error(f"Missing required columns in extracted data: {missing}")
+                raise ValueError(f"Missing required columns in extracted data: {missing}")
+
+        # Check if CRP data is available
+        has_crp_data = crp_df is not None and not crp_df.empty and 'Alt' in crp_df.columns
+
+        # Split the data into individual line files
+        line_files = []
+        for filename in coil1_df['Filename'].unique():
+            line_data = {
+                'filename': filename,
+                'Alt1': coil1_df[coil1_df['Filename'] == filename]['Alt'],
+                'Alt2': coil2_df[coil2_df['Filename'] == filename]['Alt'],
+                'Alt3': coil3_df[coil3_df['Filename'] == filename]['Alt']
+            }
+            if has_crp_data:
+                line_data['Alt_CRP'] = crp_df[crp_df['Filename'] == filename]['Alt'] if 'Filename' in crp_df.columns else None
+            line_files.append(line_data)
+
+        # Loop through all line files in the folder
+        for line in line_files: 
+            fig_name = line['filename'].removesuffix('.ptr') + " - Altitude"
+             
+            plt.figure(num=fig_name, figsize=(10, 6))
+            plt.plot(line['Alt1'].values, color='r', label='Coil 1 - STBD')
+            plt.plot(line['Alt2'].values, color='b', label='Coil 2 - CENTER')
+            plt.plot(line['Alt3'].values, color='g', label='Coil 3 - PORT')
+            
+            # Plot CRP altitude if available
+            if has_crp_data and line.get('Alt_CRP') is not None and not line['Alt_CRP'].empty:
+                plt.plot(line['Alt_CRP'].values, color='purple', linestyle='--', label='CRP')
+
+            # Function to annotate min and max points
+            def annotate_peaks(alt_data, color, label):
+                if alt_data.empty:
+                    return
+                max_idx = alt_data.values.argmax()
+                min_idx = alt_data.values.argmin()
+                max_val = alt_data.values[max_idx]
+                min_val = alt_data.values[min_idx]
+
+                # Annotate max
+                plt.annotate(f'Max: {max_val:.2f}', (max_idx, max_val),
+                            textcoords="offset points", xytext=(0,10), ha='center',
+                            color=color, fontsize=10, fontweight='bold')
+
+                # Annotate min
+                plt.annotate(f'Min: {min_val:.2f}', (min_idx, min_val),
+                            textcoords="offset points", xytext=(0,-15), ha='center',
+                            color=color, fontsize=10, fontweight='bold')
+
+            # Annotate peaks for each coil
+            annotate_peaks(line['Alt1'], 'r', 'Coil 1')
+            annotate_peaks(line['Alt2'], 'b', 'Coil 2')
+            annotate_peaks(line['Alt3'], 'g', 'Coil 3')
+            if has_crp_data and line.get('Alt_CRP') is not None and not line['Alt_CRP'].empty:
+                annotate_peaks(line['Alt_CRP'], 'purple', 'CRP')
+            
+            plt.xlabel("Time [sec]")
+            plt.ylabel("Altitude [m]")
+            plt.title(f'Altitude values for each coil - {line["filename"]}')
+            plt.legend()
+            plt.grid(True)    
+        plt.show() 
+        
+        # Log success message
+        logging.info("Altitude data plotted succesfully.")
+        
+    except Exception as e:
+        logging.error(f"Error plotting altitude data: {e}")
+        messagebox.showerror("Error", f"Error plotting altitude data: {e}")
+
 def plotHeading(folder_path, tss1_col, tss2_col, tss3_col, use_crp=True):
     try:
         # Extract the data from the PTR and Navigation files in the selected folder
@@ -835,7 +921,7 @@ def plotHeading(folder_path, tss1_col, tss2_col, tss3_col, use_crp=True):
 
         # Scatter plot with color scale
         fig, ax = plt.subplots(num= target_path + " Heading Error", figsize=(7, 6))
-        scatter = ax.scatter(merged_df['Easting'], merged_df['Northing'], c= headings_err, cmap='coolwarm', vmin=0, vmax= MAX_ANGLE_ERROR, edgecolors='k')
+        scatter = ax.scatter(merged_df['Easting'], merged_df['Northing'], c= headings_err, cmap='coolwarm', vmin=0, vmax= MAX_ANGLE_ERROR)
 
         # Add colorbar
         cbar = plt.colorbar(scatter, ax=ax)
@@ -999,6 +1085,7 @@ CONFIG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config',
 CELL_SIZE = 0.5 # Default
 
 def load_settings():
+    global COLORS_TSS, BOUNDARIES_TSS, COLORS_ALT, BOUNDARIES_ALT
     defaults = {
         "folder_path": os.getcwd(),
         "sbd_folder_path": "",
@@ -1011,13 +1098,26 @@ def load_settings():
         "coil_stbd_suffix": COIL_STBD_SUFFIX,
         "crp_suffix": CRP_SUFFIX,
         "cell_size": 0.5,
-        "use_crp": True
+        "use_crp": True,
+        "colors_tss": COLORS_TSS,
+        "boundaries_tss": BOUNDARIES_TSS,
+        "colors_alt": COLORS_ALT,
+        "boundaries_alt": BOUNDARIES_ALT
     }
     if os.path.exists(CONFIG_FILE):
         try:
             with open(CONFIG_FILE, 'r') as f:
                 settings = json.load(f)
                 defaults.update(settings)
+                # Update global color variables from saved settings
+                if "colors_tss" in settings:
+                    COLORS_TSS = settings["colors_tss"]
+                if "boundaries_tss" in settings:
+                    BOUNDARIES_TSS = settings["boundaries_tss"]
+                if "colors_alt" in settings:
+                    COLORS_ALT = settings["colors_alt"]
+                if "boundaries_alt" in settings:
+                    BOUNDARIES_ALT = settings["boundaries_alt"]
         except Exception as e:
             logging.error(f"Error loading settings: {e}")
     return defaults
@@ -1035,7 +1135,11 @@ def save_settings():
         "coil_stbd_suffix": coil_stbd_suffix_entry.get(),
         "crp_suffix": crp_suffix_entry.get(),
         "cell_size": cell_size_entry.get(),
-        "use_crp": use_crp_var.get()
+        "use_crp": use_crp_var.get(),
+        "colors_tss": COLORS_TSS,
+        "boundaries_tss": BOUNDARIES_TSS,
+        "colors_alt": COLORS_ALT,
+        "boundaries_alt": BOUNDARIES_ALT
     }
     try:
         os.makedirs(os.path.dirname(CONFIG_FILE), exist_ok=True)
@@ -1055,6 +1159,183 @@ def update_globals():
         CELL_SIZE = float(cell_size_entry.get())
     except ValueError:
         CELL_SIZE = 0.5 # Default fallback
+
+def open_heatmap_settings():
+    """Open the Heatmap Settings window."""
+    global COLORS_TSS, BOUNDARIES_TSS, COLORS_ALT, BOUNDARIES_ALT
+    
+    settings_window = tk.Toplevel(root)
+    settings_window.title("Heatmap Settings")
+    settings_window.geometry("650x550")
+    settings_window.transient(root)
+    settings_window.grab_set()
+    
+    # Create notebook for tabs
+    notebook = ttk.Notebook(settings_window)
+    notebook.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+    
+    # TSS Tab
+    tss_frame = ttk.Frame(notebook, padding="10")
+    notebook.add(tss_frame, text="TSS Color Scale")
+    
+    # ALT Tab
+    alt_frame = ttk.Frame(notebook, padding="10")
+    notebook.add(alt_frame, text="ALT Color Scale")
+    
+    # Store entry widgets for later retrieval
+    tss_entries = []
+    alt_entries = []
+    
+    def create_color_table(parent_frame, colors, boundaries, entries_list):
+        """Create a color table with From, To, Color columns."""
+        # Headers
+        ttk.Label(parent_frame, text="From", font=("Segoe UI", 10, "bold")).grid(row=0, column=0, padx=5, pady=5)
+        ttk.Label(parent_frame, text="To", font=("Segoe UI", 10, "bold")).grid(row=0, column=1, padx=5, pady=5)
+        ttk.Label(parent_frame, text="Color", font=("Segoe UI", 10, "bold")).grid(row=0, column=2, padx=5, pady=5)
+        
+        for i in range(10):
+            row_data = {}
+            
+            # From entry
+            from_entry = ttk.Entry(parent_frame, width=12)
+            from_entry.grid(row=i+1, column=0, padx=5, pady=2)
+            if i == 0:
+                # First row: editable From
+                if len(boundaries) > 0:
+                    from_entry.insert(0, str(boundaries[0]))
+            else:
+                # Other rows: readonly, auto-populated
+                from_entry.configure(state='readonly')
+            row_data['from'] = from_entry
+            
+            # To entry
+            to_entry = ttk.Entry(parent_frame, width=12)
+            to_entry.grid(row=i+1, column=1, padx=5, pady=2)
+            if i < len(boundaries) - 1:
+                to_entry.insert(0, str(boundaries[i+1]))
+            row_data['to'] = to_entry
+            
+            # Color button
+            color_btn = tk.Button(parent_frame, text="", width=15, relief="solid")
+            color_btn.grid(row=i+1, column=2, padx=5, pady=2)
+            if i < len(colors):
+                try:
+                    color_btn.configure(bg=colors[i])
+                except:
+                    color_btn.configure(bg="white")
+            row_data['color_btn'] = color_btn
+            row_data['color'] = colors[i] if i < len(colors) else ""
+            
+            # Color picker function
+            def pick_color(btn=color_btn, row_idx=i, elist=entries_list):
+                color = colorchooser.askcolor(title=f"Choose color for row {row_idx + 1}")
+                if color[1]:
+                    btn.configure(bg=color[1])
+                    elist[row_idx]['color'] = color[1]
+            
+            color_btn.configure(command=pick_color)
+            
+            # Auto-update next row's From when To changes
+            def on_to_change(event, row_idx=i, elist=entries_list):
+                if row_idx + 1 < len(elist):
+                    next_from = elist[row_idx + 1]['from']
+                    to_val = elist[row_idx]['to'].get()
+                    next_from.configure(state='normal')
+                    next_from.delete(0, tk.END)
+                    next_from.insert(0, to_val)
+                    next_from.configure(state='readonly')
+            
+            to_entry.bind('<FocusOut>', on_to_change)
+            to_entry.bind('<Return>', on_to_change)
+            
+            entries_list.append(row_data)
+        
+        # Initialize From values for rows > 0
+        for i in range(1, min(len(boundaries), 10)):
+            if i < len(entries_list):
+                entries_list[i]['from'].configure(state='normal')
+                entries_list[i]['from'].delete(0, tk.END)
+                entries_list[i]['from'].insert(0, str(boundaries[i]))
+                entries_list[i]['from'].configure(state='readonly')
+    
+    create_color_table(tss_frame, COLORS_TSS, BOUNDARIES_TSS, tss_entries)
+    create_color_table(alt_frame, COLORS_ALT, BOUNDARIES_ALT, alt_entries)
+    
+    def save_heatmap_settings():
+        """Extract values from tables and save to global variables."""
+        global COLORS_TSS, BOUNDARIES_TSS, COLORS_ALT, BOUNDARIES_ALT
+        
+        def extract_values(entries_list):
+            colors = []
+            boundaries = []
+            
+            for i, row in enumerate(entries_list):
+                from_val = row['from'].get().strip()
+                to_val = row['to'].get().strip()
+                color_val = row['color']
+                
+                # Skip empty rows
+                if not to_val and i > 0:
+                    break
+                
+                if i == 0:
+                    if from_val:
+                        try:
+                            boundaries.append(float(from_val))
+                        except ValueError:
+                            messagebox.showerror("Error", f"Invalid 'From' value in row {i+1}")
+                            return None, None
+                
+                if to_val:
+                    try:
+                        boundaries.append(float(to_val))
+                    except ValueError:
+                        messagebox.showerror("Error", f"Invalid 'To' value in row {i+1}")
+                        return None, None
+                    
+                    if color_val:
+                        colors.append(color_val)
+                    else:
+                        messagebox.showerror("Error", f"Please select a color for row {i+1}")
+                        return None, None
+            
+            return colors, boundaries
+        
+        new_tss_colors, new_tss_boundaries = extract_values(tss_entries)
+        if new_tss_colors is None:
+            return
+        
+        new_alt_colors, new_alt_boundaries = extract_values(alt_entries)
+        if new_alt_colors is None:
+            return
+        
+        # Validate that we have at least 2 boundaries (1 color interval)
+        if len(new_tss_boundaries) < 2:
+            messagebox.showerror("Error", "TSS scale needs at least one complete interval (From and To values)")
+            return
+        if len(new_alt_boundaries) < 2:
+            messagebox.showerror("Error", "ALT scale needs at least one complete interval (From and To values)")
+            return
+        
+        # Update global variables
+        COLORS_TSS = new_tss_colors
+        BOUNDARIES_TSS = new_tss_boundaries
+        COLORS_ALT = new_alt_colors
+        BOUNDARIES_ALT = new_alt_boundaries
+        
+        # Save to file
+        save_settings()
+        
+        logging.info(f"Heatmap settings saved. TSS: {len(COLORS_TSS)} colors, ALT: {len(COLORS_ALT)} colors")
+        messagebox.showinfo("Success", "Heatmap settings saved successfully!")
+        settings_window.destroy()
+    
+    # Buttons frame
+    btn_frame = ttk.Frame(settings_window)
+    btn_frame.pack(fill=tk.X, padx=10, pady=10)
+    
+    ttk.Button(btn_frame, text="Save Settings", command=save_heatmap_settings).pack(side=tk.RIGHT, padx=5)
+    ttk.Button(btn_frame, text="Cancel", command=settings_window.destroy).pack(side=tk.RIGHT, padx=5)
 
 def select_folder():
     folder_path = filedialog.askdirectory(title="Select a folder")
@@ -1439,6 +1720,19 @@ def show_coils():
     except ValueError as e:
         logging.error(f"Error plotting coils: {e}")
         messagebox.showerror("Error", str(e))
+
+def show_altitude():
+    try:
+        update_globals()
+        save_settings()
+        folder_path = folder_entry.get()
+        tss1_col, tss2_col, tss3_col = tss1_entry.get(), tss2_entry.get(), tss3_entry.get()
+        use_crp = use_crp_var.get()
+        validate_inputs(folder_path, tss1_col, tss2_col, tss3_col)
+        plotAltitude(folder_path, tss1_col, tss2_col, tss3_col, use_crp)
+    except ValueError as e:
+        logging.error(f"Error plotting altitude: {e}")
+        messagebox.showerror("Error", str(e))
         
 def close_plots():
     try:
@@ -1504,6 +1798,140 @@ def create_heatmaps_action():
     except Exception as e:
         logging.error(f"Unexpected error creating heatmaps: {e}")
         messagebox.showerror("Error", f"Unexpected error: {e}")
+
+class HeatmapSettingsWindow(tk.Toplevel):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.title("Heatmap Settings")
+        self.geometry("600x500")
+        
+        self.tss_rows = []
+        self.alt_rows = []
+        
+        # Create tabs
+        tab_control = ttk.Notebook(self)
+        self.tab_tss = ttk.Frame(tab_control)
+        self.tab_alt = ttk.Frame(tab_control)
+        tab_control.add(self.tab_tss, text='TSS Settings')
+        tab_control.add(self.tab_alt, text='ALT Settings')
+        tab_control.pack(expand=1, fill="both")
+        
+        self.create_table(self.tab_tss, COLORS_TSS, BOUNDARIES_TSS, self.tss_rows)
+        self.create_table(self.tab_alt, COLORS_ALT, BOUNDARIES_ALT, self.alt_rows)
+        
+        save_btn = ttk.Button(self, text="Save Settings", command=self.save_and_close)
+        save_btn.pack(pady=10)
+
+    def create_table(self, parent, colors, boundaries, rows_list):
+        # Headers
+        ttk.Label(parent, text="From").grid(row=0, column=0, padx=5, pady=5)
+        ttk.Label(parent, text="To").grid(row=0, column=1, padx=5, pady=5)
+        ttk.Label(parent, text="Color").grid(row=0, column=2, padx=5, pady=5)
+        
+        for i in range(10):
+            # From Entry
+            from_var = tk.StringVar()
+            from_entry = ttk.Entry(parent, textvariable=from_var, width=15)
+            from_entry.grid(row=i+1, column=0, padx=5, pady=2)
+            if i > 0:
+                from_entry.configure(state='readonly')
+            
+            # To Entry
+            to_var = tk.StringVar()
+            to_entry = ttk.Entry(parent, textvariable=to_var, width=15)
+            to_entry.grid(row=i+1, column=1, padx=5, pady=2)
+            
+            # Color Button
+            color_var = tk.StringVar()
+            color_btn = tk.Button(parent, text="Pick Color", width=15)
+            color_btn.grid(row=i+1, column=2, padx=5, pady=2)
+            
+            # Closure to capture current variables
+            def pick_color(btn=color_btn, var=color_var):
+                color = colorchooser.askcolor(color=var.get())[1]
+                if color:
+                    var.set(color)
+                    btn.configure(bg=color)
+            
+            color_btn.configure(command=pick_color)
+            
+            # Logic to update next row's From
+            def update_next(event, idx=i, var=to_var, r_list=rows_list):
+                if idx + 1 < len(r_list):
+                    r_list[idx+1]['from_var'].set(var.get())
+
+            to_entry.bind('<KeyRelease>', update_next)
+            to_entry.bind('<FocusOut>', update_next)
+
+            rows_list.append({
+                'from_var': from_var,
+                'to_var': to_var,
+                'color_var': color_var,
+                'color_btn': color_btn
+            })
+
+        # Populate
+        for i in range(min(len(colors), 10)):
+            if i < len(boundaries) - 1:
+                rows_list[i]['from_var'].set(boundaries[i])
+                rows_list[i]['to_var'].set(boundaries[i+1])
+                rows_list[i]['color_var'].set(colors[i])
+                rows_list[i]['color_btn'].configure(bg=colors[i])
+                
+                if i + 1 < 10:
+                    rows_list[i+1]['from_var'].set(boundaries[i+1])
+
+    def save_and_close(self):
+        global COLORS_TSS, BOUNDARIES_TSS, COLORS_ALT, BOUNDARIES_ALT
+        
+        def extract_values(rows_list):
+            colors = []
+            boundaries = []
+            
+            # Get first boundary
+            try:
+                first_val = float(rows_list[0]['from_var'].get())
+                boundaries.append(first_val)
+            except ValueError:
+                return None, None # Invalid start
+
+            for row in rows_list:
+                to_val_str = row['to_var'].get()
+                color_val = row['color_var'].get()
+                
+                if not to_val_str or not color_val:
+                    break # Stop at empty row
+                
+                try:
+                    to_val = float(to_val_str)
+                    boundaries.append(to_val)
+                    colors.append(color_val)
+                except ValueError:
+                    messagebox.showerror("Error", "Invalid numeric value in table.")
+                    return None, None
+            
+            if not colors:
+                return None, None
+                
+            return colors, boundaries
+
+        new_tss_colors, new_tss_boundaries = extract_values(self.tss_rows)
+        new_alt_colors, new_alt_boundaries = extract_values(self.alt_rows)
+        
+        if new_tss_colors and new_tss_boundaries:
+            COLORS_TSS = new_tss_colors
+            BOUNDARIES_TSS = new_tss_boundaries
+            
+        if new_alt_colors and new_alt_boundaries:
+            COLORS_ALT = new_alt_colors
+            BOUNDARIES_ALT = new_alt_boundaries
+            
+        save_settings()
+        self.destroy()
+        messagebox.showinfo("Settings Saved", "Heatmap settings updated successfully.")
+
+def open_heatmap_settings():
+    HeatmapSettingsWindow(root)
 
 # Main program
 logging.info(f"{SCRIPT_VERSION} started.")
@@ -1634,7 +2062,8 @@ middle_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5, pady=5)
 
 ttk.Button(middle_frame, text="Heading QC", command=show_heading).pack(fill=tk.X, pady=5)
 ttk.Button(middle_frame, text="Show Map", command=show_maps).pack(fill=tk.X, pady=5)
-ttk.Button(middle_frame, text="Show Coils", command=show_coils).pack(fill=tk.X, pady=5)
+ttk.Button(middle_frame, text="Plot TSS", command=show_coils).pack(fill=tk.X, pady=5)
+ttk.Button(middle_frame, text="Plot Altitude", command=show_altitude).pack(fill=tk.X, pady=5)
 ttk.Separator(middle_frame, orient='horizontal').pack(fill=tk.X, pady=10)
 ttk.Button(middle_frame, text="Close Plots", command=close_plots).pack(fill=tk.X, pady=5)
 
@@ -1646,6 +2075,8 @@ right_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5, pady=5)
 ttk.Button(right_frame, text="Process Files", command=process).pack(fill=tk.X, pady=5)
 ttk.Separator(right_frame, orient='horizontal').pack(fill=tk.X, pady=10)
 ttk.Button(right_frame, text="Create Heatmaps", command=create_heatmaps_action).pack(fill=tk.X, pady=5)
+ttk.Separator(right_frame, orient='horizontal').pack(fill=tk.X, pady=10)
+ttk.Button(right_frame, text="Heatmap Settings", command=open_heatmap_settings).pack(fill=tk.X, pady=5)
 
 logging.info("Graphic User Interface created. Main loop started.")
 

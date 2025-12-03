@@ -1,14 +1,60 @@
 {
-    "folder_path": "Z:/600090_WindMultiplikator_Bard/04_PROC_DATA/01_GOEL/18_SID_OR LINE_BASED_DATA/03_SIT/OTHERS/Altitude_test_20251201/Coils_test",
+    "folder_path": "Z:/600090_WindMultiplikator_Bard/04_PROC_DATA/01_GOEL/18_SID_OR LINE_BASED_DATA/05_PRELIMINARY_DATA/S5-6/D/2-survey",
     "sbd_folder_path": "Z:/600090_WindMultiplikator_Bard/04_PROC_DATA/01_GOEL/18_SID_OR LINE_BASED_DATA/03_SIT/OTHERS/Altitude_test_20251201/Coils_test",
     "tss1_col": "12",
     "tss2_col": "11",
     "tss3_col": "10",
-    "output_file": "Step4 1.0m Alt W-E.txt",
+    "output_file": "S5-6_D-2.txt",
     "coil_port_suffix": "_Coil_port.csv",
     "coil_center_suffix": "_Coil_center.csv",
     "coil_stbd_suffix": "_Coil_stbd.csv",
     "crp_suffix": "_CRP.csv",
     "cell_size": "0.5",
-    "use_crp": true
+    "use_crp": true,
+    "colors_tss": [
+        "blue",
+        "dodgerblue",
+        "green",
+        "lime",
+        "#ffff00",
+        "orange",
+        "red",
+        "purple",
+        "pink"
+    ],
+    "boundaries_tss": [
+        -500.0,
+        -100.0,
+        -25.0,
+        25.0,
+        50.0,
+        75.0,
+        150.0,
+        500.0,
+        5000.0,
+        10000.0
+    ],
+    "colors_alt": [
+        "black",
+        "darkblue",
+        "green",
+        "limegreen",
+        "lime",
+        "#ffff00",
+        "orange",
+        "red",
+        "magenta"
+    ],
+    "boundaries_alt": [
+        -0.5,
+        -0.25,
+        0.0,
+        0.25,
+        0.5,
+        0.75,
+        1.0,
+        1.5,
+        2.0,
+        2.5
+    ]
 }
