@@ -1,10 +1,10 @@
 {
-    "folder_path": "Z:/600090_WindMultiplikator_Bard/04_PROC_DATA/01_GOEL/18_SID_OR LINE_BASED_DATA/05_PRELIMINARY_DATA/S5-6/D/2-survey",
-    "sbd_folder_path": "Z:/600090_WindMultiplikator_Bard/04_PROC_DATA/01_GOEL/18_SID_OR LINE_BASED_DATA/03_SIT/OTHERS/Altitude_test_20251201/Coils_test",
-    "tss1_col": "12",
+    "folder_path": "Z:/600090_WindMultiplikator_Bard/04_PROC_DATA/01_GOEL/18_SID_OR LINE_BASED_DATA/05_PRELIMINARY_DATA/S1-4/A",
+    "ne_path": "1337-1342",
+    "tss1_col": "10",
     "tss2_col": "11",
-    "tss3_col": "10",
-    "output_file": "S5-6_D-2.txt",
+    "tss3_col": "12",
+    "output_file": "S1-4_A.txt",
     "coil_port_suffix": "_Coil_port.csv",
     "coil_center_suffix": "_Coil_center.csv",
     "coil_stbd_suffix": "_Coil_stbd.csv",
@@ -16,7 +16,7 @@
         "dodgerblue",
         "green",
         "lime",
-        "#ffff00",
+        "yellow",
         "orange",
         "red",
         "purple",
@@ -40,7 +40,7 @@
         "green",
         "limegreen",
         "lime",
-        "#ffff00",
+        "yellow",
         "orange",
         "red",
         "magenta"
@@ -56,5 +56,11 @@
         1.5,
         2.0,
         2.5
-    ]
+    ],
+    "sql_db_path": "E:/NE_DB/WMA_600090/600090_GOEL_WindMultiplikator.mdf",
+    "z_dvl_offset": "0.0",
+    "sql_server_name": "RS-GOEL-PVE03",
+    "folder_filter": "04_NAVISCAN",
+    "wfm_ne_db_name": "600090_GOEL_WindMultiplikator",
+    "wfm_ne_db_server": "localhost"
 }

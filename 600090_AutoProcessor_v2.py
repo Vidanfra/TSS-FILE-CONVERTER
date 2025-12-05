@@ -22,7 +22,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 matplotlib.use('TkAgg')  # Use a non-GUI backend for script execution
 
 # Name of the script version
-SCRIPT_VERSION = "600090_AutoProcessor v.1"
+SCRIPT_VERSION = "600090_AutoProcessor v.2"
 
 # Maximum time difference in seconds
 MAX_TIME_DIFF_SEC = 0.25

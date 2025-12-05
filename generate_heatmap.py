@@ -199,29 +199,7 @@ def generate_TSS_heatmap(output_folder, filename, df, class_id, cell_size, color
         nodata=nodata_value,
     ) as dst:
         dst.write(data_grid_float32, 1)
-    
-    # Compute bounding box for the peak
-    min_x, max_x = min(easting), max(easting)
-    min_y, max_y = min(northing), max(northing)
 
-    peak_x_norm = (max_peak_easting - min_x) / (max_x - min_x)  # Normalize [0,1]
-    peak_y_norm = (max_peak_northing - min_y) / (max_y - min_y)  # Normalize [0,1]
-
-    box_size = 0.05  # Bounding box size relative to image dimensions
-    class_id = 0  # Class ID for the bounding
-    x_center = peak_x_norm
-    y_center = peak_y_norm
-    width = box_size
-    height = box_size
-
-    # Define bounding box size (adjust as needed)
-    box_size = 1  # Meters
-    x_min = max_peak_easting - box_size / 2
-    y_min = max_peak_northing - box_size / 2
-
-    rect = patches.Rectangle((x_min, y_min), box_size, box_size, linewidth=2, edgecolor='black', facecolor='none')
-    ax.add_patch(rect)
-    ax.text(max_peak_easting, max_peak_northing, s=f"{coil_peaks_df.loc[max_peak_idx, 'Peak value']}", color='black', fontsize=10, ha='center', va='center')
 
     # Create a dummy mappable for the colorbar to show the colors evenly spaced
     dummy_norm = mcolors.Normalize(vmin=0, vmax=1)
@@ -404,28 +382,6 @@ def generate_ALT_heatmap(output_folder, filename, df, class_id, cell_size, color
     ) as dst:
         dst.write(data_grid_float32, 1)
     
-    # Compute bounding box for the peak
-    min_x, max_x = min(easting), max(easting)
-    min_y, max_y = min(northing), max(northing)
-
-    peak_x_norm = (max_peak_easting - min_x) / (max_x - min_x)  # Normalize [0,1]
-    peak_y_norm = (max_peak_northing - min_y) / (max_y - min_y)  # Normalize [0,1]
-
-    box_size = 0.05  # Bounding box size relative to image dimensions
-    class_id = 0  # Class ID for the bounding
-    x_center = peak_x_norm
-    y_center = peak_y_norm
-    width = box_size
-    height = box_size
-
-    # Define bounding box size (adjust as needed)
-    box_size = 1  # Meters
-    x_min = max_peak_easting - box_size / 2
-    y_min = max_peak_northing - box_size / 2
-
-    rect = patches.Rectangle((x_min, y_min), box_size, box_size, linewidth=2, edgecolor='white', facecolor='none')
-    ax.add_patch(rect)
-    ax.text(max_peak_easting, max_peak_northing, s=f"{coil_peaks_df.loc[max_peak_idx, 'Peak value']}", color='white', fontsize=10, ha='center', va='center')
 
     # Create a dummy mappable for the colorbar to show the colors evenly spaced
     dummy_norm = mcolors.Normalize(vmin=0, vmax=1)
