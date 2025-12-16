@@ -2,7 +2,11 @@ import pandas as pd #pip install pandas
 import os
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk, colorchooser
+
+# IMPORTANT: Set matplotlib backend BEFORE importing pyplot to avoid Tkinter threading issues
 import matplotlib
+matplotlib.use('TkAgg')
+
 import matplotlib.pyplot as plt #pip install matplotlib
 import matplotlib.colors as mcolors
 import numpy as np
@@ -14,21 +18,133 @@ import generate_heatmap as heatmaps
 import subprocess
 import threading
 import re
+import atexit
 
 # Import altitude extraction module for DVL Altitude Fixer
-from altitudeFromSQL import extract_altitude_from_sql
+from altitudeFromSQL import extract_altitude_from_sql, extract_altitude_for_block_ids_direct
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-# Set the backend for matplotlib to avoid GUI tinker issues
-matplotlib.use('TkAgg')  # Use a non-GUI backend for script execution
+# Register cleanup function for exit to prevent Tkinter threading errors
+def _cleanup_matplotlib():
+    """Close all matplotlib figures on exit to prevent threading issues."""
+    try:
+        plt.close('all')
+    except:
+        pass
+
+atexit.register(_cleanup_matplotlib)
 
 # Name of the script version
-SCRIPT_VERSION = "600090_AutoProcessor v.3"
+SCRIPT_VERSION = "600090 TSS AutoProcessor v.4"
 
 # Maximum time difference in seconds
 MAX_TIME_DIFF_SEC = 0.25
+
+# Cached datetime format detection for efficient parsing
+_datetime_format_cache = {}
+
+def parse_datetime_smart(date_str, time_str, cache_key=None):
+    """
+    Smart datetime parser with cached format detection.
+    Detects the format once per cache_key (e.g., file name) and reuses it for all rows.
+    
+    Args:
+        date_str: Date string (e.g., '20241231' or '31/12/2024')
+        time_str: Time string (e.g., '12:34:56.789')
+        cache_key: Optional key to cache format detection (e.g., filename or 'nav_file_format')
+    
+    Returns:
+        datetime object or None if parsing fails
+    """
+    global _datetime_format_cache
+    
+    combined = f"{date_str} {time_str}"
+    
+    # If we have a cached format for this key, use it directly
+    if cache_key and cache_key in _datetime_format_cache:
+        try:
+            return datetime.strptime(combined, _datetime_format_cache[cache_key])
+        except ValueError:
+            # Cache might be stale, fall through to detection
+            pass
+    
+    # Format patterns to try
+    formats = [
+        '%Y%m%d %H:%M:%S.%f',      # 20241231 12:34:56.789
+        '%d/%m/%Y %H:%M:%S.%f',    # 31/12/2024 12:34:56.789
+        '%Y-%m-%d %H:%M:%S.%f',    # 2024-12-31 12:34:56.789
+        '%Y%m%d %H:%M:%S',          # 20241231 12:34:56 (no ms)
+        '%d/%m/%Y %H:%M:%S',        # 31/12/2024 12:34:56 (no ms)
+    ]
+    
+    for fmt in formats:
+        try:
+            result = datetime.strptime(combined, fmt)
+            # Cache the successful format
+            if cache_key:
+                _datetime_format_cache[cache_key] = fmt
+            return result
+        except ValueError:
+            continue
+    
+    return None
+
+def parse_datetime_column_smart(df, date_col='Date', time_col='Time', cache_key=None):
+    """
+    Parse datetime from Date and Time columns using smart format detection.
+    Detects format from first valid row and applies to entire DataFrame.
+    
+    Args:
+        df: DataFrame with Date and Time columns
+        date_col: Name of date column
+        time_col: Name of time column
+        cache_key: Optional key to cache format detection
+    
+    Returns:
+        Series of datetime objects
+    """
+    global _datetime_format_cache
+    
+    if date_col not in df.columns or time_col not in df.columns:
+        return pd.Series([None] * len(df))
+    
+    # Create combined datetime string column
+    combined = df[date_col].astype(str) + ' ' + df[time_col].astype(str)
+    
+    # If we have a cached format, use vectorized parsing
+    if cache_key and cache_key in _datetime_format_cache:
+        try:
+            return pd.to_datetime(combined, format=_datetime_format_cache[cache_key], errors='coerce')
+        except:
+            pass
+    
+    # Detect format from first valid row
+    formats = [
+        '%Y%m%d %H:%M:%S.%f',
+        '%d/%m/%Y %H:%M:%S.%f',
+        '%Y-%m-%d %H:%M:%S.%f',
+        '%Y%m%d %H:%M:%S',
+        '%d/%m/%Y %H:%M:%S',
+    ]
+    
+    # Try first non-null row to detect format
+    sample = combined.dropna().iloc[0] if len(combined.dropna()) > 0 else None
+    
+    if sample:
+        for fmt in formats:
+            try:
+                datetime.strptime(sample, fmt)
+                # Found working format - cache it and use vectorized parsing
+                if cache_key:
+                    _datetime_format_cache[cache_key] = fmt
+                return pd.to_datetime(combined, format=fmt, errors='coerce')
+            except ValueError:
+                continue
+    
+    # Fallback to pandas auto-detection
+    return pd.to_datetime(combined, errors='coerce')
 
 # Column positions in the PTR file
 DATE_COLUMN_POS = 0
@@ -1157,13 +1273,13 @@ def load_settings():
     return defaults
 
 def save_settings():
-    # Preserve SQL settings that are managed by the SQL Settings dialog
+    # Preserve NE Database settings that are managed by the NE Database Settings dialog
     existing_sql_settings = {}
     if os.path.exists(CONFIG_FILE):
         try:
             with open(CONFIG_FILE, 'r') as f:
                 existing = json.load(f)
-                for key in ['sql_db_path', 'z_dvl_offset', 'sql_server_name', 'folder_filter']:
+                for key in ['sql_db_path', 'z_dvl_offset', 'sql_server_name', 'folder_filter', 'wfm_ne_db_name', 'wfm_ne_db_server']:
                     if key in existing:
                         existing_sql_settings[key] = existing[key]
         except:
@@ -1182,6 +1298,7 @@ def save_settings():
         "crp_suffix": crp_suffix_entry.get(),
         "cell_size": cell_size_entry.get(),
         "use_crp": use_crp_var.get(),
+        "auto_clicker_enabled": auto_clicker_var.get(),
         "colors_tss": COLORS_TSS,
         "boundaries_tss": BOUNDARIES_TSS,
         "colors_alt": COLORS_ALT,
@@ -1203,6 +1320,205 @@ def save_settings():
 # DVL Altitude Fixer Functions
 # ============================================================================
 
+# ============================================================================
+# WFM Dialog Auto-Accepter (for automatic channel selection)
+# ============================================================================
+
+def start_wfm_dialog_auto_accepter(duration_seconds=120, stop_event=None, output_folder=None, expected_file_count=0):
+    """
+    Start a background thread that automatically accepts WFM "Export settings" dialog boxes.
+    Monitors VS Nav and PTR file exports and stops when complete or timeout reached.
+    
+    Args:
+        duration_seconds: Maximum time to run (default 2 minutes)
+        stop_event: Optional threading.Event to signal stop from outside
+        output_folder: Folder to monitor for exported files (.nav, .ptr)
+        expected_file_count: Number of files expected (used to detect completion)
+    
+    Returns:
+        (stop_event, thread) - call stop_event.set() to stop the thread
+    """
+    if stop_event is None:
+        stop_event = threading.Event()
+    
+    def auto_accept_loop():
+        import time
+        import ctypes
+        import glob
+        from ctypes import c_bool, c_void_p
+        
+        # Windows API constants
+        BM_CLICK = 0x00F5
+        
+        # Properly define HWND and LPARAM for 64-bit
+        if ctypes.sizeof(c_void_p) == 8:
+            HWND = ctypes.c_uint64
+            LPARAM = ctypes.c_int64
+        else:
+            HWND = ctypes.c_uint32
+            LPARAM = ctypes.c_int32
+        
+        WNDENUMPROC = ctypes.WINFUNCTYPE(c_bool, HWND, LPARAM)
+        
+        user32 = ctypes.windll.user32
+        user32.EnumWindows.argtypes = [WNDENUMPROC, LPARAM]
+        user32.EnumWindows.restype = c_bool
+        user32.EnumChildWindows.argtypes = [HWND, WNDENUMPROC, LPARAM]
+        user32.EnumChildWindows.restype = c_bool
+        user32.GetWindowTextW.argtypes = [HWND, ctypes.c_wchar_p, ctypes.c_int]
+        user32.GetWindowTextW.restype = ctypes.c_int
+        user32.GetWindowTextLengthW.argtypes = [HWND]
+        user32.GetWindowTextLengthW.restype = ctypes.c_int
+        user32.GetClassNameW.argtypes = [HWND, ctypes.c_wchar_p, ctypes.c_int]
+        user32.GetClassNameW.restype = ctypes.c_int
+        user32.IsWindowVisible.argtypes = [HWND]
+        user32.IsWindowVisible.restype = c_bool
+        user32.SendMessageW.argtypes = [HWND, ctypes.c_uint, ctypes.c_ulonglong, ctypes.c_longlong]
+        user32.SendMessageW.restype = ctypes.c_longlong
+        
+        start_time = time.time()
+        clicks_made = 0
+        started_accepting = False
+        
+        # File monitoring state
+        file_cutoff_time = start_time - 2  # Only count files created after start
+        last_file_count = 0
+        stable_file_checks = 0
+        required_stable_checks = 3  # Files must be stable for 3 consecutive checks (~1.5 sec)
+        
+        logging.info("WFM Auto-Accepter: Waiting for 'Export settings' dialogs...")
+        if output_folder and expected_file_count > 0:
+            logging.info(f"WFM Auto-Accepter: Monitoring {output_folder} for {expected_file_count} files")
+        
+        def get_window_text(hwnd):
+            try:
+                length = user32.GetWindowTextLengthW(hwnd) + 1
+                buffer = ctypes.create_unicode_buffer(length)
+                user32.GetWindowTextW(hwnd, buffer, length)
+                return buffer.value
+            except:
+                return ""
+        
+        def get_class_name(hwnd):
+            try:
+                buffer = ctypes.create_unicode_buffer(256)
+                user32.GetClassNameW(hwnd, buffer, 256)
+                return buffer.value
+            except:
+                return ""
+        
+        def find_and_click_ok(hwnd):
+            """Find OK button and click it"""
+            clicked = [False]
+            
+            @WNDENUMPROC
+            def enum_child_callback(child_hwnd, lparam):
+                if clicked[0]:
+                    return False
+                try:
+                    class_name = get_class_name(child_hwnd)
+                    text = get_window_text(child_hwnd)
+                    
+                    if 'Button' in class_name:
+                        text_lower = text.lower().strip().replace('&', '')
+                        if text_lower in ['ok', 'yes', 'accept']:
+                            user32.SendMessageW(child_hwnd, BM_CLICK, 0, 0)
+                            clicked[0] = True
+                            return False
+                except:
+                    pass
+                return True
+            
+            try:
+                user32.EnumChildWindows(hwnd, enum_child_callback, 0)
+            except:
+                pass
+            return clicked[0]
+        
+        def count_new_export_files():
+            """Count .nav and .ptr files created after start_time"""
+            if not output_folder or not os.path.exists(output_folder):
+                return 0
+            
+            count = 0
+            try:
+                for pattern in ['*.nav', '*.ptr']:
+                    for f in glob.glob(os.path.join(output_folder, pattern)):
+                        try:
+                            if os.path.getmtime(f) > file_cutoff_time:
+                                count += 1
+                        except OSError:
+                            continue
+            except Exception:
+                pass
+            return count
+        
+        while not stop_event.is_set() and (time.time() - start_time) < duration_seconds:
+            try:
+                export_dialogs = []
+                
+                @WNDENUMPROC
+                def enum_windows_callback(hwnd, lparam):
+                    try:
+                        if user32.IsWindowVisible(hwnd):
+                            title = get_window_text(hwnd)
+                            if 'export settings' in title.lower():
+                                export_dialogs.append((hwnd, title))
+                    except:
+                        pass
+                    return True
+                
+                user32.EnumWindows(enum_windows_callback, 0)
+                
+                # Auto-accept Export settings dialogs
+                for hwnd, title in export_dialogs:
+                    if not started_accepting:
+                        started_accepting = True
+                        logging.info("WFM Auto-Accepter: Started accepting dialogs")
+                    
+                    if find_and_click_ok(hwnd):
+                        clicks_made += 1
+                        logging.info(f"WFM Auto-Accepter: Accepted dialog #{clicks_made}")
+                        time.sleep(0.4)
+                
+                # Check if export is complete by monitoring files
+                if output_folder and expected_file_count > 0 and started_accepting:
+                    current_file_count = count_new_export_files()
+                    
+                    if current_file_count >= expected_file_count:
+                        # Check if file count is stable (no new files being added)
+                        if current_file_count == last_file_count:
+                            stable_file_checks += 1
+                            if stable_file_checks >= required_stable_checks:
+                                logging.info(f"WFM Auto-Accepter: Export complete! {current_file_count}/{expected_file_count} files detected")
+                                break
+                        else:
+                            stable_file_checks = 0
+                    
+                    last_file_count = current_file_count
+                
+            except:
+                pass
+            
+            time.sleep(0.5)
+        
+        elapsed = time.time() - start_time
+        final_file_count = count_new_export_files() if output_folder else 0
+        logging.info(f"WFM Auto-Accepter: Finished after {elapsed:.1f}s. Dialogs accepted: {clicks_made}, Files detected: {final_file_count}")
+    
+    thread = threading.Thread(target=auto_accept_loop, daemon=True)
+    thread.start()
+    
+    return stop_event, thread
+
+
+def stop_wfm_auto_accepter(stop_event):
+    """Stop the WFM dialog auto-accepter thread."""
+    if stop_event:
+        stop_event.set()
+        logging.info("WFM Auto-Accepter: Stop signal sent")
+
+
 def parse_block_ids(block_ids_str):
     """
     Parse block IDs from a string in the format '100-105, 107'.
@@ -1222,6 +1538,130 @@ def parse_block_ids(block_ids_str):
         logging.error("Invalid Block ID format")
         return []
     return block_ids
+
+
+def get_expected_wfm_output_files(navdepth_folder, block_ids):
+    """
+    Get list of expected output files from WFM depth export.
+    WFM exports 4 files per block: _CRP.nav, _Coil_port.nav, _Coil_center.nav, _Coil_stbd.nav
+    
+    Args:
+        navdepth_folder: Path to navdepth output folder
+        block_ids: List of block IDs being exported
+    
+    Returns:
+        List of expected file paths (CRP files only - these are sufficient to detect completion)
+    """
+    expected_files = []
+    for bid in block_ids:
+        # We only check for CRP files as the primary indicator
+        # WFM creates files with the block name from the database
+        # Pattern is like: BlockName_CRP.nav
+        crp_pattern = os.path.join(navdepth_folder, f"*{DVL_CRP_SUFFIX}")
+        expected_files.append((bid, crp_pattern))
+    return expected_files
+
+
+def wait_for_wfm_completion(navdepth_folder, block_ids, timeout_seconds=300, poll_interval=2, 
+                            progress_callback=None, cancel_flag=None, start_time=None):
+    """
+    Monitor navdepth folder for WFM output file completion.
+    
+    Args:
+        navdepth_folder: Path to the navdepth output folder
+        block_ids: List of block IDs being exported
+        timeout_seconds: Maximum time to wait (default 5 minutes)
+        poll_interval: How often to check (default 2 seconds)
+        progress_callback: Optional callback function(status_message, found_count, expected_count)
+        cancel_flag: Optional list [bool] that can be set to [True] to cancel waiting
+        start_time: Timestamp when the export was initiated. Only files modified after this time
+                    will be considered. If None, uses current time (for backwards compatibility).
+    
+    Returns:
+        (success: bool, found_files: list, message: str)
+    """
+    import time
+    import glob
+    
+    process_start_time = time.time()
+    
+    # Use provided start_time or default to now (minus a small buffer for clock skew)
+    if start_time is None:
+        file_cutoff_time = process_start_time - 2  # 2 second buffer
+    else:
+        file_cutoff_time = start_time - 2  # 2 second buffer for clock skew
+    
+    expected_count = len(block_ids)
+    
+    # Track files and their sizes for stability checking
+    file_sizes = {}
+    stable_count = 0
+    required_stable_checks = 2  # File must have same size for 2 consecutive checks
+    
+    logging.info(f"Waiting for WFM to export {expected_count} blocks to {navdepth_folder}...")
+    logging.info(f"Only considering files modified after: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(file_cutoff_time))}")
+    
+    while True:
+        elapsed = time.time() - process_start_time
+        
+        # Check for cancellation
+        if cancel_flag and cancel_flag[0]:
+            return False, [], "Cancelled by user"
+        
+        # Check for timeout
+        if elapsed > timeout_seconds:
+            all_files = glob.glob(os.path.join(navdepth_folder, f"*{DVL_CRP_SUFFIX}"))
+            new_files = [f for f in all_files if os.path.getmtime(f) > file_cutoff_time]
+            return False, new_files, f"Timeout after {timeout_seconds}s. Found {len(new_files)} new files of {expected_count} expected."
+        
+        # Find all CRP files in navdepth folder
+        all_crp_files = glob.glob(os.path.join(navdepth_folder, f"*{DVL_CRP_SUFFIX}"))
+        
+        # Filter to only files modified AFTER the start time
+        current_files = []
+        for f in all_crp_files:
+            try:
+                file_mtime = os.path.getmtime(f)
+                if file_mtime > file_cutoff_time:
+                    current_files.append(f)
+            except OSError:
+                continue
+        
+        found_count = len(current_files)
+        
+        # Check file stability (sizes not changing)
+        all_stable = True
+        for f in current_files:
+            try:
+                current_size = os.path.getsize(f)
+                prev_size = file_sizes.get(f, -1)
+                
+                if current_size != prev_size:
+                    file_sizes[f] = current_size
+                    all_stable = False
+            except OSError:
+                all_stable = False
+        
+        # Update progress
+        if progress_callback:
+            status = f"Found {found_count}/{expected_count} NEW files ({int(elapsed)}s elapsed)"
+            if all_stable and found_count >= expected_count:
+                status += " - Verifying stability..."
+            progress_callback(status, found_count, expected_count)
+        
+        # Check if we have all expected files and they are stable
+        if found_count >= expected_count:
+            if all_stable:
+                stable_count += 1
+                if stable_count >= required_stable_checks:
+                    logging.info(f"WFM export complete: {found_count} new files found and stable")
+                    return True, current_files, f"Found {found_count} files"
+            else:
+                stable_count = 0  # Reset if files changed
+        
+        time.sleep(poll_interval)
+    
+    return False, [], "Unknown error"
 
 
 def run_wfm_depth_export(block_ids_str, output_folder):
@@ -1515,13 +1955,20 @@ def read_nav_files_by_block(navdepth_folder):
     return blocks
 
 
-def match_altitude_with_nav(sql_altitude_df, nav_blocks, z_dvl_offset):
+def match_altitude_with_nav(sql_altitude_df, nav_blocks, z_dvl_offset, expected_block_ids=None):
     """
     Match SQL Altitude data with nav depth data by time using CRP as reference.
     Calculates Coil Altitude = (CRP Altitude + DVL offset) + CRP Depth - Coil Depth
     Returns a dictionary: {block_name: merged_dataframe}
+    
+    Args:
+        sql_altitude_df: DataFrame with SQL altitude data
+        nav_blocks: Dictionary of nav data organized by block name
+        z_dvl_offset: Z offset value for DVL altitude calculation
+        expected_block_ids: Optional list of expected block IDs (for validation/error messages)
     """
     results = {}
+    unmatched_nav_blocks = []  # Nav files without SQL data
     
     if sql_altitude_df.empty or 'DateTime' not in sql_altitude_df.columns:
         logging.error("SQL Altitude DataFrame is empty or missing DateTime column")
@@ -1530,6 +1977,17 @@ def match_altitude_with_nav(sql_altitude_df, nav_blocks, z_dvl_offset):
     if 'Name' not in sql_altitude_df.columns and 'ID' not in sql_altitude_df.columns:
         logging.error("SQL Altitude DataFrame is missing 'Name' or 'ID' column for block matching")
         return results
+    
+    # Get available block names/IDs from SQL data for comparison
+    sql_block_names = set()
+    sql_block_ids = set()
+    if 'Name' in sql_altitude_df.columns:
+        sql_block_names = set(sql_altitude_df['Name'].astype(str).unique())
+    if 'ID' in sql_altitude_df.columns:
+        sql_block_ids = set(sql_altitude_df['ID'].unique())
+    
+    logging.info(f"SQL data contains {len(sql_block_names)} unique block names: {sorted(sql_block_names)[:10]}{'...' if len(sql_block_names) > 10 else ''}")
+    logging.info(f"Nav files contain {len(nav_blocks)} blocks: {sorted(nav_blocks.keys())[:10]}{'...' if len(nav_blocks) > 10 else ''}")
     
     for block_name, nav_data in nav_blocks.items():
         logging.info(f"Processing block: {block_name}")
@@ -1554,6 +2012,7 @@ def match_altitude_with_nav(sql_altitude_df, nav_blocks, z_dvl_offset):
         
         if sql_block_df.empty:
             logging.warning(f"  - Warning: No matching SQL Altitude data found for block '{block_name}'")
+            unmatched_nav_blocks.append(block_name)
             continue
         
         logging.info(f"  - Found {len(sql_block_df)} SQL Altitude records for this block")
@@ -1628,6 +2087,21 @@ def match_altitude_with_nav(sql_altitude_df, nav_blocks, z_dvl_offset):
         else:
             logging.info(f"  - No coil data matched for this block")
     
+    # Report summary of matching results
+    if unmatched_nav_blocks:
+        logging.warning(f"")
+        logging.warning(f"=== BLOCK MATCHING SUMMARY ===")
+        logging.warning(f"Nav files found for blocks: {sorted(nav_blocks.keys())}")
+        logging.warning(f"Could NOT find SQL data for: {sorted(unmatched_nav_blocks)}")
+        if sql_block_names:
+            logging.warning(f"SQL database contains these block names: {sorted(sql_block_names)[:20]}{'...' if len(sql_block_names) > 20 else ''}")
+        logging.warning(f"")
+        logging.warning(f"POSSIBLE CAUSES:")
+        logging.warning(f"  1. Wrong Block IDs entered (check the Block IDs field)")
+        logging.warning(f"  2. Nav files in folder don't match the entered Block IDs")
+        logging.warning(f"  3. Block names in nav files don't match names in database")
+        logging.warning(f"")
+    
     return results
 
 
@@ -1683,34 +2157,83 @@ def get_file_type_and_block(filename):
     return block_name, coil_type
 
 
-def update_nav_files_batch(nav_update_path, calculated_data):
+def build_nav_file_index(nav_update_path, target_blocks=None):
     """
-    Update VisualSoft Nav CSV files with calculated Altitude and Depth values.
-    """
-    if not nav_update_path or not os.path.exists(nav_update_path):
-        logging.error("Invalid VisualSoft Nav CSV folder")
-        return 0, 0
+    Pre-build an index of navigation files organized by block name.
     
-    files_updated = 0
-    files_skipped = 0
+    Args:
+        nav_update_path: Root path to scan for navigation files
+        target_blocks: Optional set of block names to filter for (optimization)
+    
+    Returns:
+        Dictionary: {block_name: [(file_path, coil_type), ...]}
+    """
+    file_index = {}
+    
+    if not nav_update_path or not os.path.exists(nav_update_path):
+        return file_index
     
     for root, dirs, files in os.walk(nav_update_path):
         for filename in files:
             if not filename.lower().endswith('.csv') and not filename.lower().endswith('.nav'):
                 continue
-                
+            
             block_name, coil_type = get_file_type_and_block(filename)
             
             if not block_name or not coil_type:
                 continue
-                
-            if block_name not in calculated_data:
+            
+            # Skip if not in target blocks (optimization)
+            if target_blocks and block_name not in target_blocks:
                 continue
             
             file_path = os.path.join(root, filename)
+            
+            if block_name not in file_index:
+                file_index[block_name] = []
+            file_index[block_name].append((file_path, coil_type))
+    
+    logging.info(f"Built file index: {len(file_index)} blocks, {sum(len(v) for v in file_index.values())} files")
+    return file_index
+
+
+def update_nav_files_batch(nav_update_path, calculated_data):
+    """
+    Update VisualSoft Nav CSV files with calculated Altitude and Depth values.
+    
+    OPTIMIZED VERSION:
+    - Pre-builds file index before processing
+    - Uses smart datetime parsing with format caching
+    - Only processes files for blocks in calculated_data
+    """
+    if not nav_update_path or not os.path.exists(nav_update_path):
+        logging.error("Invalid VisualSoft Nav CSV folder")
+        return 0, 0
+    
+    # Pre-build file index for only the blocks we need
+    target_blocks = set(calculated_data.keys())
+    file_index = build_nav_file_index(nav_update_path, target_blocks)
+    
+    if not file_index:
+        logging.warning("No matching navigation files found")
+        return 0, 0
+    
+    files_updated = 0
+    files_skipped = 0
+    
+    # Process files by block (more efficient - calculated_data is already loaded per block)
+    for block_name, file_list in file_index.items():
+        if block_name not in calculated_data:
+            continue
+        
+        calc_df = calculated_data[block_name]
+        
+        for file_path, coil_type in file_list:
+            filename = os.path.basename(file_path)
             logging.info(f"  - Updating: {filename} ({coil_type})... ")
             
             try:
+                # Read file with auto-detect separator
                 try:
                     target_df = pd.read_csv(file_path, sep=',')
                     if len(target_df.columns) < 2:
@@ -1725,20 +2248,24 @@ def update_nav_files_batch(nav_update_path, calculated_data):
                     files_skipped += 1
                     continue
                 
-                if 'Date' in target_df.columns and 'Time' in target_df.columns:
-                    try:
-                        target_df['DateTime'] = pd.to_datetime(target_df['Date'].astype(str) + ' ' + target_df['Time'].astype(str), format='%Y%m%d %H:%M:%S.%f', errors='coerce')
-                        if target_df['DateTime'].isna().sum() > len(target_df) * 0.5:
-                             target_df['DateTime'] = pd.to_datetime(target_df['Date'].astype(str) + ' ' + target_df['Time'].astype(str), format='%d/%m/%Y %H:%M:%S.%f', errors='coerce')
-                    except:
-                         target_df['DateTime'] = pd.to_datetime(target_df['Date'].astype(str) + ' ' + target_df['Time'].astype(str), errors='coerce')
-                else:
+                if 'Date' not in target_df.columns or 'Time' not in target_df.columns:
                     logging.info("Skipped (missing Date/Time columns)")
                     files_skipped += 1
                     continue
                 
-                calc_df = calculated_data[block_name]
+                # Use smart datetime parsing with caching (per file type)
+                cache_key = f"navfile_{block_name}"
+                target_df['DateTime'] = parse_datetime_column_smart(
+                    target_df, 'Date', 'Time', cache_key
+                )
                 
+                # Check if parsing was mostly successful
+                if target_df['DateTime'].isna().sum() > len(target_df) * 0.5:
+                    logging.warning(f"Poor datetime parsing for {filename}")
+                    files_skipped += 1
+                    continue
+                
+                # Prepare source data based on coil type
                 if coil_type == 'CRP':
                     source_df = calc_df[['DateTime', 'CRP_Altitude', 'CRP_Depth']].copy()
                     source_df = source_df.rename(columns={'CRP_Altitude': 'New_Alt', 'CRP_Depth': 'New_Depth'})
@@ -1752,9 +2279,11 @@ def update_nav_files_batch(nav_update_path, calculated_data):
                     files_skipped += 1
                     continue
                 
+                # Sort for merge_asof
                 target_df = target_df.sort_values(by='DateTime').reset_index(drop=True)
                 source_df = source_df.sort_values(by='DateTime').reset_index(drop=True)
                 
+                # Merge by nearest time
                 merged = pd.merge_asof(
                     target_df,
                     source_df[['DateTime', 'New_Alt', 'New_Depth']],
@@ -1763,10 +2292,12 @@ def update_nav_files_batch(nav_update_path, calculated_data):
                     tolerance=pd.Timedelta(seconds=0.5)
                 )
                 
+                # Update values where we have matches
                 mask = merged['New_Alt'].notna()
                 target_df.loc[mask, 'Alt'] = merged.loc[mask, 'New_Alt']
                 target_df.loc[mask, 'Depth'] = merged.loc[mask, 'New_Depth']
                 
+                # Save back (without DateTime column)
                 target_df.drop(columns=['DateTime'], inplace=True)
                 target_df.to_csv(file_path, index=False)
                 
@@ -1785,9 +2316,14 @@ def process_dvl_correction(sql_db_path, z_dvl_offset, output_folder, sql_server_
     Main processing function for DVL altitude correction.
     Returns calculated_data dictionary if successful, None otherwise.
     
+    OPTIMIZED VERSION:
+    - Queries SQL directly for specific block IDs (no full-database fetch)
+    - Skips CSV file I/O - uses DataFrame directly
+    - Uses smart datetime parsing with format caching
+    
     Args:
-        block_ids_str: Optional string of block IDs (e.g., '100-105, 107') to filter SQL data.
-                       If provided, only data for these blocks will be saved to CSV.
+        block_ids_str: String of block IDs (e.g., '100-105, 107') to filter SQL data.
+                       REQUIRED for optimized processing.
     """
     if not sql_db_path:
         logging.error("Please select NaviEdit SQL Database path.")
@@ -1808,64 +2344,102 @@ def process_dvl_correction(sql_db_path, z_dvl_offset, output_folder, sql_server_
     logging.info(f"Folder Filter: {folder_filter}")
     logging.info(f"Formula: Coil_Altitude = (CRP_Altitude + {z_offset}) + CRP_Depth - Coil_Depth")
     
-    # Parse block IDs if provided
+    # Parse block IDs (required for optimized path)
     target_block_ids = None
     if block_ids_str:
         target_block_ids = parse_block_ids(block_ids_str)
         if target_block_ids:
-            logging.info(f"Filtering SQL data for Block IDs: {target_block_ids}")
+            logging.info(f"Querying SQL for Block IDs: {target_block_ids}")
     
     # Step 1: Extract altitude data from SQL database
     logging.info("Step 1: Extracting altitude data from NaviEdit database...")
     
-    if output_folder and os.path.exists(output_folder):
-        altitude_csv_path = os.path.join(output_folder, "TSS_Altitude.csv")
-    else:
-        altitude_csv_path = os.path.join(SCRIPT_DIR, "TSS_Altitude.csv")
-    
-    sql_altitude_df = extract_altitude_from_sql(sql_db_path, altitude_csv_path, folder_filter, sql_server_name)
-    
-    if sql_altitude_df.empty:
-        logging.error("Failed to extract altitude data from database or no data found.")
-        return None
-    
-    logging.info(f"  - Extracted {len(sql_altitude_df)} altitude records from database")
-    
-    # Filter SQL data by block IDs if specified
     if target_block_ids:
-        original_count = len(sql_altitude_df)
-        
-        if 'ID' in sql_altitude_df.columns:
-            # Filter by ID column (exact match)
-            logging.info("  - Filtering by ID column")
-            sql_altitude_df = sql_altitude_df[sql_altitude_df['ID'].isin(target_block_ids)]
-        elif 'Name' in sql_altitude_df.columns:
-            # Filter by Name column (prefix match)
-            logging.info("  - Filtering by Name column (ID column not found)")
-            block_id_strs = [str(bid) for bid in target_block_ids]
-            mask = sql_altitude_df['Name'].astype(str).apply(
-                lambda x: any(x == bid or x.startswith(bid + '_') or x.startswith(bid + '-') for bid in block_id_strs)
-            )
-            sql_altitude_df = sql_altitude_df[mask]
-        
-        logging.info(f"  - Filtered to {len(sql_altitude_df)} records for specified Block IDs (from {original_count})")
+        # OPTIMIZED PATH: Query SQL directly for specific blocks
+        sql_altitude_df = extract_altitude_for_block_ids_direct(sql_db_path, target_block_ids, sql_server_name)
         
         if sql_altitude_df.empty:
-            logging.error(f"No data found for specified Block IDs: {target_block_ids}")
-            if 'ID' in sql_altitude_df.columns:
-                logging.info(f"  - Available IDs: {sql_altitude_df['ID'].unique()[:20]}")
+            # Check if there's detailed error info attached to the DataFrame
+            error_info = sql_altitude_df.attrs.get('error_info', {})
+            error_type = error_info.get('error_type', 'unknown')
+            
+            if error_type == 'block_ids_not_found':
+                not_found = error_info.get('not_found_ids', [])
+                available_ids = error_info.get('available_block_ids', [])
+                available_names = error_info.get('available_block_names', {})
+                
+                # Build user-friendly error message
+                error_msg = "SQL Altitude Extraction Error\n\n"
+                error_msg += f"Requested Block IDs: {target_block_ids}\n\n"
+                
+                if not_found:
+                    error_msg += f"❌ Block IDs NOT found in database:\n   {not_found}\n\n"
+                
+                if available_ids:
+                    # Show available blocks with names (limited to 15 for readability)
+                    error_msg += "Available Block IDs in database:\n"
+                    for i, bid in enumerate(available_ids[:15]):
+                        name = available_names.get(bid, "")
+                        error_msg += f"   {bid}: {name}\n"
+                    if len(available_ids) > 15:
+                        error_msg += f"   ... and {len(available_ids) - 15} more blocks\n"
+                else:
+                    error_msg += "No blocks with altitude data found in database.\n"
+                
+                error_msg += "\nPossible causes:\n"
+                error_msg += "  • Wrong Block ID number entered\n"
+                error_msg += "  • Block exists but has no bathy/altitude data\n"
+                error_msg += "  • Wrong database selected\n"
+                
+                logging.error(error_msg)
+                messagebox.showerror("SQL Extraction Failed", error_msg)
+            
+            elif error_type == 'connection_failed':
+                error_msg = "Database Connection Error\n\n"
+                error_msg += error_info.get('message', 'Could not connect to database')
+                error_msg += "\n\nPossible causes:\n"
+                error_msg += "  • Database file is locked by another application\n"
+                error_msg += "  • SQL Server service is not running\n"
+                error_msg += "  • Wrong database path selected\n"
+                logging.error(error_msg)
+                messagebox.showerror("Database Connection Failed", error_msg)
+            
+            elif error_type == 'database_not_found':
+                error_msg = f"Database Not Found\n\n{error_info.get('message', '')}"
+                logging.error(error_msg)
+                messagebox.showerror("Database Not Found", error_msg)
+            
+            else:
+                # Generic error
+                error_msg = error_info.get('message', f"No altitude data found for Block IDs: {target_block_ids}")
+                logging.error(error_msg)
+                messagebox.showerror("SQL Extraction Failed", error_msg)
+            
             return None
         
-        # Re-save the filtered CSV
-        sql_altitude_df.to_csv(altitude_csv_path, index=False)
-        logging.info(f"  - Saved filtered data to: {altitude_csv_path}")
+        logging.info(f"  - Extracted {len(sql_altitude_df)} altitude records directly from database")
     else:
-        logging.info(f"  - Saved to: {altitude_csv_path}")
-    
-    sql_altitude_df = read_sql_altitude_csv(altitude_csv_path)
-    if sql_altitude_df.empty:
-        logging.error("Failed to read generated altitude CSV.")
-        return None
+        # FALLBACK: Legacy path - extract all then filter (slower for large DBs)
+        logging.warning("No block IDs provided - using slower legacy extraction method")
+        
+        if output_folder and os.path.exists(output_folder):
+            altitude_csv_path = os.path.join(output_folder, "TSS_Altitude.csv")
+        else:
+            altitude_csv_path = os.path.join(SCRIPT_DIR, "TSS_Altitude.csv")
+        
+        sql_altitude_df = extract_altitude_from_sql(sql_db_path, altitude_csv_path, folder_filter, sql_server_name)
+        
+        if sql_altitude_df.empty:
+            logging.error("Failed to extract altitude data from database or no data found.")
+            return None
+        
+        logging.info(f"  - Extracted {len(sql_altitude_df)} altitude records from database")
+        
+        # Read back with proper formatting (legacy path)
+        sql_altitude_df = read_sql_altitude_csv(altitude_csv_path)
+        if sql_altitude_df.empty:
+            logging.error("Failed to read generated altitude CSV.")
+            return None
     
     # Step 2: Read nav depth files
     navdepth_folder = os.path.join(output_folder, "navdepth") if output_folder and os.path.exists(output_folder) else os.path.join(SCRIPT_DIR, "navdepth")
@@ -1887,10 +2461,24 @@ def process_dvl_correction(sql_db_path, z_dvl_offset, output_folder, sql_server_
     # Step 3: Match and calculate altitude
     logging.info("Step 3: Matching data and calculating Coil Altitude...")
     
-    results = match_altitude_with_nav(sql_altitude_df, nav_blocks, z_offset)
+    results = match_altitude_with_nav(sql_altitude_df, nav_blocks, z_offset, target_block_ids)
     
     if not results:
-        logging.error("No data could be matched.")
+        # Provide detailed error message about the mismatch
+        nav_block_names = sorted(nav_blocks.keys())
+        entered_block_ids = target_block_ids if target_block_ids else []
+        
+        error_msg = "Block ID Mismatch Error:\n\n"
+        error_msg += f"Nav files found in folder for blocks:\n  {nav_block_names}\n\n"
+        error_msg += f"Block IDs entered:\n  {entered_block_ids}\n\n"
+        error_msg += "No matching data could be found.\n\n"
+        error_msg += "Please check:\n"
+        error_msg += "  1. Are the Block IDs correct?\n"
+        error_msg += "  2. Do the nav files match those Block IDs?\n"
+        error_msg += "  3. Is the correct folder selected?"
+        
+        logging.error(error_msg)
+        messagebox.showerror("Block ID Mismatch", error_msg)
         return None
     
     # Step 4: Filter and save CSV files
@@ -1920,7 +2508,8 @@ def process_dvl_correction(sql_db_path, z_dvl_offset, output_folder, sql_server_
     for block_name, df in filtered_results.items():
         df_copy = df.copy()
         if 'Date' in df_copy.columns and 'Time' in df_copy.columns:
-            df_copy['DateTime'] = pd.to_datetime(df_copy['Date'] + ' ' + df_copy['Time'], format='%d/%m/%Y %H:%M:%S.%f', errors='coerce')
+            # Use smart datetime parsing with caching
+            df_copy['DateTime'] = parse_datetime_column_smart(df_copy, 'Date', 'Time', f'calc_{block_name}')
             df_copy = df_copy.dropna(subset=['DateTime'])
         calculated_data[block_name] = df_copy
     
@@ -2044,14 +2633,20 @@ def open_sql_settings_dialog():
 def recalculate_tss_altitude():
     """
     Combined function that runs:
-    1. Export Depth from NaviEdit (WFM)
+    1. Export Depth from NaviEdit (WFM) - with automatic completion detection
     2. Calculate TSS Altitude
     3. Update VisualSoft Navigation files
+    
+    OPTIMIZED VERSION:
+    - Automatic WFM completion monitoring (no user interaction needed)
+    - Progress window with step tracking
+    - Direct SQL query for specific blocks
+    - Pre-indexed file lookup
     """
     try:
         # Get settings
         settings = load_settings()
-        block_ids = ne_path_entry.get()
+        block_ids_str = ne_path_entry.get()
         output_folder = folder_entry.get()
         sql_db_path = settings.get('sql_db_path', '')
         z_dvl_offset = settings.get('z_dvl_offset', '0.0')
@@ -2059,7 +2654,7 @@ def recalculate_tss_altitude():
         folder_filter = settings.get('folder_filter', '04_NAVISCAN')
         
         # Validate inputs
-        if not block_ids:
+        if not block_ids_str:
             messagebox.showerror("Error", "Please enter Block IDs.")
             return
         
@@ -2071,10 +2666,18 @@ def recalculate_tss_altitude():
             messagebox.showerror("Error", "Please configure the NaviEdit SQL Database path in SQL Settings.")
             return
         
+        # Parse block IDs
+        block_ids = parse_block_ids(block_ids_str)
+        if not block_ids:
+            messagebox.showerror("Error", "Invalid Block ID format.")
+            return
+        
+        navdepth_folder = os.path.join(output_folder, "navdepth")
+        
         # Ask user to confirm
         result = messagebox.askyesno("Recalculate TSS Altitude", 
             f"This will:\n\n"
-            f"1. Export Depth data from NaviEdit for blocks: {block_ids}\n"
+            f"1. Export Depth data from NaviEdit for blocks: {block_ids_str}\n"
             f"2. Calculate TSS Altitude using offset: {z_dvl_offset}m\n"
             f"3. Update VisualSoft Navigation files in:\n   {output_folder}\n\n"
             f"Continue?")
@@ -2082,104 +2685,188 @@ def recalculate_tss_altitude():
         if not result:
             return
         
-        # Step 1: Run WFM Depth Export
-        logging.info("=== Step 1: Exporting Depth from NaviEdit ===")
-        success = run_wfm_depth_export(block_ids, output_folder)
-        
-        if not success:
-            return
-        
-        # Create custom dialog for WFM wait
-        wfm_dialog = tk.Toplevel(root)
-        wfm_dialog.title("WFM Export Started")
-        wfm_dialog.geometry("450x200")
-        wfm_dialog.transient(root)
-        wfm_dialog.grab_set()
+        # Create progress dialog
+        progress_dialog = tk.Toplevel(root)
+        progress_dialog.title("TSS Altitude Recalculation Progress")
+        progress_dialog.geometry("500x330")
+        progress_dialog.transient(root)
+        progress_dialog.grab_set()
         
         # Center the dialog
         root_x = root.winfo_x()
         root_y = root.winfo_y()
         root_w = root.winfo_width()
         root_h = root.winfo_height()
-        x = root_x + (root_w // 2) - 225
-        y = root_y + (root_h // 2) - 100
-        wfm_dialog.geometry(f"+{x}+{y}")
+        x = root_x + (root_w // 2) - 250
+        y = root_y + (root_h // 2) - 150
+        progress_dialog.geometry(f"+{x}+{y}")
         
-        # Prevent closing with X button during processing
-        wfm_dialog.protocol("WM_DELETE_WINDOW", lambda: None)
+        # Cancel flag for WFM monitoring
+        cancel_flag = [False]
         
-        frame = ttk.Frame(wfm_dialog, padding="20")
+        def on_cancel():
+            cancel_flag[0] = True
+            cancel_button.config(state=tk.DISABLED, text="Cancelling...")
+        
+        def on_dialog_close():
+            if step_status[0] < 3:  # Still processing
+                on_cancel()
+        
+        progress_dialog.protocol("WM_DELETE_WINDOW", on_dialog_close)
+        
+        frame = ttk.Frame(progress_dialog, padding="20")
         frame.pack(fill=tk.BOTH, expand=True)
         
-        # Message label
-        message_label = ttk.Label(frame, text=(
-            "Workflow Manager has been started to export depth data.\n\n"
-            "⚠️ IMPORTANT: Wait for WFM to finish loading and complete\n"
-            "the export before clicking OK.\n\n"
-            "The OK button will be enabled in 5 seconds..."
-        ), wraplength=400, justify=tk.CENTER)
-        message_label.pack(pady=10)
+        # Title
+        title_label = ttk.Label(frame, text="Processing TSS Altitude Recalculation", 
+                                font=('TkDefaultFont', 11, 'bold'))
+        title_label.pack(pady=(0, 15))
         
-        # OK Button (initially disabled)
-        ok_button = ttk.Button(frame, text="OK - Continue with calculation", state=tk.DISABLED)
-        ok_button.pack(pady=10)
+        # Step labels
+        step_labels = []
+        step_frames = []
+        steps = [
+            "Step 1: Export Depth from NaviEdit (WFM)",
+            "Step 2: Calculate TSS Altitude from SQL",
+            "Step 3: Update VisualSoft Navigation Files"
+        ]
         
-        # Variable to track if user clicked OK
-        user_confirmed = [False]
-        countdown = [5]
+        for i, step_text in enumerate(steps):
+            step_frame = ttk.Frame(frame)
+            step_frame.pack(fill=tk.X, pady=5)
+            
+            status_icon = ttk.Label(step_frame, text="⬜", width=3)
+            status_icon.pack(side=tk.LEFT)
+            
+            step_label = ttk.Label(step_frame, text=step_text)
+            step_label.pack(side=tk.LEFT)
+            
+            step_labels.append((status_icon, step_label))
+            step_frames.append(step_frame)
         
-        def update_countdown():
-            if countdown[0] > 0:
-                message_label.config(text=(
-                    "Workflow Manager has been started to export depth data.\n\n"
-                    "⚠️ IMPORTANT: Wait for WFM to finish loading and complete\n"
-                    "the export before clicking OK.\n\n"
-                    f"The OK button will be enabled in {countdown[0]} seconds..."
-                ))
-                countdown[0] -= 1
-                wfm_dialog.after(1000, update_countdown)
-            else:
-                message_label.config(text=(
-                    "Workflow Manager has been started to export depth data.\n\n"
-                    "⚠️ IMPORTANT: Wait for WFM to finish the export,\n"
-                    "then click OK to continue with altitude calculation."
-                ))
-                ok_button.config(state=tk.NORMAL)
+        # Status message
+        status_label = ttk.Label(frame, text="Initializing...", wraplength=450)
+        status_label.pack(pady=15)
         
-        def on_ok_click():
-            user_confirmed[0] = True
-            message_label.config(text=(
-                "⏳ Calculating TSS Altitude...\n\n"
-                "Please wait while the process completes.\n"
-                "This window will close automatically when done."
-            ))
-            ok_button.config(state=tk.DISABLED, text="Processing...")
-            wfm_dialog.update()
+        # Progress bar
+        progress_var = tk.DoubleVar(value=0)
+        progress_bar = ttk.Progressbar(frame, variable=progress_var, maximum=100, length=400)
+        progress_bar.pack(pady=10)
         
-        ok_button.config(command=on_ok_click)
+        # Cancel button
+        cancel_button = ttk.Button(frame, text="Cancel", command=on_cancel)
+        cancel_button.pack(pady=20)
         
-        # Start countdown
-        wfm_dialog.after(1000, update_countdown)
+        # Track current step
+        step_status = [0]  # [current_step_index]
         
-        # Wait for user to click OK
-        while not user_confirmed[0]:
-            wfm_dialog.update()
-            root.update()
+        def update_step(step_idx, status='in_progress'):
+            """Update step status: 'pending', 'in_progress', 'done', 'error'"""
+            icons = {'pending': '⬜', 'in_progress': '🔄', 'done': '✅', 'error': '❌'}
+            if step_idx < len(step_labels):
+                step_labels[step_idx][0].config(text=icons.get(status, '⬜'))
+            progress_dialog.update()
         
-        # Step 2: Calculate TSS Altitude
+        def update_status(message):
+            status_label.config(text=message)
+            progress_dialog.update()
+        
+        def update_progress(pct):
+            progress_var.set(pct)
+            progress_dialog.update()
+        
+        # ===== Step 1: Run WFM Depth Export =====
+        logging.info("=== Step 1: Exporting Depth from NaviEdit ===")
+        update_step(0, 'in_progress')
+        update_status("Starting Workflow Manager...")
+        update_progress(5)
+        
+        # Capture timestamp BEFORE launching WFM - only files modified after this will be considered
+        import time
+        wfm_start_timestamp = time.time()
+        
+        success = run_wfm_depth_export(block_ids_str, output_folder)
+        
+        if not success:
+            update_step(0, 'error')
+            update_status("Failed to start WFM export")
+            progress_dialog.destroy()
+            return
+        
+        # Monitor for WFM completion
+        update_status(f"Waiting for WFM to export {len(block_ids)} blocks...")
+        
+        def wfm_progress_callback(status_message, found, expected):
+            if not cancel_flag[0]:
+                pct = 10 + (30 * found / max(expected, 1))  # 10-40%
+                update_status(status_message)
+                update_progress(pct)
+        
+        wfm_success, found_files, wfm_message = wait_for_wfm_completion(
+            navdepth_folder, 
+            block_ids,
+            timeout_seconds=300,  # 5 minutes timeout
+            poll_interval=2,
+            progress_callback=wfm_progress_callback,
+            cancel_flag=cancel_flag,
+            start_time=wfm_start_timestamp  # Only consider files newer than this
+        )
+        
+        if cancel_flag[0]:
+            update_step(0, 'error')
+            update_status("Cancelled by user")
+            progress_dialog.after(2000, progress_dialog.destroy)
+            return
+        
+        if not wfm_success:
+            update_step(0, 'error')
+            update_status(f"WFM export issue: {wfm_message}")
+            result = messagebox.askyesno("WFM Export Warning", 
+                f"{wfm_message}\n\nDo you want to continue anyway with available files?")
+            if not result:
+                progress_dialog.destroy()
+                return
+        
+        update_step(0, 'done')
+        update_progress(40)
+        
+        # ===== Step 2: Calculate TSS Altitude =====
         logging.info("=== Step 2: Calculating TSS Altitude ===")
-        calculated_data = process_dvl_correction(sql_db_path, z_dvl_offset, output_folder, sql_server_name, folder_filter, block_ids)
+        update_step(1, 'in_progress')
+        update_status("Extracting altitude data from SQL database...")
+        update_progress(45)
         
-        # Close the wait dialog
-        wfm_dialog.destroy()
+        calculated_data = process_dvl_correction(sql_db_path, z_dvl_offset, output_folder, 
+                                                  sql_server_name, folder_filter, block_ids_str)
         
         if calculated_data is None:
+            update_step(1, 'error')
+            update_status("Failed to calculate TSS Altitude")
+            progress_dialog.after(2000, progress_dialog.destroy)
             messagebox.showerror("Error", "Failed to calculate TSS Altitude. Check the log for details.")
             return
         
-        # Step 3: Update VisualSoft Navigation files
+        update_step(1, 'done')
+        update_progress(70)
+        
+        # ===== Step 3: Update VisualSoft Navigation files =====
         logging.info("=== Step 3: Updating VisualSoft Navigation Files ===")
+        update_step(2, 'in_progress')
+        update_status(f"Updating navigation files in {output_folder}...")
+        update_progress(75)
+        
         files_updated, files_skipped = update_nav_files_batch(output_folder, calculated_data)
+        
+        update_step(2, 'done')
+        update_progress(100)
+        step_status[0] = 3  # Mark as complete
+        
+        # Update UI for completion
+        cancel_button.config(state=tk.DISABLED, text="Complete")
+        update_status(f"✅ Done! Updated {files_updated} files, skipped {files_skipped}")
+        
+        # Close progress dialog after delay and show summary
+        progress_dialog.after(1500, progress_dialog.destroy)
         
         # Summary
         messagebox.showinfo("TSS Altitude Recalculation Complete", 
@@ -2358,8 +3045,19 @@ def plot_altitude_depth(source_folder):
         
         canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
         
-        # Add close button
-        ttk.Button(plot_window, text="Close", command=plot_window.destroy).pack(pady=10)
+        # Proper cleanup function to close matplotlib figure before destroying window
+        def on_close():
+            try:
+                plt.close(fig)  # Close the matplotlib figure first
+            except:
+                pass
+            plot_window.destroy()
+        
+        # Add close button with proper cleanup
+        ttk.Button(plot_window, text="Close", command=on_close).pack(pady=10)
+        
+        # Also handle window close button (X) with proper cleanup
+        plot_window.protocol("WM_DELETE_WINDOW", on_close)
         
         logging.info(f"Plot displayed for block: {block_name}")
 
@@ -2735,6 +3433,23 @@ def run_export_script():
         if not os.path.exists(wfm_exe):
              messagebox.showerror("Error", f"Workflow Manager executable not found at {wfm_exe}")
              return
+        
+        # Start the auto-accepter to handle channel selection dialogs for VS Nav exports
+        # Only if auto-clicker is enabled in settings
+        if auto_clicker_var.get():
+            # Each block exports 4 VS Nav files (CRP, PORT, CENTER, STBD) + 1 PTR file = 5 files per block
+            # The auto-accepter will monitor for these files and stop when export is complete
+            expected_files_per_block = 5  # 4 nav files + 1 ptr file
+            total_expected_files = len(block_ids) * expected_files_per_block
+            
+            auto_stop_event, auto_thread = start_wfm_dialog_auto_accepter(
+                duration_seconds=120,  # Max 2 minutes
+                output_folder=output_path,
+                expected_file_count=total_expected_files
+            )
+            logging.info(f"Started WFM dialog auto-accepter (max 2 min, expecting {total_expected_files} files)")
+        else:
+            logging.info("Auto-clicker disabled - user will need to click OK on WFM dialogs manually")
     
         subprocess.Popen([wfm_exe, "-run", temp_xml_path])
         # messagebox.showinfo("Info", f"Export Script started for Block IDs: {block_ids}. Please wait for it to finish.")
@@ -2804,18 +3519,22 @@ def show_altitude():
         
 def close_plots():
     try:
-        plt.close('all')  # Close all open matplotlib plots
+        # Close all open matplotlib plots FIRST before destroying Tkinter windows
+        plt.close('all')
         
         # Also close any Tkinter Toplevel windows that might be holding plots
         # We iterate through all children of root and destroy Toplevels that have "Depth & Altitude" in title
-        for widget in root.winfo_children():
+        for widget in list(root.winfo_children()):  # Use list() to avoid modification during iteration
             if isinstance(widget, tk.Toplevel):
-                if "Depth & Altitude" in widget.title():
-                    widget.destroy()
+                try:
+                    title = widget.title()
+                    if "Depth & Altitude" in title:
+                        widget.destroy()
+                except tk.TclError:
+                    pass  # Window already destroyed
                     
     except Exception as e:
         logging.error(f"Error closing plots: {e}")
-        messagebox.showerror("Error", f"Error closing plots: {e}")
 
 def process():
     try:
@@ -2832,6 +3551,7 @@ def process():
         messagebox.showerror("Error", str(e))
 
 def create_heatmaps_action():
+    import gc  # Import garbage collector for cleanup
     try:
         update_globals()
         save_settings()
@@ -2866,6 +3586,9 @@ def create_heatmaps_action():
             else:
                 logging.warning(f"Skipping Altitude heatmap for {filename}: Missing required columns.")
             
+            # Force garbage collection after heatmap generation to clean up any remaining matplotlib objects
+            gc.collect()
+            
             messagebox.showinfo("Success", "Files processed and heatmaps generated successfully")
 
     except ValueError as e:
@@ -2874,6 +3597,12 @@ def create_heatmaps_action():
     except Exception as e:
         logging.error(f"Unexpected error creating heatmaps: {e}")
         messagebox.showerror("Error", f"Unexpected error: {e}")
+    finally:
+        # Always run garbage collection to clean up matplotlib objects on the main thread
+        try:
+            gc.collect()
+        except:
+            pass
 
 class HeatmapSettingsWindow(tk.Toplevel):
     def __init__(self, parent):
@@ -3015,7 +3744,7 @@ logging.info(f"{SCRIPT_VERSION} started.")
 # Create the main window
 root = tk.Tk()
 root.title(SCRIPT_VERSION)
-root.geometry("1200x600")
+root.geometry("1200x635")
 
 # Load settings
 settings = load_settings()
@@ -3112,9 +3841,13 @@ crp_suffix_entry.insert(0, settings["crp_suffix"])
 use_crp_var = tk.BooleanVar(value=settings.get("use_crp", True))
 ttk.Checkbutton(left_frame, text="Include CRP Navigation", variable=use_crp_var).grid(row=15, column=0, columnspan=2, sticky=tk.W, pady=5)
 
+# Auto-clicker Checkbox (for WFM Export dialogs)
+auto_clicker_var = tk.BooleanVar(value=settings.get("auto_clicker_enabled", True))
+ttk.Checkbutton(left_frame, text="Enable Auto-clicker (WFM Export)", variable=auto_clicker_var).grid(row=16, column=0, columnspan=2, sticky=tk.W, pady=5)
+
 # NE Database Settings Button at bottom of left frame
-ttk.Separator(left_frame, orient='horizontal').grid(row=16, column=0, columnspan=2, sticky="ew", pady=10)
-ttk.Button(left_frame, text="NE Database Settings", command=open_sql_settings_dialog).grid(row=17, column=0, columnspan=2, sticky="ew", pady=5)
+ttk.Separator(left_frame, orient='horizontal').grid(row=17, column=0, columnspan=2, sticky="ew", pady=10)
+ttk.Button(left_frame, text="NE Database Settings", command=open_sql_settings_dialog).grid(row=18, column=0, columnspan=2, sticky="ew", pady=5)
 
 
 # --- Middle Frame: QC Tools ---
@@ -3153,6 +3886,21 @@ ttk.Label(right_frame, text="Heatmap Cell Size (m):").pack(anchor=tk.W, pady=(5,
 cell_size_entry = ttk.Entry(right_frame, width=10)
 cell_size_entry.pack(anchor=tk.W, pady=2)
 cell_size_entry.insert(0, settings["cell_size"])
+
+# Proper cleanup on exit to prevent Tkinter threading issues
+def on_app_closing():
+    """Clean up matplotlib figures and close application properly."""
+    try:
+        plt.close('all')  # Close all matplotlib figures before exiting
+    except:
+        pass
+    try:
+        root.quit()
+        root.destroy()
+    except:
+        pass
+
+root.protocol("WM_DELETE_WINDOW", on_app_closing)
 
 logging.info("Graphic User Interface created. Main loop started.")
 
