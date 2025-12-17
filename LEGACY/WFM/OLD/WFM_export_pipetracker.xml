@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<Setup StateDatabaseLocation="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\WFM\WFM_LOGS\1_WFM_import_export.db">
+    <Log TimingLog="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\WFM\WFM_LOGS\2_Timing_WFM_import_export.csv"/>
+	<Log ErrorLog="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\WFM\WFM_LOGS\3_Error_WFM_import_export.csv"/>
+	<Log InfoLogFile="C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\WFM\WFM_LOGS\4_InfoLogFile_WFM_import_export.txt"/>					
+	<GroupTask name="Export Pipetracker Data">
+        <ExportAsciiTask po="1" name="Export PTR" logKeyword="PTRxport">
+        <NaviEditTask version="1.0">
+            <SqlServer>localhost</SqlServer>
+            <DatabaseName>600090_GOEL_WindMultiplikator</DatabaseName>
+            <Export type="xyp_ptr">
+            <BlockId>
+                53
+            </BlockId>
+
+            <Output>
+                <Location outputMethod="0" prefixKPRange="no" combineFiles="no" sortCombined="no">
+                <Path>C:\Users\Administrator\Documents\Vicente\TSS-FILE-CONVERTER\TEST DATA\WFM_DATA</Path>
+                <AppendPath></AppendPath>
+                </Location>
+
+                <DbFolderUsage createSubdir="no" prefixFileName="no" useAsFilename="no"/>
+                <Options writeHeader="yes" sortKP="no" reduceMethod="0" selectionMethod="0" interval="1.0"/>
+
+            </Output>
+            <Units posScale="1.0" depthScale="1.0"/>
+            <Settings>
+                <!-- type = 0: pipe, type = 1: bathy -->
+                <Pipe type="0" onlyExportGoodValues="true">
+                <!-- The bathy element is only needed if Pipe type 1 is used. Use the zero based sequence number as seen in the HeaderEditor as the seq attribute -->
+                <Bathy seq="1"/>
+                </Pipe>
+            </Settings>
+            </Export>
+        </NaviEditTask>
+        </ExportAsciiTask>
+    </GroupTask>
+</Setup>

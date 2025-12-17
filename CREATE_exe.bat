@@ -10,11 +10,22 @@ if %errorlevel% neq 0 (
 
 echo PyInstaller is installed.
 echo.
-echo Starting the build process for TSSconverter4...
+echo Starting the build process for TSSAutoProcessor...
 echo This may take a few minutes.
 echo.
 
-pyinstaller --noconsole --onefile --clean --name "TSSconverter4" --exclude-module PyQt5 --exclude-module PyQt6 --exclude-module PySide2 --exclude-module PySide6 --exclude-module notebook --exclude-module share --exclude-module scipy TSSconverter4.py
+pyinstaller --noconsole --onefile --clean ^
+ --name "TSSAutoProcessor" ^
+ --add-data "config;config" ^
+ --add-data "WFM_DepthExport.xml;." ^
+ --hidden-import rasterio.sample ^
+ --hidden-import rasterio.vrt ^
+ --hidden-import rasterio._features ^
+ --hidden-import pyodbc ^
+ --exclude-module PyQt5 --exclude-module PyQt6 --exclude-module PySide2 --exclude-module PySide6 ^
+ --exclude-module notebook --exclude-module share ^
+ --exclude-module IPython --exclude-module jupyter --exclude-module hooks --exclude-module test ^
+ 600090_TSSAutoProcessor.py
 
 echo.
 echo Build process completed!

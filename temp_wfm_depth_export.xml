@@ -16,7 +16,7 @@
 
         <GroupTask po="1" name="Data selection and setup">
             <!-- Output Directory -->
-            <SetPropertyTask po="5" name="Set Output Directory" input="Z:/600090_WindMultiplikator_Bard/04_PROC_DATA/01_GOEL/18_SID_OR LINE_BASED_DATA/05_PRELIMINARY_DATA/38_N2-7/A\navdepth" output="OutputDirectory" level="2"/>
+            <SetPropertyTask po="5" name="Set Output Directory" input="Z:/600090_WindMultiplikator_Bard/04_PROC_DATA/01_GOEL/18_SID_OR LINE_BASED_DATA/05_PRELIMINARY_DATA/40_N1-2/C\navdepth" output="OutputDirectory" level="2"/>
             <!-- <SetPropertyTask po="6" name="Define output directory" input="{OutputDirectory}" output="OutputDirectory" level="2"/> -->
         </GroupTask>
 
@@ -28,18 +28,18 @@
         </GroupTask>
 
         <!-- Find Blocks in the specified Job (Folder) -->
-        <GroupTask po="4" name="Export Block_3550">
+        <GroupTask po="4" name="Export Block_3662">
                 
-                <SetTitleTask po="1" name="Set WorkFlow Title" title="Exporting Depth: Block_3550" size="25" red="0" green="255" blue="0" />
+                <SetTitleTask po="1" name="Set WorkFlow Title" title="Exporting Depth: Block_3662" size="25" red="0" green="255" blue="0" />
 
                 <!-- ==================== EXPORT DEPTH NAV - CRP ==================== -->
-                <ExportAsciiTask po="11" name="Block_3550 - Export Depth Nav CRP" logKeyword="DEPTHxport" output=" ">
+                <ExportAsciiTask po="11" name="Block_3662 - Export Depth Nav CRP" logKeyword="DEPTHxport" output=" ">
                     <NaviEditTask version="1.0">
                         <SqlServer>{SqlServer}</SqlServer>
                         <DatabaseName>600090_GOEL_WindMultiplikator</DatabaseName>
                         <Export type="xyz_kpdoldepth">
                             <BlockId>
-                                3550
+                                3662
                             </BlockId>
 
                             <Output>
@@ -64,13 +64,13 @@
                 </ExportAsciiTask>
 
                 <!-- ==================== EXPORT DEPTH NAV - PORT ==================== -->
-                <ExportAsciiTask po="12" name="Block_3550 - Export Depth Nav PORT Coil" logKeyword="DEPTHxport" output=" ">
+                <ExportAsciiTask po="12" name="Block_3662 - Export Depth Nav PORT Coil" logKeyword="DEPTHxport" output=" ">
                     <NaviEditTask version="1.0">
                         <SqlServer>{SqlServer}</SqlServer>
                         <DatabaseName>600090_GOEL_WindMultiplikator</DatabaseName>
                         <Export type="xyz_kpdoldepth">
                             <BlockId>
-                                3550
+                                3662
                             </BlockId>
 
                             <Output>
@@ -95,13 +95,13 @@
                 </ExportAsciiTask>
 
                 <!-- ==================== EXPORT DEPTH NAV - CENTER ==================== -->
-                <ExportAsciiTask po="13" name="Block_3550 - Export Depth Nav CENTER Coil" logKeyword="DEPTHxport" output=" ">
+                <ExportAsciiTask po="13" name="Block_3662 - Export Depth Nav CENTER Coil" logKeyword="DEPTHxport" output=" ">
                     <NaviEditTask version="1.0">
                         <SqlServer>{SqlServer}</SqlServer>
                         <DatabaseName>600090_GOEL_WindMultiplikator</DatabaseName>
                         <Export type="xyz_kpdoldepth">
                             <BlockId>
-                                3550
+                                3662
                             </BlockId>
 
                             <Output>
@@ -126,13 +126,13 @@
                 </ExportAsciiTask>
 
                 <!-- ==================== EXPORT DEPTH NAV - STARBOARD ==================== -->
-                <ExportAsciiTask po="14" name="Block_3550 - Export Depth Nav STARBOARD Coil" logKeyword="DEPTHxport" output=" ">
+                <ExportAsciiTask po="14" name="Block_3662 - Export Depth Nav STARBOARD Coil" logKeyword="DEPTHxport" output=" ">
                     <NaviEditTask version="1.0">
                         <SqlServer>{SqlServer}</SqlServer>
                         <DatabaseName>600090_GOEL_WindMultiplikator</DatabaseName>
                         <Export type="xyz_kpdoldepth">
                             <BlockId>
-                                3550
+                                3662
                             </BlockId>
 
                             <Output>

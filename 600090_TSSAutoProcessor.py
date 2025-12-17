@@ -19,6 +19,7 @@ import subprocess
 import threading
 import re
 import atexit
+import sys
 
 # Import altitude extraction module for DVL Altitude Fixer
 from altitudeFromSQL import extract_altitude_from_sql, extract_altitude_for_block_ids_direct
@@ -176,8 +177,44 @@ DVL_CRP_SUFFIX = "_CRP.nav"
 # WFM Export XML template filename for DVL Altitude Fixer
 WFM_DEPTH_EXPORT_XML = "WFM_DepthExport.xml"
 
-# Script directory (where the script is located)
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+def _get_resource_dir():
+    """Return directory where bundled resources live.
+
+    In PyInstaller onefile, data files are extracted under `sys._MEIPASS`.
+    """
+    if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+        return os.path.abspath(sys._MEIPASS)
+    return os.path.dirname(os.path.abspath(__file__))
+
+
+def _get_app_dir():
+    """Return a persistent directory for user-writable files (config/logs)."""
+    if getattr(sys, 'frozen', False):
+        return os.path.dirname(os.path.abspath(sys.executable))
+    return _get_resource_dir()
+
+
+# Resource directory (read-only packaged files) and app directory (writable)
+RESOURCE_DIR = _get_resource_dir()
+APP_DIR = _get_app_dir()
+
+# Keep existing behavior for resource lookups
+SCRIPT_DIR = RESOURCE_DIR
+
+
+def _ensure_config_file(default_settings=None):
+    """Ensure config folder and settings.json exist; optionally write defaults."""
+    config_dir = os.path.join(APP_DIR, 'config')
+    os.makedirs(config_dir, exist_ok=True)
+
+    config_file = os.path.join(config_dir, 'settings.json')
+    if not os.path.exists(config_file) and default_settings is not None:
+        try:
+            with open(config_file, 'w') as f:
+                json.dump(default_settings, f, indent=4)
+        except Exception as e:
+            logging.error(f"Error creating default settings file: {e}")
+    return config_file
 
 # Color map and boundaries for TSS heatmaps
 COLORS_TSS = ['blue', 'dodgerblue', 'green', 'lime', 'yellow', 'orange', 'red', 'purple', 'pink']
@@ -1225,7 +1262,7 @@ def processFiles(folder_path, tss1_col, tss2_col, tss3_col, output_file, silent=
         messagebox.showerror("Error", f"Error processing files: {e}")
         return None
 
-CONFIG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config', 'settings.json')
+CONFIG_FILE = os.path.join(APP_DIR, 'config', 'settings.json')
 CELL_SIZE = 0.5 # Default
 
 def load_settings():
@@ -1254,6 +1291,10 @@ def load_settings():
         "wfm_ne_db_name": "",
         "wfm_ne_db_server": "localhost"
     }
+
+    # Ensure config folder exists and create settings.json on first run
+    _ensure_config_file(default_settings=defaults)
+
     if os.path.exists(CONFIG_FILE):
         try:
             with open(CONFIG_FILE, 'r') as f:

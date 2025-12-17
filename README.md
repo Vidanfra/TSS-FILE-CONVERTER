@@ -1,18 +1,19 @@
-# **TSS Converter v4.6**
+# **TSS AutoProcessor v4**
 
 ## **Overview**
-TSS Converter v4.6 is a Python-based tool for processing and analyzing **electromagnetic survey data** from **Teledyne Pipetarcker TSS440 and Visualsoft Navigation CSV files** exported from **EIVA NaviEdit**. It extracts, merges, and analyzes **navigation and electromagnetic data** from UXO detection surveys, allowing users to:
+TSS AutoProcessor v4 is a Python-based tool for processing and analyzing **electromagnetic survey data** from **Teledyne Pipetarcker TSS440 and Visualsoft Navigation CSV files** exported from **EIVA NaviEdit**. It extracts, merges, and analyzes **navigation and electromagnetic data** from UXO detection surveys, allowing users to:
+- Export from NaviEdit the pipetracker and navigation data.
 - Process raw **PTR files** and navigation data.
-- Generate **heatmaps** and **quality control plots**.
+- Generate **heatmaps** and **quality control plots of TSS, Altitude and Depth**.
 - Calculate **heading errors** and survey statistics.
 - Export processed data in a structured format.
+- Generate Geotiff and PNG heatmaps
 
 ---
 ## **Installation**
 ### **1. Clone the Repository**
 ```bash
 git clone https://github.com/Vidanfra/TSS-FILE-CONVERTER 
-cd TSSConverter
 ```
 ### **2. Install Required Dependencies**
 Ensure you have Python **3.7+** installed. Install required packages with:
@@ -21,18 +22,18 @@ pip install -r requeriments.txt
 ```
 If `requirements.txt` is missing, install manually:
 ```bash
-pip install pandas matplotlib numpy tk
+pip install pandas matplotlib numpy tk scipy rasterio pyodbc
 ```
 ---
 ## **Usage**
 ### **1. Run the Script**
 Run the script from the command line or a Python environment:
 ```bash
-python TSSconverter4.py
+python 600090_TSSAutoProcessor.py
 ```
-Alternatively, double-click the `TSSconverter v4.6.exe` file to launch the script.
+Alternatively, double-click the `TSSAutoProcessor.exe` file to launch the script.
 
-![alt text](README_images/image.png)
+![alt text](_README_images/GUI.png)
 ### **2. Select Input Data**
 - Click **Browse** to select the folder containing **PTR and CSV files**.
 - Ensure **PTR files** and corresponding **Coil navigation CSV files** are present.
@@ -44,10 +45,32 @@ Alternatively, double-click the `TSSconverter v4.6.exe` file to launch the scrip
 - **Show Map**: Generate a **heatmap** of **TSS electromagnetic values** and **altitude**.
 - **Show Coils**: Plot **TSS values** for each coil.
 - **Heading QC**: Display heading quality control statistics.
+- **Plot Altitude**: Visualize altitude data for all coils.
+- **Plot Depth & Altitude**: Compare depth and altitude profiles.
 
 ### **4. Export Processed Data**
 - The processed data is saved in the selected folder as **BOSSE_XXX_A.txt** (default).
 - Coil peak values are saved separately in **BOSSE_XXX_A_coil_peaks.csv** (default).
+
+### **5. WFM Export & Auto-Clicker**
+The tool includes an automated workflow for exporting data from **EIVA Workflow Manager (WFM)**.
+- **Enable Auto-clicker**: Check this box to automatically accept "Export settings" dialogs in WFM.
+- **NE Database Settings**: Configure the connection to the NaviEdit SQL database to fetch block IDs and altitude data directly.
+- **Run WFM Export**: Initiates the export process for selected blocks. The auto-clicker will handle the repetitive confirmation dialogs, allowing for unattended batch processing.
+
+### **6. Settings & Configuration**
+- **NE Database Settings**:
+  - Connect to the local or remote SQL Server instance containing NaviEdit data.
+  - Select the database and filter for specific run folders (e.g., `04_NAVISCAN`).
+  - Define the **Z DVL Offset** to correct altitude measurements.
+  
+  ![alt text](_README_images/ne_settings.png)
+
+- **Color Heatmap Settings**:
+  - Customize the color palette and value boundaries for TSS and Altitude heatmaps.
+  - Adjust the **Cell Size** for grid interpolation.
+  
+  ![alt text](_README_images/heatmap_settings.png)
 
 ---
 
@@ -55,9 +78,10 @@ Alternatively, double-click the `TSSconverter v4.6.exe` file to launch the scrip
 | File Type  | Naming Format        | Description |
 |------------|---------------------|-------------|
 | PTR File  | `Survey_XYZ.ptr`     | Raw TSS data |
-| Coil 1 Nav | `Survey_XYZ_Coil_1.csv` | Navigation for Coil 1 |
-| Coil 2 Nav | `Survey_XYZ_Coil_2.csv` | Navigation for Coil 2 |
-| Coil 3 Nav | `Survey_XYZ_Coil_3.csv` | Navigation for Coil 3 |
+| Coil 1 Nav | `Survey_XYZ_Coil_port.csv` | Navigation for Coil 1 |
+| Coil 2 Nav | `Survey_XYZ__Coil_center.csv` | Navigation for Coil 2 |
+| Coil 3 Nav | `Survey_XYZ_Coil_stbd.csv` | Navigation for Coil 3 |
+| CRP Nav | `Survey_XYZ_CRP.csv` | Navigation for CRP |
 | Output     | `BOSSE_XXX_A.txt`   | Processed TSS Data |
 | Coil Peaks | `BOSSE_XXX_A_coil_peaks.csv` | Peak values per coil |
 
@@ -73,11 +97,13 @@ Alternatively, double-click the `TSSconverter v4.6.exe` file to launch the scrip
 
 ### ✅ **Analysis & Visualization**
 - **Heatmaps** for **TSS electromagnetic values** and **altitude**.
-![alt text](README_images/image-1.png)
+![alt text](_README_images/image-1.png)
 - **Coil plots** showing TSS variations over time.
-![alt text](README_images/image-2.png)
+![alt text](_README_images/image-2.png)
 - **Heading Quality Control (QC)** with statistical analysis.
-![alt text](README_images/image-3.png)
+![alt text](_README_images/image-3.png)
+- **Altitude & Depth Plots**: Visualize sensor altitude and depth profiles to identify anomalies or data gaps.
+- **Geotiff Export**: Automatically generates **RGB** and **32-bit Float GeoTIFFs** for seamless import into NaviModel or GIS software.
 
 ### ✅ **Error Handling & Logging**
 - **Logs errors and warnings** for missing or inconsistent data.
@@ -86,6 +112,13 @@ Alternatively, double-click the `TSSconverter v4.6.exe` file to launch the scrip
 ---
 
 ## **Troubleshooting**
+### ❓ WFM export fails
+✔ Review that you introduced the correct **Block IDs** (comma-separated or ranges, e.g., `100-105, 107`).
+
+✔ Ensure **NaviEdit** is closed or not locking the database.
+
+✔ Verify that the **SQL Server connection settings** are correct in "NE Database Settings".
+
 ### ❓ Coils position looks swapped in the heatmaps
 ✔ Check that the **coils numbers convention is what is expected** in both files.
 
@@ -106,67 +139,6 @@ Alternatively, double-click the `TSSconverter v4.6.exe` file to launch the scrip
 
 ### ❓ Missing Navigation Files warning
 ✔ Make sure all **three coil navigation CSVs** exist and are named correctly for each **PTR file**.
-
----
-
-## **Building a smaller executable**
-The default requirements now omit SciPy (the only heavy dependency we previously needed solely for `circstd`).
-Combined with a clean build environment and compression, the standalone executable drops from ~2.5 GB to under 150 MB.
-
-### **Quick Build (Recommended)**
-Use the automated PowerShell script that handles everything:
-```powershell
-.\BUILD_CLEAN_EXE.ps1
-```
-
-This script will:
-1. Create a clean virtual environment (`.venv-build`)
-2. Install only the minimal required dependencies
-3. Build the optimized executable with PyInstaller
-4. Report the final size and build time
-5. Leave the environment for debugging (you can delete it manually after)
-
-### **Manual Build (Advanced)**
-If you prefer to build manually or troubleshoot:
-
-1. **Create a clean virtual environment** so PyInstaller only sees the dependencies from `requirements.txt`:
-   ```powershell
-   python -m venv .venv-build
-   .\.venv-build\Scripts\Activate.ps1
-   pip install --upgrade pip
-   pip install pandas numpy matplotlib pyinstaller --no-cache-dir
-   ```
-
-2. **Build using the optimized spec file**:
-   ```powershell
-   pyinstaller TSSconverter4.spec --clean --noconfirm
-   ```
-   
-3. *(Optional but recommended)* **Install [UPX](https://upx.github.io/)** and add it to your `PATH`. PyInstaller will automatically use it to compress DLLs when available.
-
-4. **Deactivate and remove** the temporary environment when you are done to free disk space:
-   ```powershell
-   deactivate
-   Remove-Item .venv-build -Recurse -Force
-   ```
-
-### **Why was my executable 2.5 GB?**
-Large executables typically result from:
-- **Building from your main Python environment** with dozens of unnecessary packages (scipy, jupyter, pytest, etc.)
-- **Debug symbols not stripped** (`strip=False` in spec file)
-- **No bytecode optimization** (`optimize=0` in spec file)
-- **Missing exclusions** for heavy packages like Qt, IPython, scipy
-
-The optimized build configuration (`TSSconverter4.spec`) now:
-- Enables `strip=True` to remove debug symbols
-- Sets `optimize=2` for maximum bytecode optimization
-- Excludes 20+ unnecessary packages that were being auto-detected
-- Uses UPX compression when available
-
-**Expected sizes:**
-- Without optimization: 2-3 GB ❌
-- With clean venv + optimizations: 80-150 MB ✅
-- With UPX compression: 50-100 MB ✅✅---
 
 ## **Contributing**
 Feel free to **fork** this repository, submit **issues**, and open **pull requests** for improvements.
