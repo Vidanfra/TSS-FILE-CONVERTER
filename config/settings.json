@@ -1,10 +1,10 @@
 {
-    "folder_path": "Z:/600090_WindMultiplikator_Bard/04_PROC_DATA/01_GOEL/18_SID_OR LINE_BASED_DATA/05_PRELIMINARY_DATA/40_N1-2/C",
-    "ne_path": "3660",
+    "folder_path": "P:/SAI_600101/04_PROC_DATA/01_OLTA/18_SID_OR LINE_BASED_DATA/Test script",
+    "ne_path": "1-5",
     "tss1_col": "10",
     "tss2_col": "11",
     "tss3_col": "12",
-    "output_file": "N1-2_C.txt",
+    "output_file": "test.txt",
     "coil_port_suffix": "_Coil_port.csv",
     "coil_center_suffix": "_Coil_center.csv",
     "coil_stbd_suffix": "_Coil_stbd.csv",
@@ -62,6 +62,6 @@
     "z_dvl_offset": "0.0",
     "sql_server_name": "RS-GOEL-PVE03",
     "folder_filter": "04_NAVISCAN",
-    "wfm_ne_db_name": "600090_GOEL_WindMultiplikator",
+    "wfm_ne_db_name": "600101_OLTA_SAIPEM_UXO",
     "wfm_ne_db_server": "localhost"
 }
