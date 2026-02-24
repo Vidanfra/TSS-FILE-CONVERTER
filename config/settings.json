@@ -1,6 +1,6 @@
 {
     "folder_path": "P:/SAI_600101/04_PROC_DATA/01_OLTA/14_PYTHON/TSS-FILE-CONVERTER/TEST DATA/83_B14_034_MAG/As_Found/5m",
-    "ne_path": "1-5",
+    "ne_path": "1-5,8,10",
     "tss1_col": "10",
     "tss2_col": "11",
     "tss3_col": "12",
@@ -10,7 +10,7 @@
     "coil_stbd_suffix": "_Coil_3.csv",
     "crp_suffix": "_CRP.csv",
     "cell_size": "0.5",
-    "use_crp": false,
+    "use_crp": true,
     "auto_clicker_enabled": true,
     "colors_tss": [
         "blue",
@@ -39,12 +39,12 @@
         "black",
         "darkblue",
         "green",
-        "limegreen",
-        "lime",
-        "yellow",
-        "orange",
-        "red",
-        "magenta"
+        "#00ff00",
+        "#ffff00",
+        "#ff8040",
+        "#ff0000",
+        "#ff80ff",
+        "#ff00ff"
     ],
     "boundaries_alt": [
         -0.5,

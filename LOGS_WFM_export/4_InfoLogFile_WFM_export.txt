@@ -4198,3 +4198,26 @@
 2026.02.24 - 19.46.04 [ExportAsciiTask] DEBUG (PTRxport) - c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-48f7613b-5664-45e5-936d-335d723493b3.xml Stopped
 2026.02.24 - 19.46.04 [ExportAsciiTask] TIMING () - 0.51
 2026.02.24 - 19.46.04 [ExportAsciiTask] INFO (PTRxport) - Block_5 - Export PTR Stopped with Success
+2026.02.24 - 20.57.28 [SetPropertyTask] INFO () - Set Output Directory Started
+2026.02.24 - 20.57.28 [SetPropertyTask] TIMING () - 0.00
+2026.02.24 - 20.57.28 [SetPropertyTask] INFO () - Set Output Directory Stopped with Success
+2026.02.24 - 20.57.28 [SetPropertyTask] INFO () - CRP ID Started
+2026.02.24 - 20.57.28 [SetPropertyTask] TIMING () - 0.00
+2026.02.24 - 20.57.28 [SetPropertyTask] INFO () - CRP ID Stopped with Success
+2026.02.24 - 20.57.28 [SetPropertyTask] INFO () - PORT ID Started
+2026.02.24 - 20.57.28 [SetPropertyTask] TIMING () - 0.00
+2026.02.24 - 20.57.28 [SetPropertyTask] INFO () - PORT ID Stopped with Success
+2026.02.24 - 20.57.29 [SetPropertyTask] INFO () - CENTER ID Started
+2026.02.24 - 20.57.29 [SetPropertyTask] TIMING () - 0.01
+2026.02.24 - 20.57.29 [SetPropertyTask] INFO () - CENTER ID Stopped with Success
+2026.02.24 - 20.57.29 [SetPropertyTask] INFO () - STBD ID Started
+2026.02.24 - 20.57.29 [SetPropertyTask] TIMING () - 0.00
+2026.02.24 - 20.57.29 [SetPropertyTask] INFO () - STBD ID Stopped with Success
+2026.02.24 - 20.57.30 [SetTitleTask] INFO () - Set WorkFlow Title Started
+2026.02.24 - 20.57.30 [SetTitleTask] TIMING () - 0.01
+2026.02.24 - 20.57.30 [SetTitleTask] INFO () - Set WorkFlow Title Stopped with Success
+2026.02.24 - 20.57.30 [ExportAsciiTask] INFO (NAVxport) - Block_1 - Export Visualsoft Nav CRP Started
+2026.02.24 - 20.57.30 [ExportAsciiTask] DEBUG (NAVxport) - Starting c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-37dca0e2-9acf-41a2-8938-8a60d6f13bad.xml
+2026.02.24 - 20.57.30 [ExportAsciiTask] EXTERNAL (NAVxport) - HDLib.DLL Initializing!
+2026.02.24 - 20.57.30 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0
+2026.02.24 - 20.57.30 [ExportAsciiTask] EXTERNAL (NAVxport) - Opening V6 database '600101_OLTA_SAIPEM_UXO' on server 'localhost'

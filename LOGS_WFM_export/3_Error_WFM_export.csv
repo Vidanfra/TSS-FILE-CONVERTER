@@ -18,3 +18,4 @@ Data;Time;TaskName;Logging Level;Message;Exception; Data;Time;TaskName;Logging L
 2026.02.24;19.45.57;[ExportAsciiTask];ERROR;Should the export continue with possible invalid KPs?;;
 2026.02.24;19.46.04;[ExportAsciiTask];ERROR;No runline found.;;
 2026.02.24;19.46.04;[ExportAsciiTask];ERROR;Should the export continue with possible invalid KPs?;;
+Data;Time;TaskName;Logging Level;Message;Exception; 

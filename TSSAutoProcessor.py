@@ -36,7 +36,7 @@ def _cleanup_matplotlib():
 atexit.register(_cleanup_matplotlib)
 
 # Name of the script version
-SCRIPT_VERSION = "TSS AutoProcessor v.4"
+SCRIPT_VERSION = "TSS AutoProcessor v.5"
 
 # Maximum time difference in seconds
 MAX_TIME_DIFF_SEC = 0.25
