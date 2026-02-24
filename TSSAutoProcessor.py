@@ -1,4 +1,4 @@
-import pandas as pd #pip install pandas
+﻿import pandas as pd #pip install pandas
 import os
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk, colorchooser
@@ -21,8 +21,6 @@ import re
 import atexit
 import sys
 
-# Import altitude extraction module for DVL Altitude Fixer
-from altitudeFromSQL import extract_altitude_from_sql, extract_altitude_for_block_ids_direct
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -168,14 +166,7 @@ COIL_CENTER_SUFFIX = "_Coil_center.csv"    # Center coil
 COIL_STBD_SUFFIX = "_Coil_stbd.csv"      # Starboard coil (NaviEdit convention: Coil 3 = STARBOARD)
 CRP_SUFFIX = "_CRP.csv"               # ROV CRP navigation
 
-# File suffix conventions for DVL Altitude Fixer navigation files (.nav)
-DVL_COIL_PORT_SUFFIX = "_Coil_port.nav"
-DVL_COIL_CENTER_SUFFIX = "_Coil_center.nav"
-DVL_COIL_STBD_SUFFIX = "_Coil_stbd.nav"
-DVL_CRP_SUFFIX = "_CRP.nav"
-
-# WFM Export XML template filenames
-WFM_DEPTH_EXPORT_XML = "WFM_DepthExport.xml"
+# WFM Export XML template filename
 WFM_EXPORT_XML = os.path.join('config', 'WFM_Export.xml')
 
 def _get_resource_dir():
@@ -1285,10 +1276,6 @@ def load_settings():
         "boundaries_tss": BOUNDARIES_TSS,
         "colors_alt": COLORS_ALT,
         "boundaries_alt": BOUNDARIES_ALT,
-        "sql_db_path": "",
-        "z_dvl_offset": "0.0",
-        "sql_server_name": "localhost",
-        "folder_filter": "04_NAVISCAN",
         "wfm_ne_db_name": "",
         "wfm_ne_db_server": "localhost"
     }
@@ -1321,7 +1308,7 @@ def save_settings():
         try:
             with open(CONFIG_FILE, 'r') as f:
                 existing = json.load(f)
-                for key in ['sql_db_path', 'z_dvl_offset', 'sql_server_name', 'folder_filter', 'wfm_ne_db_name', 'wfm_ne_db_server']:
+                for key in ['wfm_ne_db_name', 'wfm_ne_db_server']:
                     if key in existing:
                         existing_sql_settings[key] = existing[key]
         except:
@@ -1357,10 +1344,6 @@ def save_settings():
         logging.info("Settings saved.")
     except Exception as e:
         logging.error(f"Error saving settings: {e}")
-
-# ============================================================================
-# DVL Altitude Fixer Functions
-# ============================================================================
 
 # ============================================================================
 # WFM Dialog Auto-Accepter (for automatic channel selection)
@@ -1554,13 +1537,6 @@ def start_wfm_dialog_auto_accepter(duration_seconds=120, stop_event=None, output
     return stop_event, thread
 
 
-def stop_wfm_auto_accepter(stop_event):
-    """Stop the WFM dialog auto-accepter thread."""
-    if stop_event:
-        stop_event.set()
-        logging.info("WFM Auto-Accepter: Stop signal sent")
-
-
 def parse_block_ids(block_ids_str):
     """
     Parse block IDs from a string in the format '100-105, 107'.
@@ -1582,988 +1558,13 @@ def parse_block_ids(block_ids_str):
     return block_ids
 
 
-def get_expected_wfm_output_files(navdepth_folder, block_ids):
-    """
-    Get list of expected output files from WFM depth export.
-    WFM exports 4 files per block: _CRP.nav, _Coil_port.nav, _Coil_center.nav, _Coil_stbd.nav
-    
-    Args:
-        navdepth_folder: Path to navdepth output folder
-        block_ids: List of block IDs being exported
-    
-    Returns:
-        List of expected file paths (CRP files only - these are sufficient to detect completion)
-    """
-    expected_files = []
-    for bid in block_ids:
-        # We only check for CRP files as the primary indicator
-        # WFM creates files with the block name from the database
-        # Pattern is like: BlockName_CRP.nav
-        crp_pattern = os.path.join(navdepth_folder, f"*{DVL_CRP_SUFFIX}")
-        expected_files.append((bid, crp_pattern))
-    return expected_files
-
-
-def wait_for_wfm_completion(navdepth_folder, block_ids, timeout_seconds=300, poll_interval=2, 
-                            progress_callback=None, cancel_flag=None, start_time=None):
-    """
-    Monitor navdepth folder for WFM output file completion.
-    
-    Args:
-        navdepth_folder: Path to the navdepth output folder
-        block_ids: List of block IDs being exported
-        timeout_seconds: Maximum time to wait (default 5 minutes)
-        poll_interval: How often to check (default 2 seconds)
-        progress_callback: Optional callback function(status_message, found_count, expected_count)
-        cancel_flag: Optional list [bool] that can be set to [True] to cancel waiting
-        start_time: Timestamp when the export was initiated. Only files modified after this time
-                    will be considered. If None, uses current time (for backwards compatibility).
-    
-    Returns:
-        (success: bool, found_files: list, message: str)
-    """
-    import time
-    import glob
-    
-    process_start_time = time.time()
-    
-    # Use provided start_time or default to now (minus a small buffer for clock skew)
-    if start_time is None:
-        file_cutoff_time = process_start_time - 2  # 2 second buffer
-    else:
-        file_cutoff_time = start_time - 2  # 2 second buffer for clock skew
-    
-    expected_count = len(block_ids)
-    
-    # Track files and their sizes for stability checking
-    file_sizes = {}
-    stable_count = 0
-    required_stable_checks = 2  # File must have same size for 2 consecutive checks
-    
-    logging.info(f"Waiting for WFM to export {expected_count} blocks to {navdepth_folder}...")
-    logging.info(f"Only considering files modified after: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(file_cutoff_time))}")
-    
-    while True:
-        elapsed = time.time() - process_start_time
-        
-        # Check for cancellation
-        if cancel_flag and cancel_flag[0]:
-            return False, [], "Cancelled by user"
-        
-        # Check for timeout
-        if elapsed > timeout_seconds:
-            all_files = glob.glob(os.path.join(navdepth_folder, f"*{DVL_CRP_SUFFIX}"))
-            new_files = [f for f in all_files if os.path.getmtime(f) > file_cutoff_time]
-            return False, new_files, f"Timeout after {timeout_seconds}s. Found {len(new_files)} new files of {expected_count} expected."
-        
-        # Find all CRP files in navdepth folder
-        all_crp_files = glob.glob(os.path.join(navdepth_folder, f"*{DVL_CRP_SUFFIX}"))
-        
-        # Filter to only files modified AFTER the start time
-        current_files = []
-        for f in all_crp_files:
-            try:
-                file_mtime = os.path.getmtime(f)
-                if file_mtime > file_cutoff_time:
-                    current_files.append(f)
-            except OSError:
-                continue
-        
-        found_count = len(current_files)
-        
-        # Check file stability (sizes not changing)
-        all_stable = True
-        for f in current_files:
-            try:
-                current_size = os.path.getsize(f)
-                prev_size = file_sizes.get(f, -1)
-                
-                if current_size != prev_size:
-                    file_sizes[f] = current_size
-                    all_stable = False
-            except OSError:
-                all_stable = False
-        
-        # Update progress
-        if progress_callback:
-            status = f"Found {found_count}/{expected_count} NEW files ({int(elapsed)}s elapsed)"
-            if all_stable and found_count >= expected_count:
-                status += " - Verifying stability..."
-            progress_callback(status, found_count, expected_count)
-        
-        # Check if we have all expected files and they are stable
-        if found_count >= expected_count:
-            if all_stable:
-                stable_count += 1
-                if stable_count >= required_stable_checks:
-                    logging.info(f"WFM export complete: {found_count} new files found and stable")
-                    return True, current_files, f"Found {found_count} files"
-            else:
-                stable_count = 0  # Reset if files changed
-        
-        time.sleep(poll_interval)
-    
-    return False, [], "Unknown error"
-
-
-def run_wfm_depth_export(block_ids_str, output_folder):
-    """
-    Run the WFM Depth Export script with the specified block IDs.
-    Exports files to the 'navdepth' folder in the specified output folder.
-    """
-    # Load settings for WFM database configuration
-    settings = load_settings()
-    wfm_db_name = settings.get('wfm_ne_db_name', '')
-    wfm_db_server = settings.get('wfm_ne_db_server', 'localhost')
-    
-    # Validate WFM database settings
-    if not wfm_db_name:
-        messagebox.showerror("Error", "Please configure the WFM NE Database Name in NE Database Settings.")
-        return False
-    
-    # Parse block IDs
-    block_ids = parse_block_ids(block_ids_str)
-    if not block_ids:
-        messagebox.showerror("Error", "Invalid Block ID format. Use comma separated numbers or ranges (e.g. 100-105, 107).")
-        return False
-    
-    # Create navdepth output folder
-    if output_folder and os.path.exists(output_folder):
-        navdepth_folder = os.path.join(output_folder, "navdepth")
-    else:
-        navdepth_folder = os.path.join(SCRIPT_DIR, "navdepth")
-        
-    if not os.path.exists(navdepth_folder):
-        try:
-            os.makedirs(navdepth_folder)
-            logging.info(f"Created navdepth folder: {navdepth_folder}")
-        except Exception as e:
-            messagebox.showerror("Error", f"Could not create navdepth folder: {e}")
-            return False
-    
-    # Path to the XML template
-    xml_path = os.path.join(SCRIPT_DIR, WFM_DEPTH_EXPORT_XML)
-    
-    if not os.path.exists(xml_path):
-        messagebox.showerror("Error", f"WFM XML template not found at {xml_path}")
-        return False
-    
-    try:
-        with open(xml_path, 'r') as f:
-            xml_content = f.read()
-        
-        # Replace InputTask with SetPropertyTask for OutputDirectory
-        target_output_str = 'name="Select OUTPUT folder (for Depth Nav exports)" output="OutputDirectory" AskForInput="true" Message="Select OUTPUT folder (for Depth Nav exports)"/>'
-        replacement_output_str = f'name="Set Output Directory" input="{navdepth_folder}" output="OutputDirectory" level="2"/>'
-        
-        if target_output_str in xml_content:
-            xml_content = xml_content.replace(
-                f'<InputTask po="5" {target_output_str}',
-                f'<SetPropertyTask po="5" {replacement_output_str}'
-            )
-        
-        # Comment out redundant SetPropertyTask po="6"
-        target_po6 = '<SetPropertyTask po="6" name="Define output directory" input="{OutputDirectory}" output="OutputDirectory" level="2"/>'
-        if target_po6 in xml_content:
-            xml_content = xml_content.replace(target_po6, f'<!-- {target_po6} -->')
-        
-        # --- INJECT WFM DATABASE SETTINGS ---
-        # Replace SqlServer (use regex to handle any existing server value)
-        xml_content = re.sub(r'<SqlServer>[^<]*</SqlServer>', f'<SqlServer>{wfm_db_server}</SqlServer>', xml_content)
-        # Replace DatabaseName (the placeholder in the template)
-        xml_content = re.sub(r'<DatabaseName>[^<]*</DatabaseName>', f'<DatabaseName>{wfm_db_name}</DatabaseName>', xml_content)
-        
-        logging.info(f"WFM Database: {wfm_db_name} on server {wfm_db_server}")
-        
-        # --- DYNAMICALLY GENERATE EXPORT TASKS FOR EACH BLOCK ID ---
-        start_marker = '<FindBlocksTask po="4" name="Iterate Blocks in Job" output="Block">'
-        end_marker = '</FindBlocksTask>'
-        
-        start_idx = xml_content.find(start_marker)
-        end_idx = xml_content.find(end_marker)
-        
-        if start_idx != -1 and end_idx != -1:
-            template_start = xml_content.find('<GroupTask po="1" name="Export {Block.name}">', start_idx)
-            last_group_task_end = xml_content.rfind('</GroupTask>', start_idx, end_idx) + len('</GroupTask>')
-            
-            block_template = xml_content[template_start:last_group_task_end]
-            
-            generated_tasks = []
-            for i, bid in enumerate(block_ids):
-                task_xml = block_template
-                task_xml = task_xml.replace('{Block.id}', str(bid))
-                task_xml = task_xml.replace('{Block.name}', f'Block_{bid}')
-                task_xml = task_xml.replace('po="1" name="Export', f'po="{i+4}" name="Export')
-                generated_tasks.append(task_xml)
-            
-            new_content_block = '\n'.join(generated_tasks)
-            full_match_string = xml_content[start_idx:end_idx + len(end_marker)]
-            xml_content = xml_content.replace(full_match_string, new_content_block)
-        
-        # Replace relative log paths with absolute paths
-        logs_dir = os.path.join(SCRIPT_DIR, "LOGS_WFM_DVL_Fixer")
-        if not os.path.exists(logs_dir):
-            try:
-                os.makedirs(logs_dir)
-            except Exception as e:
-                logging.warning(f"Could not create logs directory: {e}")
-        
-        xml_content = xml_content.replace(r'.\LOGS_WFM_DVL_Fixer', logs_dir)
-        
-        # Save to temp file
-        temp_xml_path = os.path.join(SCRIPT_DIR, "temp_wfm_depth_export.xml")
-        with open(temp_xml_path, "w") as f:
-            f.write(xml_content)
-        
-        # Run WFM
-        wfm_exe = r"C:\Eiva\WorkFlowManager\WorkflowManager.exe"
-        if not os.path.exists(wfm_exe):
-            messagebox.showerror("Error", f"Workflow Manager executable not found at {wfm_exe}")
-            return False
-        
-        logging.info(f"Starting WFM Depth Export for Block IDs: {block_ids}")
-        logging.info(f"Output folder: {navdepth_folder}")
-        
-        subprocess.Popen([wfm_exe, "-run", temp_xml_path])
-        
-        logging.info(f"WFM Depth Export started for Block IDs: {block_ids}")
-        return True
-        
-    except Exception as e:
-        messagebox.showerror("Error", f"Failed to run Depth Export script: {e}")
-        logging.error(f"WFM Depth Export error: {e}")
-        return False
-
-
-def read_sql_altitude_csv(file_path):
-    """
-    Read the SQL Altitude CSV file and extract the 'Altitude' column.
-    Returns a DataFrame with CRP Altitude data with parsed datetime.
-    """
-    if not os.path.exists(file_path):
-        logging.error(f"SQL Altitude CSV file not found: {file_path}")
-        return pd.DataFrame()
-    
-    try:
-        df = pd.read_csv(file_path)
-        if 'Altitude' not in df.columns:
-            logging.error(f"'Altitude' column not found in {file_path}")
-            logging.info(f"Available columns: {df.columns.tolist()}")
-            return pd.DataFrame()
-        
-        relevant_cols = ['ID', 'Name', 'Folder', 'Time', 'RelTime', 'Depth', 'Altitude']
-        existing_cols = [col for col in relevant_cols if col in df.columns]
-        df = df[existing_cols].copy()
-        df.rename(columns={'Altitude': 'CRP_Altitude', 'Depth': 'SQL_Depth'}, inplace=True)
-        
-        if 'Name' in df.columns:
-            df['Name'] = df['Name'].astype(str)
-        
-        if 'Time' in df.columns:
-            df['DateTime'] = pd.to_datetime(df['Time'], format='%Y-%m-%d %H:%M:%S.%f')
-            df = df.sort_values(by='DateTime')
-        
-        logging.info(f"Successfully read SQL Altitude CSV: {len(df)} rows")
-        return df
-    except Exception as e:
-        logging.error(f"Error reading SQL Altitude CSV: {e}")
-        return pd.DataFrame()
-
-
-def read_nav_file_with_time_dvl(file_path):
-    """
-    Read a VisualSoft .nav file and extract the 'DEPTH' column with time parsing.
-    Returns a DataFrame with depth data and parsed datetime.
-    """
-    if not os.path.exists(file_path):
-        logging.warning(f"Nav file not found: {file_path}")
-        return pd.DataFrame()
-    
-    try:
-        df = pd.read_csv(file_path, delimiter=',')
-        df.columns = df.columns.str.strip().str.upper()
-        
-        if 'DEPTH' not in df.columns:
-            logging.warning(f"'DEPTH' column not found in {file_path}")
-            logging.info(f"Available columns: {df.columns.tolist()}")
-            return pd.DataFrame()
-        
-        date_col = 'DATE' if 'DATE' in df.columns else None
-        time_col = None
-        if 'TIME' in df.columns:
-            time_col = 'TIME'
-        elif 'HH:MM:SS.SSS' in df.columns:
-            time_col = 'HH:MM:SS.SSS'
-        
-        if date_col and time_col:
-            try:
-                df['DateTime'] = pd.to_datetime(
-                    df[date_col].astype(str) + ' ' + df[time_col].astype(str), 
-                    format='%Y%m%d %H:%M:%S.%f'
-                )
-            except:
-                try:
-                    df['DateTime'] = pd.to_datetime(
-                        df[date_col].astype(str) + ' ' + df[time_col].astype(str), 
-                        format='%d/%m/%Y %H:%M:%S.%f'
-                    )
-                except Exception as e:
-                    logging.warning(f"Could not parse datetime in {file_path}: {e}")
-                    return pd.DataFrame()
-            
-            df = df.sort_values(by='DateTime')
-            df['Date'] = df['DateTime'].dt.strftime('%d/%m/%Y')
-        
-        df['Source_File'] = os.path.basename(file_path)
-        
-        logging.info(f"Successfully read nav file: {os.path.basename(file_path)} - {len(df)} rows")
-        return df
-    except Exception as e:
-        logging.error(f"Error reading nav file {file_path}: {e}")
-        return pd.DataFrame()
-
-
-def find_nav_files_dvl(navdepth_folder, suffix):
-    """
-    Find all nav files in the navdepth folder with the given suffix.
-    Returns a list of file paths.
-    """
-    if not os.path.exists(navdepth_folder):
-        logging.error(f"Navdepth folder not found: {navdepth_folder}")
-        return []
-    
-    if not os.path.isdir(navdepth_folder):
-        logging.error(f"Path is not a directory: {navdepth_folder}")
-        return []
-    
-    nav_files = []
-    for filename in os.listdir(navdepth_folder):
-        if filename.endswith(suffix):
-            nav_files.append(os.path.join(navdepth_folder, filename))
-    
-    logging.info(f"Found {len(nav_files)} files with suffix '{suffix}' in {navdepth_folder}")
-    return nav_files
-
-
-def get_block_name_from_file(filename, suffix):
-    """Extract block name from a nav file name by removing the suffix."""
-    return filename.replace(suffix, '')
-
-
-def read_nav_files_by_block(navdepth_folder):
-    """
-    Read all nav files and organize them by block name.
-    Returns a dictionary: {block_name: {'CRP': df, 'Coil_Port': df, 'Coil_Center': df, 'Coil_Stbd': df}}
-    """
-    blocks = {}
-    
-    crp_files = find_nav_files_dvl(navdepth_folder, DVL_CRP_SUFFIX)
-    
-    for crp_file in crp_files:
-        block_name = get_block_name_from_file(os.path.basename(crp_file), DVL_CRP_SUFFIX)
-        
-        blocks[block_name] = {
-            'CRP': pd.DataFrame(),
-            'Coil_Port': pd.DataFrame(),
-            'Coil_Center': pd.DataFrame(),
-            'Coil_Stbd': pd.DataFrame()
-        }
-        
-        crp_df = read_nav_file_with_time_dvl(crp_file)
-        if not crp_df.empty:
-            blocks[block_name]['CRP'] = crp_df
-        
-        port_file = os.path.join(navdepth_folder, block_name + DVL_COIL_PORT_SUFFIX)
-        if os.path.exists(port_file):
-            port_df = read_nav_file_with_time_dvl(port_file)
-            if not port_df.empty:
-                blocks[block_name]['Coil_Port'] = port_df
-        
-        center_file = os.path.join(navdepth_folder, block_name + DVL_COIL_CENTER_SUFFIX)
-        if os.path.exists(center_file):
-            center_df = read_nav_file_with_time_dvl(center_file)
-            if not center_df.empty:
-                blocks[block_name]['Coil_Center'] = center_df
-        
-        stbd_file = os.path.join(navdepth_folder, block_name + DVL_COIL_STBD_SUFFIX)
-        if os.path.exists(stbd_file):
-            stbd_df = read_nav_file_with_time_dvl(stbd_file)
-            if not stbd_df.empty:
-                blocks[block_name]['Coil_Stbd'] = stbd_df
-    
-    logging.info(f"Found {len(blocks)} blocks in navdepth folder")
-    return blocks
-
-
-def match_altitude_with_nav(sql_altitude_df, nav_blocks, z_dvl_offset, expected_block_ids=None):
-    """
-    Match SQL Altitude data with nav depth data by time using CRP as reference.
-    Calculates Coil Altitude = (CRP Altitude + DVL offset) + CRP Depth - Coil Depth
-    Returns a dictionary: {block_name: merged_dataframe}
-    
-    Args:
-        sql_altitude_df: DataFrame with SQL altitude data
-        nav_blocks: Dictionary of nav data organized by block name
-        z_dvl_offset: Z offset value for DVL altitude calculation
-        expected_block_ids: Optional list of expected block IDs (for validation/error messages)
-    """
-    results = {}
-    unmatched_nav_blocks = []  # Nav files without SQL data
-    
-    if sql_altitude_df.empty or 'DateTime' not in sql_altitude_df.columns:
-        logging.error("SQL Altitude DataFrame is empty or missing DateTime column")
-        return results
-    
-    if 'Name' not in sql_altitude_df.columns and 'ID' not in sql_altitude_df.columns:
-        logging.error("SQL Altitude DataFrame is missing 'Name' or 'ID' column for block matching")
-        return results
-    
-    # Get available block names/IDs from SQL data for comparison
-    sql_block_names = set()
-    sql_block_ids = set()
-    if 'Name' in sql_altitude_df.columns:
-        sql_block_names = set(sql_altitude_df['Name'].astype(str).unique())
-    if 'ID' in sql_altitude_df.columns:
-        sql_block_ids = set(sql_altitude_df['ID'].unique())
-    
-    logging.info(f"SQL data contains {len(sql_block_names)} unique block names: {sorted(sql_block_names)[:10]}{'...' if len(sql_block_names) > 10 else ''}")
-    logging.info(f"Nav files contain {len(nav_blocks)} blocks: {sorted(nav_blocks.keys())[:10]}{'...' if len(nav_blocks) > 10 else ''}")
-    
-    for block_name, nav_data in nav_blocks.items():
-        logging.info(f"Processing block: {block_name}")
-        
-        crp_df = nav_data['CRP']
-        if crp_df.empty:
-            logging.info(f"  - Skipping: CRP data empty")
-            continue
-        
-        if 'DateTime' not in crp_df.columns:
-            logging.info(f"  - Skipping: CRP data missing DateTime column")
-            continue
-        
-        # Try to match by Name first (since nav files usually use the timestamp name)
-        sql_block_df = pd.DataFrame()
-        if 'Name' in sql_altitude_df.columns:
-             sql_block_df = sql_altitude_df[sql_altitude_df['Name'].astype(str) == str(block_name)].copy()
-        
-        # If no match by Name, and block_name is numeric, try matching by ID
-        if sql_block_df.empty and 'ID' in sql_altitude_df.columns and block_name.isdigit():
-            sql_block_df = sql_altitude_df[sql_altitude_df['ID'] == int(block_name)].copy()
-        
-        if sql_block_df.empty:
-            logging.warning(f"  - Warning: No matching SQL Altitude data found for block '{block_name}'")
-            unmatched_nav_blocks.append(block_name)
-            continue
-        
-        logging.info(f"  - Found {len(sql_block_df)} SQL Altitude records for this block")
-        
-        crp_df = crp_df.sort_values(by='DateTime').reset_index(drop=True)
-        sql_block_df_sorted = sql_block_df.sort_values(by='DateTime').reset_index(drop=True)
-        
-        merged_crp = pd.merge_asof(
-            crp_df,
-            sql_block_df_sorted[['DateTime', 'CRP_Altitude']],
-            on='DateTime',
-            direction='nearest'
-        )
-        
-        matched_count = merged_crp['CRP_Altitude'].notna().sum()
-        logging.info(f"  - Matched {matched_count} of {len(merged_crp)} records with SQL Altitude")
-        
-        if merged_crp['CRP_Altitude'].isna().all():
-            logging.warning(f"  - Warning: No time-matched SQL Altitude data found for this block")
-            continue
-        
-        merged_crp = merged_crp.rename(columns={'DEPTH': 'CRP_Depth'})
-        
-        if 'Date' not in merged_crp.columns:
-            merged_crp['Date'] = merged_crp['DateTime'].dt.strftime('%d/%m/%Y')
-        
-        coil_dfs = []
-        coil_types = [
-            ('Coil_Port', 'Port', 1),
-            ('Coil_Center', 'Center', 2),
-            ('Coil_Stbd', 'Stbd', 3)
-        ]
-        
-        for coil_key, coil_name, coil_num in coil_types:
-            coil_df = nav_data[coil_key]
-            if coil_df.empty or 'DateTime' not in coil_df.columns:
-                logging.info(f"  - Skipping {coil_name}: data empty or missing DateTime")
-                continue
-            
-            coil_df = coil_df.sort_values(by='DateTime').reset_index(drop=True)
-            
-            merged_coil = pd.merge_asof(
-                merged_crp[['DateTime', 'Date', 'CRP_Depth', 'CRP_Altitude']].copy(),
-                coil_df[['DateTime', 'DEPTH']].rename(columns={'DEPTH': 'Coil_Depth'}),
-                on='DateTime',
-                direction='nearest',
-                tolerance=pd.Timedelta(seconds=MAX_TIME_DIFF_SEC)
-            )
-            
-            merged_coil['Coil'] = coil_num
-            merged_coil['Coil_Name'] = coil_name
-            merged_coil['Coil_Altitude'] = ((merged_coil['CRP_Altitude'] + z_dvl_offset) + merged_coil['CRP_Depth'] - merged_coil['Coil_Depth']).round(2)
-            merged_coil['CRP_Altitude'] = (merged_coil['CRP_Altitude'] + z_dvl_offset).round(2)
-            merged_coil['Time'] = merged_coil['DateTime'].dt.strftime('%H:%M:%S.%f').str[:-3]
-            
-            coil_dfs.append(merged_coil)
-        
-        if coil_dfs:
-            min_len = min(len(df) for df in coil_dfs)
-            coil_dfs = [df.iloc[:min_len].reset_index(drop=True) for df in coil_dfs]
-            
-            interleaved_df = pd.concat(coil_dfs, axis=0).sort_index(kind='merge')
-            interleaved_df = interleaved_df.reset_index(drop=True)
-            
-            column_order = ['Date', 'Time', 'Coil', 'Coil_Name', 'Coil_Depth', 'CRP_Altitude', 'CRP_Depth', 'Coil_Altitude']
-            existing_cols = [col for col in column_order if col in interleaved_df.columns]
-            remaining_cols = [col for col in interleaved_df.columns if col not in column_order and col != 'DateTime']
-            interleaved_df = interleaved_df[existing_cols + remaining_cols]
-            
-            results[block_name] = interleaved_df
-            logging.info(f"  - Successfully processed: {len(interleaved_df)} rows")
-        else:
-            logging.info(f"  - No coil data matched for this block")
-    
-    # Report summary of matching results
-    if unmatched_nav_blocks:
-        logging.warning(f"")
-        logging.warning(f"=== BLOCK MATCHING SUMMARY ===")
-        logging.warning(f"Nav files found for blocks: {sorted(nav_blocks.keys())}")
-        logging.warning(f"Could NOT find SQL data for: {sorted(unmatched_nav_blocks)}")
-        if sql_block_names:
-            logging.warning(f"SQL database contains these block names: {sorted(sql_block_names)[:20]}{'...' if len(sql_block_names) > 20 else ''}")
-        logging.warning(f"")
-        logging.warning(f"POSSIBLE CAUSES:")
-        logging.warning(f"  1. Wrong Block IDs entered (check the Block IDs field)")
-        logging.warning(f"  2. Nav files in folder don't match the entered Block IDs")
-        logging.warning(f"  3. Block names in nav files don't match names in database")
-        logging.warning(f"")
-    
-    return results
-
-
-def save_calculated_altitude_csvs(results, output_folder):
-    """Save the calculated altitude dataframes to CSV files, one per block."""
-    if not os.path.exists(output_folder):
-        try:
-            os.makedirs(output_folder)
-            logging.info(f"Created output folder: {output_folder}")
-        except Exception as e:
-            logging.error(f"Could not create output folder: {e}")
-            return False
-    
-    for block_name, df in results.items():
-        output_file = os.path.join(output_folder, f"{block_name}_calculated_altitude.csv")
-        try:
-            df.to_csv(output_file, index=False)
-            logging.info(f"Saved CSV: {output_file}")
-        except Exception as e:
-            logging.error(f"Error saving CSV {output_file}: {e}")
-    
-    return True
-
-
-def get_file_type_and_block(filename):
-    """
-    Determine block name and coil type from filename.
-    Returns (block_name, coil_type) or (None, None).
-    """
-    name_without_ext = os.path.splitext(filename)[0]
-    name_lower = name_without_ext.lower()
-    
-    block_name = None
-    coil_type = None
-    
-    if name_lower.endswith('_coil_center'):
-        block_name = name_without_ext[:-12]
-        coil_type = 'Center'
-    elif name_lower.endswith('_coil_port'):
-        block_name = name_without_ext[:-10]
-        coil_type = 'Port'
-    elif name_lower.endswith('_coil_stbd'):
-        block_name = name_without_ext[:-10]
-        coil_type = 'Stbd'
-    elif name_lower.endswith('_crp'):
-        block_name = name_without_ext[:-4]
-        coil_type = 'CRP'
-    
-    if block_name:
-        if block_name.lower().endswith('_manual'):
-            block_name = block_name[:-7]
-            
-    return block_name, coil_type
-
-
-def build_nav_file_index(nav_update_path, target_blocks=None):
-    """
-    Pre-build an index of navigation files organized by block name.
-    
-    Args:
-        nav_update_path: Root path to scan for navigation files
-        target_blocks: Optional set of block names to filter for (optimization)
-    
-    Returns:
-        Dictionary: {block_name: [(file_path, coil_type), ...]}
-    """
-    file_index = {}
-    
-    if not nav_update_path or not os.path.exists(nav_update_path):
-        return file_index
-    
-    for root, dirs, files in os.walk(nav_update_path):
-        for filename in files:
-            if not filename.lower().endswith('.csv') and not filename.lower().endswith('.nav'):
-                continue
-            
-            block_name, coil_type = get_file_type_and_block(filename)
-            
-            if not block_name or not coil_type:
-                continue
-            
-            # Skip if not in target blocks (optimization)
-            if target_blocks and block_name not in target_blocks:
-                continue
-            
-            file_path = os.path.join(root, filename)
-            
-            if block_name not in file_index:
-                file_index[block_name] = []
-            file_index[block_name].append((file_path, coil_type))
-    
-    logging.info(f"Built file index: {len(file_index)} blocks, {sum(len(v) for v in file_index.values())} files")
-    return file_index
-
-
-def update_nav_files_batch(nav_update_path, calculated_data):
-    """
-    Update VisualSoft Nav CSV files with calculated Altitude and Depth values.
-    
-    OPTIMIZED VERSION:
-    - Pre-builds file index before processing
-    - Uses smart datetime parsing with format caching
-    - Only processes files for blocks in calculated_data
-    """
-    if not nav_update_path or not os.path.exists(nav_update_path):
-        logging.error("Invalid VisualSoft Nav CSV folder")
-        return 0, 0
-    
-    # Pre-build file index for only the blocks we need
-    target_blocks = set(calculated_data.keys())
-    file_index = build_nav_file_index(nav_update_path, target_blocks)
-    
-    if not file_index:
-        logging.warning("No matching navigation files found")
-        return 0, 0
-    
-    files_updated = 0
-    files_skipped = 0
-    
-    # Process files by block (more efficient - calculated_data is already loaded per block)
-    for block_name, file_list in file_index.items():
-        if block_name not in calculated_data:
-            continue
-        
-        calc_df = calculated_data[block_name]
-        
-        for file_path, coil_type in file_list:
-            filename = os.path.basename(file_path)
-            logging.info(f"  - Updating: {filename} ({coil_type})... ")
-            
-            try:
-                # Read file with auto-detect separator
-                try:
-                    target_df = pd.read_csv(file_path, sep=',')
-                    if len(target_df.columns) < 2:
-                        target_df = pd.read_csv(file_path, sep=';')
-                except:
-                    target_df = pd.read_csv(file_path, sep=None, engine='python')
-                
-                target_df.columns = target_df.columns.str.strip()
-                
-                if 'Alt' not in target_df.columns or 'Depth' not in target_df.columns:
-                    logging.info("Skipped (missing Alt/Depth columns)")
-                    files_skipped += 1
-                    continue
-                
-                if 'Date' not in target_df.columns or 'Time' not in target_df.columns:
-                    logging.info("Skipped (missing Date/Time columns)")
-                    files_skipped += 1
-                    continue
-                
-                # Use smart datetime parsing with caching (per file type)
-                cache_key = f"navfile_{block_name}"
-                target_df['DateTime'] = parse_datetime_column_smart(
-                    target_df, 'Date', 'Time', cache_key
-                )
-                
-                # Check if parsing was mostly successful
-                if target_df['DateTime'].isna().sum() > len(target_df) * 0.5:
-                    logging.warning(f"Poor datetime parsing for {filename}")
-                    files_skipped += 1
-                    continue
-                
-                # Prepare source data based on coil type
-                if coil_type == 'CRP':
-                    source_df = calc_df[['DateTime', 'CRP_Altitude', 'CRP_Depth']].copy()
-                    source_df = source_df.rename(columns={'CRP_Altitude': 'New_Alt', 'CRP_Depth': 'New_Depth'})
-                    source_df = source_df.drop_duplicates(subset=['DateTime'])
-                else:
-                    source_df = calc_df[calc_df['Coil_Name'] == coil_type][['DateTime', 'Coil_Altitude', 'Coil_Depth']].copy()
-                    source_df = source_df.rename(columns={'Coil_Altitude': 'New_Alt', 'Coil_Depth': 'New_Depth'})
-                
-                if source_df.empty:
-                    logging.info(f"Skipped (no calculated data for {coil_type})")
-                    files_skipped += 1
-                    continue
-                
-                # Sort for merge_asof
-                target_df = target_df.sort_values(by='DateTime').reset_index(drop=True)
-                source_df = source_df.sort_values(by='DateTime').reset_index(drop=True)
-                
-                # Merge by nearest time
-                merged = pd.merge_asof(
-                    target_df,
-                    source_df[['DateTime', 'New_Alt', 'New_Depth']],
-                    on='DateTime',
-                    direction='nearest',
-                    tolerance=pd.Timedelta(seconds=0.5)
-                )
-                
-                # Update values where we have matches
-                mask = merged['New_Alt'].notna()
-                target_df.loc[mask, 'Alt'] = merged.loc[mask, 'New_Alt']
-                target_df.loc[mask, 'Depth'] = merged.loc[mask, 'New_Depth']
-                
-                # Save back (without DateTime column)
-                target_df.drop(columns=['DateTime'], inplace=True)
-                target_df.to_csv(file_path, index=False)
-                
-                logging.info(f"Done ({mask.sum()} rows updated)")
-                files_updated += 1
-                    
-            except Exception as e:
-                logging.error(f"Error: {e}")
-                files_skipped += 1
-
-    return files_updated, files_skipped
-
-
-def process_dvl_correction(sql_db_path, z_dvl_offset, output_folder, sql_server_name, folder_filter, block_ids_str=None):
-    """
-    Main processing function for DVL altitude correction.
-    Returns calculated_data dictionary if successful, None otherwise.
-    
-    OPTIMIZED VERSION:
-    - Queries SQL directly for specific block IDs (no full-database fetch)
-    - Skips CSV file I/O - uses DataFrame directly
-    - Uses smart datetime parsing with format caching
-    
-    Args:
-        block_ids_str: String of block IDs (e.g., '100-105, 107') to filter SQL data.
-                       REQUIRED for optimized processing.
-    """
-    if not sql_db_path:
-        logging.error("Please select NaviEdit SQL Database path.")
-        return None
-    
-    if not output_folder:
-        logging.error("Please select an Output Folder.")
-        return None
-    
-    try:
-        z_offset = float(z_dvl_offset)
-    except ValueError:
-        logging.error("Z DVL Offset must be a numeric value.")
-        return None
-    
-    logging.info(f"Z DVL Offset: {z_offset} m")
-    logging.info(f"SQL Server: {sql_server_name}")
-    logging.info(f"Folder Filter: {folder_filter}")
-    logging.info(f"Formula: Coil_Altitude = (CRP_Altitude + {z_offset}) + CRP_Depth - Coil_Depth")
-    
-    # Parse block IDs (required for optimized path)
-    target_block_ids = None
-    if block_ids_str:
-        target_block_ids = parse_block_ids(block_ids_str)
-        if target_block_ids:
-            logging.info(f"Querying SQL for Block IDs: {target_block_ids}")
-    
-    # Step 1: Extract altitude data from SQL database
-    logging.info("Step 1: Extracting altitude data from NaviEdit database...")
-    
-    if target_block_ids:
-        # OPTIMIZED PATH: Query SQL directly for specific blocks
-        sql_altitude_df = extract_altitude_for_block_ids_direct(sql_db_path, target_block_ids, sql_server_name)
-        
-        if sql_altitude_df.empty:
-            # Check if there's detailed error info attached to the DataFrame
-            error_info = sql_altitude_df.attrs.get('error_info', {})
-            error_type = error_info.get('error_type', 'unknown')
-            
-            if error_type == 'block_ids_not_found':
-                not_found = error_info.get('not_found_ids', [])
-                available_ids = error_info.get('available_block_ids', [])
-                available_names = error_info.get('available_block_names', {})
-                
-                # Build user-friendly error message
-                error_msg = "SQL Altitude Extraction Error\n\n"
-                error_msg += f"Requested Block IDs: {target_block_ids}\n\n"
-                
-                if not_found:
-                    error_msg += f"❌ Block IDs NOT found in database:\n   {not_found}\n\n"
-                
-                if available_ids:
-                    # Show available blocks with names (limited to 15 for readability)
-                    error_msg += "Available Block IDs in database:\n"
-                    for i, bid in enumerate(available_ids[:15]):
-                        name = available_names.get(bid, "")
-                        error_msg += f"   {bid}: {name}\n"
-                    if len(available_ids) > 15:
-                        error_msg += f"   ... and {len(available_ids) - 15} more blocks\n"
-                else:
-                    error_msg += "No blocks with altitude data found in database.\n"
-                
-                error_msg += "\nPossible causes:\n"
-                error_msg += "  • Wrong Block ID number entered\n"
-                error_msg += "  • Block exists but has no bathy/altitude data\n"
-                error_msg += "  • Wrong database selected\n"
-                
-                logging.error(error_msg)
-                messagebox.showerror("SQL Extraction Failed", error_msg)
-            
-            elif error_type == 'connection_failed':
-                error_msg = "Database Connection Error\n\n"
-                error_msg += error_info.get('message', 'Could not connect to database')
-                error_msg += "\n\nPossible causes:\n"
-                error_msg += "  • Database file is locked by another application\n"
-                error_msg += "  • SQL Server service is not running\n"
-                error_msg += "  • Wrong database path selected\n"
-                logging.error(error_msg)
-                messagebox.showerror("Database Connection Failed", error_msg)
-            
-            elif error_type == 'database_not_found':
-                error_msg = f"Database Not Found\n\n{error_info.get('message', '')}"
-                logging.error(error_msg)
-                messagebox.showerror("Database Not Found", error_msg)
-            
-            else:
-                # Generic error
-                error_msg = error_info.get('message', f"No altitude data found for Block IDs: {target_block_ids}")
-                logging.error(error_msg)
-                messagebox.showerror("SQL Extraction Failed", error_msg)
-            
-            return None
-        
-        logging.info(f"  - Extracted {len(sql_altitude_df)} altitude records directly from database")
-    else:
-        # FALLBACK: Legacy path - extract all then filter (slower for large DBs)
-        logging.warning("No block IDs provided - using slower legacy extraction method")
-        
-        if output_folder and os.path.exists(output_folder):
-            altitude_csv_path = os.path.join(output_folder, "TSS_Altitude.csv")
-        else:
-            altitude_csv_path = os.path.join(SCRIPT_DIR, "TSS_Altitude.csv")
-        
-        sql_altitude_df = extract_altitude_from_sql(sql_db_path, altitude_csv_path, folder_filter, sql_server_name)
-        
-        if sql_altitude_df.empty:
-            logging.error("Failed to extract altitude data from database or no data found.")
-            return None
-        
-        logging.info(f"  - Extracted {len(sql_altitude_df)} altitude records from database")
-        
-        # Read back with proper formatting (legacy path)
-        sql_altitude_df = read_sql_altitude_csv(altitude_csv_path)
-        if sql_altitude_df.empty:
-            logging.error("Failed to read generated altitude CSV.")
-            return None
-    
-    # Step 2: Read nav depth files
-    navdepth_folder = os.path.join(output_folder, "navdepth") if output_folder and os.path.exists(output_folder) else os.path.join(SCRIPT_DIR, "navdepth")
-    
-    logging.info(f"Step 2: Reading nav depth files from: {navdepth_folder}")
-    
-    if not os.path.exists(navdepth_folder):
-        logging.error(f"Navdepth folder not found: {navdepth_folder}")
-        return None
-    
-    nav_blocks = read_nav_files_by_block(navdepth_folder)
-    
-    if not nav_blocks:
-        logging.error("No nav files found in navdepth folder.")
-        return None
-    
-    logging.info(f"  - Found {len(nav_blocks)} blocks in navdepth folder")
-    
-    # Step 3: Match and calculate altitude
-    logging.info("Step 3: Matching data and calculating Coil Altitude...")
-    
-    results = match_altitude_with_nav(sql_altitude_df, nav_blocks, z_offset, target_block_ids)
-    
-    if not results:
-        # Provide detailed error message about the mismatch
-        nav_block_names = sorted(nav_blocks.keys())
-        entered_block_ids = target_block_ids if target_block_ids else []
-        
-        error_msg = "Block ID Mismatch Error:\n\n"
-        error_msg += f"Nav files found in folder for blocks:\n  {nav_block_names}\n\n"
-        error_msg += f"Block IDs entered:\n  {entered_block_ids}\n\n"
-        error_msg += "No matching data could be found.\n\n"
-        error_msg += "Please check:\n"
-        error_msg += "  1. Are the Block IDs correct?\n"
-        error_msg += "  2. Do the nav files match those Block IDs?\n"
-        error_msg += "  3. Is the correct folder selected?"
-        
-        logging.error(error_msg)
-        messagebox.showerror("Block ID Mismatch", error_msg)
-        return None
-    
-    # Step 4: Filter and save CSV files
-    logging.info(f"Step 4: Saving CSV files to: {output_folder}")
-    
-    existing_blocks = set()
-    if os.path.exists(output_folder):
-        for filename in os.listdir(output_folder):
-            if filename.lower().endswith('.csv') or filename.lower().endswith('.nav'):
-                b_name, _ = get_file_type_and_block(filename)
-                if b_name:
-                    existing_blocks.add(b_name)
-    
-    if existing_blocks:
-        filtered_results = {k: v for k, v in results.items() if k in existing_blocks}
-    else:
-        filtered_results = results
-    
-    if not filtered_results:
-        logging.warning("No matching blocks found in output folder.")
-        return None
-
-    save_calculated_altitude_csvs(filtered_results, output_folder)
-    
-    # Convert results for update_nav_files_batch (needs DateTime column)
-    calculated_data = {}
-    for block_name, df in filtered_results.items():
-        df_copy = df.copy()
-        if 'Date' in df_copy.columns and 'Time' in df_copy.columns:
-            # Use smart datetime parsing with caching
-            df_copy['DateTime'] = parse_datetime_column_smart(df_copy, 'Date', 'Time', f'calc_{block_name}')
-            df_copy = df_copy.dropna(subset=['DateTime'])
-        calculated_data[block_name] = df_copy
-    
-    logging.info("DVL Altitude correction processing completed.")
-    return calculated_data
-
-
 def open_sql_settings_dialog():
-    """Open a dialog to configure NE Database settings."""
+    """Open a dialog to configure WFM NE Database settings."""
     settings = load_settings()
     
     dialog = tk.Toplevel(root)
     dialog.title("NE Database Settings")
-    dialog.geometry("550x480")
+    dialog.geometry("550x220")
     dialog.transient(root)
     dialog.grab_set()
     
@@ -2573,14 +1574,14 @@ def open_sql_settings_dialog():
     root_w = root.winfo_width()
     root_h = root.winfo_height()
     x = root_x + (root_w // 2) - 275
-    y = root_y + (root_h // 2) - 240
+    y = root_y + (root_h // 2) - 110
     dialog.geometry(f"+{x}+{y}")
     
     frame = ttk.Frame(dialog, padding="20")
     frame.pack(fill=tk.BOTH, expand=True)
     
     # === WFM Database Settings Section ===
-    ttk.Label(frame, text="WFM Database Settings", font=("Segoe UI", 10, "bold")).grid(row=0, column=0, columnspan=3, sticky=tk.W, pady=(0, 10))
+    ttk.Label(frame, text="WFM Database Settings", font=("Segoe UI", 10, "bold")).grid(row=0, column=0, columnspan=2, sticky=tk.W, pady=(0, 10))
     
     # WFM NE Database Name
     ttk.Label(frame, text="WFM NE Database Name:").grid(row=1, column=0, sticky=tk.W, pady=5)
@@ -2594,51 +1595,7 @@ def open_sql_settings_dialog():
     wfm_db_server_entry = ttk.Entry(frame, width=40)
     wfm_db_server_entry.grid(row=3, column=1, sticky="ew", padx=5, pady=5)
     wfm_db_server_entry.insert(0, settings.get('wfm_ne_db_server', 'localhost'))
-    ttk.Label(frame, text="(e.g. localhost, RS-GOEL-PVE03)", font=("Segoe UI", 8, "italic")).grid(row=4, column=1, sticky=tk.W, padx=5)
-    
-    ttk.Separator(frame, orient='horizontal').grid(row=5, column=0, columnspan=3, sticky="ew", pady=15)
-    
-    # === SQL Altitude Extraction Settings Section ===
-    ttk.Label(frame, text="SQL Altitude Extraction Settings", font=("Segoe UI", 10, "bold")).grid(row=6, column=0, columnspan=3, sticky=tk.W, pady=(0, 10))
-    
-    # NaviEdit SQL Database Path
-    ttk.Label(frame, text="NaviEdit SQL Database:").grid(row=7, column=0, sticky=tk.W, pady=5)
-    sql_db_entry = ttk.Entry(frame, width=40)
-    sql_db_entry.grid(row=7, column=1, sticky="ew", padx=5, pady=5)
-    sql_db_entry.insert(0, settings.get('sql_db_path', ''))
-    
-    def browse_sql_db():
-        file_path = filedialog.askopenfilename(
-            title="Select NaviEdit SQL Server Database File",
-            filetypes=[("SQL Server Database", "*.mdf"), ("All files", "*.*")]
-        )
-        if file_path:
-            sql_db_entry.delete(0, tk.END)
-            sql_db_entry.insert(0, file_path)
-    
-    ttk.Button(frame, text="Browse", command=browse_sql_db).grid(row=7, column=2, padx=5, pady=5)
-    ttk.Label(frame, text="(Path to NaviEdit .mdf database file)", font=("Segoe UI", 8, "italic")).grid(row=8, column=1, sticky=tk.W, padx=5)
-    
-    # Z DVL Offset
-    ttk.Label(frame, text="Z DVL Offset (m):").grid(row=9, column=0, sticky=tk.W, pady=5)
-    z_offset_entry = ttk.Entry(frame, width=20)
-    z_offset_entry.grid(row=9, column=1, sticky=tk.W, padx=5, pady=5)
-    z_offset_entry.insert(0, settings.get('z_dvl_offset', '0.0'))
-    ttk.Label(frame, text="(Offset to apply to DVL altitude)", font=("Segoe UI", 8, "italic")).grid(row=10, column=1, sticky=tk.W, padx=5)
-    
-    # SQL Server Name
-    ttk.Label(frame, text="SQL Server Name:").grid(row=11, column=0, sticky=tk.W, pady=5)
-    server_entry = ttk.Entry(frame, width=40)
-    server_entry.grid(row=11, column=1, sticky="ew", padx=5, pady=5)
-    server_entry.insert(0, settings.get('sql_server_name', 'localhost'))
-    ttk.Label(frame, text="(e.g. localhost, MYSERVER\\SQLEXPRESS, .)", font=("Segoe UI", 8, "italic")).grid(row=12, column=1, sticky=tk.W, padx=5)
-    
-    # Folder Filter
-    ttk.Label(frame, text="Folder Filter:").grid(row=13, column=0, sticky=tk.W, pady=5)
-    filter_entry = ttk.Entry(frame, width=40)
-    filter_entry.grid(row=13, column=1, sticky="ew", padx=5, pady=5)
-    filter_entry.insert(0, settings.get('folder_filter', '04_NAVISCAN'))
-    ttk.Label(frame, text="(Parent folder name to extract from)", font=("Segoe UI", 8, "italic")).grid(row=14, column=1, sticky=tk.W, padx=5)
+    ttk.Label(frame, text="(e.g. localhost, MYSERVER\\\\SQLEXPRESS)", font=("Segoe UI", 8, "italic")).grid(row=4, column=1, sticky=tk.W, padx=5)
     
     frame.columnconfigure(1, weight=1)
     
@@ -2651,10 +1608,6 @@ def open_sql_settings_dialog():
             
             current_settings['wfm_ne_db_name'] = wfm_db_name_entry.get()
             current_settings['wfm_ne_db_server'] = wfm_db_server_entry.get()
-            current_settings['sql_db_path'] = sql_db_entry.get()
-            current_settings['z_dvl_offset'] = z_offset_entry.get()
-            current_settings['sql_server_name'] = server_entry.get()
-            current_settings['folder_filter'] = filter_entry.get()
             
             os.makedirs(os.path.dirname(CONFIG_FILE), exist_ok=True)
             with open(CONFIG_FILE, 'w') as f:
@@ -2665,458 +1618,220 @@ def open_sql_settings_dialog():
         except Exception as e:
             messagebox.showerror("Error", f"Could not save settings: {e}")
     
-    ttk.Button(frame, text="Save", command=save_and_close).grid(row=15, column=1, pady=20, sticky=tk.E)
+    ttk.Button(frame, text="Save", command=save_and_close).grid(row=5, column=1, pady=20, sticky=tk.E)
     
     dialog.wait_window()
 
 
-def recalculate_tss_altitude():
+def plot_depth_altitude(folder_path, tss1_col, tss2_col, tss3_col, use_crp=True):
     """
-    Combined function that runs:
-    1. Export Depth from NaviEdit (WFM) - with automatic completion detection
-    2. Calculate TSS Altitude
-    3. Update VisualSoft Navigation files
-    
-    OPTIMIZED VERSION:
-    - Automatic WFM completion monitoring (no user interaction needed)
-    - Progress window with step tracking
-    - Direct SQL query for specific blocks
-    - Pre-indexed file lookup
-    """
-    try:
-        # Get settings
-        settings = load_settings()
-        block_ids_str = ne_path_entry.get()
-        output_folder = folder_entry.get()
-        sql_db_path = settings.get('sql_db_path', '')
-        z_dvl_offset = settings.get('z_dvl_offset', '0.0')
-        sql_server_name = settings.get('sql_server_name', 'localhost')
-        folder_filter = settings.get('folder_filter', '04_NAVISCAN')
-        
-        # Validate inputs
-        if not block_ids_str:
-            messagebox.showerror("Error", "Please enter Block IDs.")
-            return
-        
-        if not output_folder:
-            messagebox.showerror("Error", "Please select a Processed Data Folder.")
-            return
-        
-        if not sql_db_path:
-            messagebox.showerror("Error", "Please configure the NaviEdit SQL Database path in SQL Settings.")
-            return
-        
-        # Parse block IDs
-        block_ids = parse_block_ids(block_ids_str)
-        if not block_ids:
-            messagebox.showerror("Error", "Invalid Block ID format.")
-            return
-        
-        navdepth_folder = os.path.join(output_folder, "navdepth")
-        
-        # Ask user to confirm
-        result = messagebox.askyesno("Recalculate TSS Altitude", 
-            f"This will:\n\n"
-            f"1. Export Depth data from NaviEdit for blocks: {block_ids_str}\n"
-            f"2. Calculate TSS Altitude using offset: {z_dvl_offset}m\n"
-            f"3. Update VisualSoft Navigation files in:\n   {output_folder}\n\n"
-            f"Continue?")
-        
-        if not result:
-            return
-        
-        # Create progress dialog
-        progress_dialog = tk.Toplevel(root)
-        progress_dialog.title("TSS Altitude Recalculation Progress")
-        progress_dialog.geometry("500x330")
-        progress_dialog.transient(root)
-        progress_dialog.grab_set()
-        
-        # Center the dialog
-        root_x = root.winfo_x()
-        root_y = root.winfo_y()
-        root_w = root.winfo_width()
-        root_h = root.winfo_height()
-        x = root_x + (root_w // 2) - 250
-        y = root_y + (root_h // 2) - 150
-        progress_dialog.geometry(f"+{x}+{y}")
-        
-        # Cancel flag for WFM monitoring
-        cancel_flag = [False]
-        
-        def on_cancel():
-            cancel_flag[0] = True
-            cancel_button.config(state=tk.DISABLED, text="Cancelling...")
-        
-        def on_dialog_close():
-            if step_status[0] < 3:  # Still processing
-                on_cancel()
-        
-        progress_dialog.protocol("WM_DELETE_WINDOW", on_dialog_close)
-        
-        frame = ttk.Frame(progress_dialog, padding="20")
-        frame.pack(fill=tk.BOTH, expand=True)
-        
-        # Title
-        title_label = ttk.Label(frame, text="Processing TSS Altitude Recalculation", 
-                                font=('TkDefaultFont', 11, 'bold'))
-        title_label.pack(pady=(0, 15))
-        
-        # Step labels
-        step_labels = []
-        step_frames = []
-        steps = [
-            "Step 1: Export Depth from NaviEdit (WFM)",
-            "Step 2: Calculate TSS Altitude from SQL",
-            "Step 3: Update VisualSoft Navigation Files"
-        ]
-        
-        for i, step_text in enumerate(steps):
-            step_frame = ttk.Frame(frame)
-            step_frame.pack(fill=tk.X, pady=5)
-            
-            status_icon = ttk.Label(step_frame, text="⬜", width=3)
-            status_icon.pack(side=tk.LEFT)
-            
-            step_label = ttk.Label(step_frame, text=step_text)
-            step_label.pack(side=tk.LEFT)
-            
-            step_labels.append((status_icon, step_label))
-            step_frames.append(step_frame)
-        
-        # Status message
-        status_label = ttk.Label(frame, text="Initializing...", wraplength=450)
-        status_label.pack(pady=15)
-        
-        # Progress bar
-        progress_var = tk.DoubleVar(value=0)
-        progress_bar = ttk.Progressbar(frame, variable=progress_var, maximum=100, length=400)
-        progress_bar.pack(pady=10)
-        
-        # Cancel button
-        cancel_button = ttk.Button(frame, text="Cancel", command=on_cancel)
-        cancel_button.pack(pady=20)
-        
-        # Track current step
-        step_status = [0]  # [current_step_index]
-        
-        def update_step(step_idx, status='in_progress'):
-            """Update step status: 'pending', 'in_progress', 'done', 'error'"""
-            icons = {'pending': '⬜', 'in_progress': '🔄', 'done': '✅', 'error': '❌'}
-            if step_idx < len(step_labels):
-                step_labels[step_idx][0].config(text=icons.get(status, '⬜'))
-            progress_dialog.update()
-        
-        def update_status(message):
-            status_label.config(text=message)
-            progress_dialog.update()
-        
-        def update_progress(pct):
-            progress_var.set(pct)
-            progress_dialog.update()
-        
-        # ===== Step 1: Run WFM Depth Export =====
-        logging.info("=== Step 1: Exporting Depth from NaviEdit ===")
-        update_step(0, 'in_progress')
-        update_status("Starting Workflow Manager...")
-        update_progress(5)
-        
-        # Capture timestamp BEFORE launching WFM - only files modified after this will be considered
-        import time
-        wfm_start_timestamp = time.time()
-        
-        success = run_wfm_depth_export(block_ids_str, output_folder)
-        
-        if not success:
-            update_step(0, 'error')
-            update_status("Failed to start WFM export")
-            progress_dialog.destroy()
-            return
-        
-        # Monitor for WFM completion
-        update_status(f"Waiting for WFM to export {len(block_ids)} blocks...")
-        
-        def wfm_progress_callback(status_message, found, expected):
-            if not cancel_flag[0]:
-                pct = 10 + (30 * found / max(expected, 1))  # 10-40%
-                update_status(status_message)
-                update_progress(pct)
-        
-        wfm_success, found_files, wfm_message = wait_for_wfm_completion(
-            navdepth_folder, 
-            block_ids,
-            timeout_seconds=300,  # 5 minutes timeout
-            poll_interval=2,
-            progress_callback=wfm_progress_callback,
-            cancel_flag=cancel_flag,
-            start_time=wfm_start_timestamp  # Only consider files newer than this
-        )
-        
-        if cancel_flag[0]:
-            update_step(0, 'error')
-            update_status("Cancelled by user")
-            progress_dialog.after(2000, progress_dialog.destroy)
-            return
-        
-        if not wfm_success:
-            update_step(0, 'error')
-            update_status(f"WFM export issue: {wfm_message}")
-            result = messagebox.askyesno("WFM Export Warning", 
-                f"{wfm_message}\n\nDo you want to continue anyway with available files?")
-            if not result:
-                progress_dialog.destroy()
-                return
-        
-        update_step(0, 'done')
-        update_progress(40)
-        
-        # ===== Step 2: Calculate TSS Altitude =====
-        logging.info("=== Step 2: Calculating TSS Altitude ===")
-        update_step(1, 'in_progress')
-        update_status("Extracting altitude data from SQL database...")
-        update_progress(45)
-        
-        calculated_data = process_dvl_correction(sql_db_path, z_dvl_offset, output_folder, 
-                                                  sql_server_name, folder_filter, block_ids_str)
-        
-        if calculated_data is None:
-            update_step(1, 'error')
-            update_status("Failed to calculate TSS Altitude")
-            progress_dialog.after(2000, progress_dialog.destroy)
-            messagebox.showerror("Error", "Failed to calculate TSS Altitude. Check the log for details.")
-            return
-        
-        update_step(1, 'done')
-        update_progress(70)
-        
-        # ===== Step 3: Update VisualSoft Navigation files =====
-        logging.info("=== Step 3: Updating VisualSoft Navigation Files ===")
-        update_step(2, 'in_progress')
-        update_status(f"Updating navigation files in {output_folder}...")
-        update_progress(75)
-        
-        files_updated, files_skipped = update_nav_files_batch(output_folder, calculated_data)
-        
-        update_step(2, 'done')
-        update_progress(100)
-        step_status[0] = 3  # Mark as complete
-        
-        # Update UI for completion
-        cancel_button.config(state=tk.DISABLED, text="Complete")
-        update_status(f"✅ Done! Updated {files_updated} files, skipped {files_skipped}")
-        
-        # Close progress dialog after delay and show summary
-        progress_dialog.after(1500, progress_dialog.destroy)
-        
-        # Summary
-        messagebox.showinfo("TSS Altitude Recalculation Complete", 
-            f"Process completed successfully!\n\n"
-            f"Files updated: {files_updated}\n"
-            f"Files skipped: {files_skipped}\n\n"
-            f"Calculated altitude CSVs saved to:\n{output_folder}")
-        
-        logging.info(f"=== TSS Altitude Recalculation Complete ===")
-        logging.info(f"Files updated: {files_updated}, Files skipped: {files_skipped}")
-        
-    except Exception as e:
-        logging.error(f"Error during TSS Altitude recalculation: {e}")
-        messagebox.showerror("Error", f"Error during TSS Altitude recalculation: {e}")
-
-
-def plot_altitude_depth(source_folder):
-    """
-    Display a plot with CRP and Center Coil data.
+    Display a plot with Depth and Altitude data from NaviEdit CSV export files.
     X-axis: Time
     Left Y-axis (inverted): Depth values (CRP and Center Coil)
     Right Y-axis (normal): Altitude values (CRP and Center Coil)
     
-    The 0m altitude line aligns with the seabed depth (CRP_Depth + CRP_Altitude from first row).
+    Reads directly from the standard navigation CSV exports (which contain Alt and Depth columns).
     Includes zoom and pan functionality via matplotlib navigation toolbar.
     """
     from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
     
-    if not source_folder or not os.path.exists(source_folder):
-        messagebox.showerror("Error", f"Source folder not found: {source_folder}\nPlease run 'Recalculate TSS Altitude' first.")
-        return
-    
-    csv_files = [f for f in os.listdir(source_folder) if f.endswith('_calculated_altitude.csv')]
-    
-    if not csv_files:
-        messagebox.showerror("Error", "No calculated altitude CSV files found.\nPlease run 'Recalculate TSS Altitude' first.")
-        return
-    
-    logging.info(f"Generating Depth & Altitude plots for {len(csv_files)} files...")
-    
-    for csv_file in csv_files:
-        # Read the CSV file
-        csv_path = os.path.join(source_folder, csv_file)
-        try:
-            df = pd.read_csv(csv_path)
-        except Exception as e:
-            logging.error(f"Error reading {csv_file}: {e}")
-            continue
+    try:
+        # Extract the data from the PTR and Navigation files in the selected folder
+        coil1_df, coil2_df, coil3_df, crp_df = extractData(folder_path, tss1_col, tss2_col, tss3_col, use_crp)
         
-        # Parse Date and Time to create a datetime for plotting
-        if 'Date' in df.columns and 'Time' in df.columns:
-            df['DateTime'] = pd.to_datetime(df['Date'] + ' ' + df['Time'], format='%d/%m/%Y %H:%M:%S.%f')
-        else:
-            logging.warning(f"Skipping {csv_file}: missing Date or Time columns.")
-            continue
+        # Validate extracted data
+        if coil1_df.empty or coil2_df.empty or coil3_df.empty:
+            logging.error("Extracted data is empty. Please check the input files.")
+            raise ValueError("Extracted data is empty. Please check the input files.")
         
-        # Get block name for title
-        block_name = csv_file.replace('_calculated_altitude.csv', '')
+        # Check required columns
+        required_columns = {'Filename', 'Alt', 'Depth', 'Time_PTR'}
+        for label, df in [('Coil 1', coil1_df), ('Coil 2', coil2_df), ('Coil 3', coil3_df)]:
+            missing = required_columns - set(df.columns)
+            if missing:
+                logging.error(f"Missing required columns in {label} data: {missing}")
+                raise ValueError(f"Missing required columns in {label} data: {missing}")
         
-        # Get CRP data (from Center coil rows, since CRP values are repeated for all coils)
-        center_data = df[df['Coil_Name'] == 'Center'].copy()
+        has_crp_data = crp_df is not None and not crp_df.empty and 'Alt' in crp_df.columns and 'Depth' in crp_df.columns
         
-        if center_data.empty:
-            logging.warning(f"Skipping {csv_file}: No Center Coil data found.")
-            continue
+        # Group by filename (each PTR line)
+        for line_name in coil2_df['Filename'].unique():
+            center_data = coil2_df[coil2_df['Filename'] == line_name].copy()
+            
+            if center_data.empty:
+                continue
+            
+            # Use Time_PTR as DateTime
+            center_data['DateTime'] = center_data['Time_PTR']
+            center_data = center_data.dropna(subset=['DateTime'])
+            
+            if center_data.empty:
+                continue
+            
+            block_name = line_name.replace('.ptr', '')
+            
+            # Get CRP data for same line
+            crp_line_data = None
+            if has_crp_data:
+                crp_line_data = crp_df[crp_df['Filename'] == line_name].copy()
+                if not crp_line_data.empty:
+                    crp_line_data['DateTime'] = crp_line_data['Time_PTR']
+                    crp_line_data = crp_line_data.dropna(subset=['DateTime'])
+            
+            # Calculate seabed depth reference from CRP data if available
+            if crp_line_data is not None and not crp_line_data.empty:
+                avg_crp_depth = crp_line_data['Depth'].mean()
+                avg_crp_altitude = crp_line_data['Alt'].mean()
+            else:
+                avg_crp_depth = center_data['Depth'].mean()
+                avg_crp_altitude = center_data['Alt'].mean()
+            
+            seabed_depth = avg_crp_depth + avg_crp_altitude
+            if pd.isna(seabed_depth):
+                logging.warning(f"Could not calculate seabed depth for {block_name} due to missing Alt/Depth data.")
+                continue
+            
+            # Create the plot window
+            plot_window = tk.Toplevel()
+            plot_window.title(f"Depth & Altitude - {block_name}")
+            plot_window.geometry("1300x750")
+            
+            fig, ax1 = plt.subplots(figsize=(14, 7))
+            
+            # Colors
+            crp_depth_color = 'red'
+            crp_alt_color = 'red'
+            coil_depth_color = 'blue'
+            coil_alt_color = 'blue'
+            
+            # Left Y-axis: Depth (inverted)
+            ax1.set_xlabel('Time', fontsize=11)
+            ax1.set_ylabel('Depth (m)', fontsize=11, color='#2c3e50')
+            
+            # Plot Center Coil Depth
+            ax1.plot(center_data['DateTime'], center_data['Depth'],
+                    color=coil_depth_color, linestyle='-', linewidth=1.5, alpha=0.8,
+                    label='Center Coil Depth')
+            
+            # Plot CRP Depth if available
+            if crp_line_data is not None and not crp_line_data.empty:
+                ax1.plot(crp_line_data['DateTime'], crp_line_data['Depth'],
+                        color=crp_depth_color, linestyle='-', linewidth=2.0, alpha=0.9,
+                        label='CRP Depth')
+            
+            # Calculate ranges for both Depth and Altitude to ensure same scale
+            all_depths = center_data['Depth'].dropna()
+            if crp_line_data is not None and not crp_line_data.empty:
+                all_depths = pd.concat([all_depths, crp_line_data['Depth'].dropna()])
+            depth_min, depth_max = all_depths.min(), all_depths.max()
+            
+            all_altitudes = center_data['Alt'].dropna()
+            if crp_line_data is not None and not crp_line_data.empty:
+                all_altitudes = pd.concat([all_altitudes, crp_line_data['Alt'].dropna()])
+            alt_min, alt_max = all_altitudes.min(), all_altitudes.max()
+            
+            # Convert altitude limits to "virtual depth" limits relative to seabed
+            virt_depth_from_alt_max = seabed_depth - alt_max
+            virt_depth_from_alt_min = seabed_depth - alt_min
+            
+            # Determine global depth range covering both datasets
+            global_depth_min = min(depth_min, virt_depth_from_alt_max)
+            global_depth_max = max(depth_max, virt_depth_from_alt_min)
+            
+            span = global_depth_max - global_depth_min
+            if span == 0: span = 1.0
+            padding = span * 0.1
+            
+            plot_depth_min = global_depth_min - padding
+            plot_depth_max = global_depth_max + padding
+            
+            ax1.invert_yaxis()
+            ax1.set_ylim(plot_depth_max, plot_depth_min)
+            ax1.tick_params(axis='y', labelcolor='#2c3e50')
+            ax1.grid(True, alpha=0.3, linestyle='-', linewidth=0.5)
+            
+            # Right Y-axis: Altitude (aligned so 0m = seabed depth)
+            ax2 = ax1.twinx()
+            ax2.set_ylabel('Altitude (m)', fontsize=11, color='#c0392b')
+            
+            # Plot Center Coil Altitude
+            ax2.plot(center_data['DateTime'], center_data['Alt'],
+                    color=coil_alt_color, linestyle=':', linewidth=2.0, alpha=0.9,
+                    label='Center Coil Altitude')
+            
+            # Plot CRP Altitude if available
+            if crp_line_data is not None and not crp_line_data.empty:
+                ax2.plot(crp_line_data['DateTime'], crp_line_data['Alt'],
+                        color=crp_alt_color, linestyle=':', linewidth=2.0, alpha=0.9,
+                        label='CRP Altitude')
+            
+            # Set Altitude limits based on the Depth limits to maintain 1:1 scale
+            plot_alt_min = seabed_depth - plot_depth_max
+            plot_alt_max = seabed_depth - plot_depth_min
+            
+            ax2.set_ylim(plot_alt_min, plot_alt_max)
+            ax2.tick_params(axis='y', labelcolor='#c0392b')
+            
+            # Add horizontal line at 0 altitude (seabed reference)
+            ax2.axhline(y=0, color='#7f8c8d', linestyle='-', linewidth=1, alpha=0.5, label='Seabed (0m)')
+            
+            fig.autofmt_xdate()
+            
+            # Combined legend
+            lines1, labels1 = ax1.get_legend_handles_labels()
+            lines2, labels2 = ax2.get_legend_handles_labels()
+            ax1.legend(lines1 + lines2, labels1 + labels2, loc='upper right', fontsize=10,
+                       framealpha=0.9, edgecolor='#bdc3c7')
+            
+            plt.title(f'CRP & Center Coil - {block_name}\nSeabed Depth: {seabed_depth:.2f}m (Depth + Altitude)',
+                      fontsize=12, fontweight='bold')
+            plt.tight_layout()
+            
+            # Embed in Tkinter window with navigation toolbar for zoom/pan
+            canvas = FigureCanvasTkAgg(fig, master=plot_window)
+            canvas.draw()
+            
+            toolbar_frame = ttk.Frame(plot_window)
+            toolbar_frame.pack(side=tk.TOP, fill=tk.X)
+            toolbar = NavigationToolbar2Tk(canvas, toolbar_frame)
+            toolbar.update()
+            
+            canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+            
+            def on_close(f=fig, w=plot_window):
+                try:
+                    plt.close(f)
+                except:
+                    pass
+                w.destroy()
+            
+            ttk.Button(plot_window, text="Close", command=on_close).pack(pady=10)
+            plot_window.protocol("WM_DELETE_WINDOW", on_close)
+            
+            logging.info(f"Depth & Altitude plot displayed for: {block_name}")
         
-        # Calculate seabed depth from average CRP_Depth + average CRP_Altitude
-        avg_crp_depth = center_data['CRP_Depth'].mean()
-        avg_crp_altitude = center_data['CRP_Altitude'].mean()
-        seabed_depth = avg_crp_depth + avg_crp_altitude
-        
-        # Create the plot window
-        plot_window = tk.Toplevel()
-        plot_window.title(f"Depth & Altitude - {block_name}")
-        plot_window.geometry("1300x750")
-        
-        # Create figure
-        fig, ax1 = plt.subplots(figsize=(14, 7))
-        
-        # Colors
-        crp_depth_color = 'red'
-        crp_alt_color = 'red'
-        coil_depth_color = 'blue'
-        coil_alt_color = 'blue'
-        
-        # Left Y-axis: Depth (inverted)
-        ax1.set_xlabel('Time', fontsize=11)
-        ax1.set_ylabel('Depth (m)', fontsize=11, color='#2c3e50')
-        
-        # Plot CRP Depth (solid line)
-        ax1.plot(center_data['DateTime'], center_data['CRP_Depth'], 
-                color=crp_depth_color, linestyle='-', linewidth=2.0, alpha=0.9,
-                label='CRP Depth')
-        
-        # Plot Center Coil Depth (solid line)
-        ax1.plot(center_data['DateTime'], center_data['Coil_Depth'], 
-                color=coil_depth_color, linestyle='-', linewidth=1.5, alpha=0.8,
-                label='Center Coil Depth')
-        
-        # Calculate ranges for both Depth and Altitude to ensure same scale
-        all_depths = pd.concat([center_data['Coil_Depth'], center_data['CRP_Depth']]).dropna()
-        depth_min, depth_max = all_depths.min(), all_depths.max()
-        
-        all_altitudes = pd.concat([center_data['Coil_Altitude'], center_data['CRP_Altitude']]).dropna()
-        alt_min, alt_max = all_altitudes.min(), all_altitudes.max()
-        
-        # Convert altitude limits to "virtual depth" limits relative to seabed
-        virt_depth_from_alt_max = seabed_depth - alt_max
-        virt_depth_from_alt_min = seabed_depth - alt_min
-        
-        # Determine global depth range covering both datasets
-        global_depth_min = min(depth_min, virt_depth_from_alt_max)
-        global_depth_max = max(depth_max, virt_depth_from_alt_min)
-        
-        # Add padding
-        span = global_depth_max - global_depth_min
-        if span == 0: span = 1.0
-        padding = span * 0.1
-        
-        plot_depth_min = global_depth_min - padding
-        plot_depth_max = global_depth_max + padding
-        
-        # Set Depth Axis (Left, Inverted)
-        ax1.invert_yaxis()
-        ax1.set_ylim(plot_depth_max, plot_depth_min)
-        ax1.tick_params(axis='y', labelcolor='#2c3e50')
-        ax1.grid(True, alpha=0.3, linestyle='-', linewidth=0.5)
-        
-        # Right Y-axis: Altitude (aligned so 0m = seabed depth)
-        ax2 = ax1.twinx()
-        ax2.set_ylabel('Altitude (m)', fontsize=11, color='#c0392b')
-        
-        # Plot CRP Altitude (dotted line)
-        ax2.plot(center_data['DateTime'], center_data['CRP_Altitude'], 
-                color=crp_alt_color, linestyle=':', linewidth=2.0, alpha=0.9,
-                label='CRP Altitude')
-        
-        # Plot Center Coil Altitude (dotted line)
-        ax2.plot(center_data['DateTime'], center_data['Coil_Altitude'], 
-                color=coil_alt_color, linestyle=':', linewidth=2.0, alpha=0.9,
-                label='Center Coil Altitude')
-                
-        # Set Altitude limits based on the Depth limits to maintain 1:1 scale
-        plot_alt_min = seabed_depth - plot_depth_max
-        plot_alt_max = seabed_depth - plot_depth_min
-        
-        ax2.set_ylim(plot_alt_min, plot_alt_max)
-        ax2.tick_params(axis='y', labelcolor='#c0392b')
-        
-        # Add horizontal line at 0 altitude (seabed reference)
-        ax2.axhline(y=0, color='#7f8c8d', linestyle='-', linewidth=1, alpha=0.5, label='Seabed (0m)')
-        
-        # Format x-axis
-        fig.autofmt_xdate()
-        
-        # Create combined legend
-        lines1, labels1 = ax1.get_legend_handles_labels()
-        lines2, labels2 = ax2.get_legend_handles_labels()
-        ax1.legend(lines1 + lines2, labels1 + labels2, loc='upper right', fontsize=10, 
-                   framealpha=0.9, edgecolor='#bdc3c7')
-        
-        # Title with seabed depth info
-        plt.title(f'CRP & Center Coil - Block {block_name}\nSeabed Depth: {seabed_depth:.2f}m (CRP Depth + CRP Altitude)', 
-                  fontsize=12, fontweight='bold')
-        plt.tight_layout()
-        
-        # Embed in Tkinter window with navigation toolbar for zoom/pan
-        canvas = FigureCanvasTkAgg(fig, master=plot_window)
-        canvas.draw()
-        
-        # Add navigation toolbar for zoom and pan functionality
-        toolbar_frame = ttk.Frame(plot_window)
-        toolbar_frame.pack(side=tk.TOP, fill=tk.X)
-        toolbar = NavigationToolbar2Tk(canvas, toolbar_frame)
-        toolbar.update()
-        
-        canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
-        
-        # Proper cleanup function to close matplotlib figure before destroying window
-        def on_close():
-            try:
-                plt.close(fig)  # Close the matplotlib figure first
-            except:
-                pass
-            plot_window.destroy()
-        
-        # Add close button with proper cleanup
-        ttk.Button(plot_window, text="Close", command=on_close).pack(pady=10)
-        
-        # Also handle window close button (X) with proper cleanup
-        plot_window.protocol("WM_DELETE_WINDOW", on_close)
-        
-        logging.info(f"Plot displayed for block: {block_name}")
+    except Exception as e:
+        logging.error(f"Error plotting depth & altitude data: {e}")
+        messagebox.showerror("Error", f"Error plotting depth & altitude data: {e}")
 
 
 def show_depth_altitude():
-    """Show Depth & Altitude plot for calculated altitude CSV files."""
+    """Show Depth & Altitude plot from navigation CSV export files."""
     try:
+        update_globals()
         folder_path = folder_entry.get()
+        tss1_col = tss1_entry.get()
+        tss2_col = tss2_entry.get()
+        tss3_col = tss3_entry.get()
+        use_crp = use_crp_var.get()
         if not folder_path:
             messagebox.showerror("Error", "Please select a Processed Data Folder first.")
             return
-        plot_altitude_depth(folder_path)
+        plot_depth_altitude(folder_path, tss1_col, tss2_col, tss3_col, use_crp)
     except Exception as e:
         logging.error(f"Error plotting depth & altitude: {e}")
         messagebox.showerror("Error", str(e))
 
-# ============================================================================
-# End of DVL Altitude Fixer Functions
-# ============================================================================
 
 def update_globals():
     global COIL_PORT_SUFFIX, COIL_CENTER_SUFFIX, COIL_STBD_SUFFIX, CRP_SUFFIX, CELL_SIZE
@@ -3577,11 +2292,10 @@ def show_altitude():
         
 def close_plots():
     try:
-        # Close all open matplotlib plots FIRST before destroying Tkinter windows
+        # Close all open matplotlib plots
         plt.close('all')
         
         # Also close any Tkinter Toplevel windows that might be holding plots
-        # We iterate through all children of root and destroy Toplevels that have "Depth & Altitude" in title
         for widget in list(root.winfo_children()):  # Use list() to avoid modification during iteration
             if isinstance(widget, tk.Toplevel):
                 try:
@@ -3852,60 +2566,57 @@ left_frame.columnconfigure(0, weight=1) # Make entry expand
 # Export Data from NE Button (renamed from Run Export Script)
 ttk.Button(left_frame, text="Export Data from NE", command=run_export_script).grid(row=4, column=0, columnspan=2, sticky="ew", pady=(5, 2))
 
-# Recalculate TSS Altitude Button
-ttk.Button(left_frame, text="Recalculate TSS Altitude", command=recalculate_tss_altitude).grid(row=5, column=0, columnspan=2, sticky="ew", pady=(2, 10))
-
 # Column Settings
-ttk.Label(left_frame, text="Coil 1 (Starboard) Column:").grid(row=6, column=0, sticky=tk.W, pady=2)
+ttk.Label(left_frame, text="Coil 1 (Starboard) Column:").grid(row=5, column=0, sticky=tk.W, pady=2)
 tss1_entry = ttk.Entry(left_frame, width=10)
-tss1_entry.grid(row=6, column=1, sticky=tk.W, pady=2)
+tss1_entry.grid(row=5, column=1, sticky=tk.W, pady=2)
 tss1_entry.insert(0, settings["tss1_col"])
 
-ttk.Label(left_frame, text="Coil 2 (Center) Column:").grid(row=7, column=0, sticky=tk.W, pady=2)
+ttk.Label(left_frame, text="Coil 2 (Center) Column:").grid(row=6, column=0, sticky=tk.W, pady=2)
 tss2_entry = ttk.Entry(left_frame, width=10)
-tss2_entry.grid(row=7, column=1, sticky=tk.W, pady=2)
+tss2_entry.grid(row=6, column=1, sticky=tk.W, pady=2)
 tss2_entry.insert(0, settings["tss2_col"])
 
-ttk.Label(left_frame, text="Coil 3 (Port) Column:").grid(row=8, column=0, sticky=tk.W, pady=2)
+ttk.Label(left_frame, text="Coil 3 (Port) Column:").grid(row=7, column=0, sticky=tk.W, pady=2)
 tss3_entry = ttk.Entry(left_frame, width=10)
-tss3_entry.grid(row=8, column=1, sticky=tk.W, pady=2)
+tss3_entry.grid(row=7, column=1, sticky=tk.W, pady=2)
 tss3_entry.insert(0, settings["tss3_col"])
 
 # Suffix Settings
-ttk.Separator(left_frame, orient='horizontal').grid(row=9, column=0, columnspan=2, sticky="ew", pady=10)
-ttk.Label(left_frame, text="File Suffixes:").grid(row=10, column=0, sticky=tk.W, pady=2)
+ttk.Separator(left_frame, orient='horizontal').grid(row=8, column=0, columnspan=2, sticky="ew", pady=10)
+ttk.Label(left_frame, text="File Suffixes:").grid(row=9, column=0, sticky=tk.W, pady=2)
 
-ttk.Label(left_frame, text="Coil Port Suffix:").grid(row=11, column=0, sticky=tk.W, pady=2)
+ttk.Label(left_frame, text="Coil Port Suffix:").grid(row=10, column=0, sticky=tk.W, pady=2)
 coil_port_suffix_entry = ttk.Entry(left_frame, width=20)
-coil_port_suffix_entry.grid(row=11, column=1, sticky=tk.W, pady=2)
+coil_port_suffix_entry.grid(row=10, column=1, sticky=tk.W, pady=2)
 coil_port_suffix_entry.insert(0, settings["coil_port_suffix"])
 
-ttk.Label(left_frame, text="Coil Center Suffix:").grid(row=12, column=0, sticky=tk.W, pady=2)
+ttk.Label(left_frame, text="Coil Center Suffix:").grid(row=11, column=0, sticky=tk.W, pady=2)
 coil_center_suffix_entry = ttk.Entry(left_frame, width=20)
-coil_center_suffix_entry.grid(row=12, column=1, sticky=tk.W, pady=2)
+coil_center_suffix_entry.grid(row=11, column=1, sticky=tk.W, pady=2)
 coil_center_suffix_entry.insert(0, settings["coil_center_suffix"])
 
-ttk.Label(left_frame, text="Coil Stbd Suffix:").grid(row=13, column=0, sticky=tk.W, pady=2)
+ttk.Label(left_frame, text="Coil Stbd Suffix:").grid(row=12, column=0, sticky=tk.W, pady=2)
 coil_stbd_suffix_entry = ttk.Entry(left_frame, width=20)
-coil_stbd_suffix_entry.grid(row=13, column=1, sticky=tk.W, pady=2)
+coil_stbd_suffix_entry.grid(row=12, column=1, sticky=tk.W, pady=2)
 coil_stbd_suffix_entry.insert(0, settings["coil_stbd_suffix"])
 
-ttk.Label(left_frame, text="CRP Suffix:").grid(row=14, column=0, sticky=tk.W, pady=2)
+ttk.Label(left_frame, text="CRP Suffix:").grid(row=13, column=0, sticky=tk.W, pady=2)
 crp_suffix_entry = ttk.Entry(left_frame, width=20)
-crp_suffix_entry.grid(row=14, column=1, sticky=tk.W, pady=2)
+crp_suffix_entry.grid(row=13, column=1, sticky=tk.W, pady=2)
 crp_suffix_entry.insert(0, settings["crp_suffix"])
 
 # CRP Checkbox
 use_crp_var = tk.BooleanVar(value=settings.get("use_crp", True))
-ttk.Checkbutton(left_frame, text="Include CRP Navigation", variable=use_crp_var).grid(row=15, column=0, columnspan=2, sticky=tk.W, pady=5)
+ttk.Checkbutton(left_frame, text="Include CRP Navigation", variable=use_crp_var).grid(row=14, column=0, columnspan=2, sticky=tk.W, pady=5)
 
 # Auto-clicker Checkbox (for WFM Export dialogs)
 auto_clicker_var = tk.BooleanVar(value=settings.get("auto_clicker_enabled", True))
-ttk.Checkbutton(left_frame, text="Enable Auto-clicker (WFM Export)", variable=auto_clicker_var).grid(row=16, column=0, columnspan=2, sticky=tk.W, pady=5)
+ttk.Checkbutton(left_frame, text="Enable Auto-clicker (WFM Export)", variable=auto_clicker_var).grid(row=15, column=0, columnspan=2, sticky=tk.W, pady=5)
 
 # NE Database Settings Button at bottom of left frame
-ttk.Separator(left_frame, orient='horizontal').grid(row=17, column=0, columnspan=2, sticky="ew", pady=10)
-ttk.Button(left_frame, text="NE Database Settings", command=open_sql_settings_dialog).grid(row=18, column=0, columnspan=2, sticky="ew", pady=5)
+ttk.Separator(left_frame, orient='horizontal').grid(row=16, column=0, columnspan=2, sticky="ew", pady=10)
+ttk.Button(left_frame, text="NE Database Settings", command=open_sql_settings_dialog).grid(row=17, column=0, columnspan=2, sticky="ew", pady=5)
 
 
 # --- Middle Frame: QC Tools ---

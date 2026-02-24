@@ -1,16 +1,16 @@
 {
-    "folder_path": "P:/SAI_600101/04_PROC_DATA/01_OLTA/18_SID_OR LINE_BASED_DATA/Test script",
+    "folder_path": "P:/SAI_600101/04_PROC_DATA/01_OLTA/14_PYTHON/TSS-FILE-CONVERTER/TEST DATA/83_B14_034_MAG/As_Found/5m",
     "ne_path": "1-5",
     "tss1_col": "10",
     "tss2_col": "11",
     "tss3_col": "12",
     "output_file": "test.txt",
-    "coil_port_suffix": "_Coil_port.csv",
-    "coil_center_suffix": "_Coil_center.csv",
-    "coil_stbd_suffix": "_Coil_stbd.csv",
+    "coil_port_suffix": "_Coil_1.csv",
+    "coil_center_suffix": "_Coil_2.csv",
+    "coil_stbd_suffix": "_Coil_3.csv",
     "crp_suffix": "_CRP.csv",
     "cell_size": "0.5",
-    "use_crp": true,
+    "use_crp": false,
     "auto_clicker_enabled": true,
     "colors_tss": [
         "blue",
@@ -58,10 +58,6 @@
         2.0,
         2.5
     ],
-    "sql_db_path": "E:/NE_DB/WMA_600090/600090_GOEL_WindMultiplikator.mdf",
-    "z_dvl_offset": "0.0",
-    "sql_server_name": "RS-GOEL-PVE03",
-    "folder_filter": "04_NAVISCAN",
     "wfm_ne_db_name": "600101_OLTA_SAIPEM_UXO",
     "wfm_ne_db_server": "localhost"
 }

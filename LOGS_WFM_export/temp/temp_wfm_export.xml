@@ -12,7 +12,7 @@
 	<GroupTask name="Export PTR and VisualSoft Nav">
 
         <SqlServer>localhost</SqlServer>
-        <DatabaseName>600101_OLTA_SAIPEM_UX</DatabaseName>
+        <DatabaseName>600101_OLTA_SAIPEM_UXO</DatabaseName>
 
         <GroupTask po="1" name="Data selection and setup">
             <!-- Job Name/Path is passed from Python via {NEPath} -->
@@ -38,7 +38,7 @@
                 <ExportAsciiTask po="11" name="Block_1 - Export Visualsoft Nav CRP" logKeyword="NAVxport" output=" ">
                     <NaviEditTask version="1.0">
                         <SqlServer>localhost</SqlServer>
-                        <DatabaseName>600101_OLTA_SAIPEM_UX</DatabaseName>
+                        <DatabaseName>600101_OLTA_SAIPEM_UXO</DatabaseName>
                         <Export type="xyvsoftvev">
                             <BlockId>
                                 1
@@ -69,7 +69,7 @@
                 <ExportAsciiTask po="12" name="Block_1 - Export Visualsoft Nav PORT Coil" logKeyword="NAVxport" output=" ">
                     <NaviEditTask version="1.0">
                         <SqlServer>localhost</SqlServer>
-                        <DatabaseName>600101_OLTA_SAIPEM_UX</DatabaseName>
+                        <DatabaseName>600101_OLTA_SAIPEM_UXO</DatabaseName>
                         <Export type="xyvsoftvev">
                             <BlockId>
                                 1
@@ -100,7 +100,7 @@
                 <ExportAsciiTask po="13" name="Block_1 - Export Visualsoft Nav CENTER Coil" logKeyword="NAVxport" output=" ">
                     <NaviEditTask version="1.0">
                         <SqlServer>localhost</SqlServer>
-                        <DatabaseName>600101_OLTA_SAIPEM_UX</DatabaseName>
+                        <DatabaseName>600101_OLTA_SAIPEM_UXO</DatabaseName>
                         <Export type="xyvsoftvev">
                             <BlockId>
                                 1
@@ -131,7 +131,7 @@
                 <ExportAsciiTask po="14" name="Block_1 - Export Visualsoft Nav STARBOARD Coil" logKeyword="NAVxport" output=" ">
                     <NaviEditTask version="1.0">
                         <SqlServer>localhost</SqlServer>
-                        <DatabaseName>600101_OLTA_SAIPEM_UX</DatabaseName>
+                        <DatabaseName>600101_OLTA_SAIPEM_UXO</DatabaseName>
                         <Export type="xyvsoftvev">
                             <BlockId>
                                 1
@@ -162,7 +162,7 @@
                 <ExportAsciiTask po="15" name="Block_1 - Export PTR" logKeyword="PTRxport">
                     <NaviEditTask version="1.0">
                         <SqlServer>localhost</SqlServer>
-                        <DatabaseName>600101_OLTA_SAIPEM_UX</DatabaseName>
+                        <DatabaseName>600101_OLTA_SAIPEM_UXO</DatabaseName>
                         <Export type="xyp_ptr">
                             <BlockId>
                                 1
@@ -191,7 +191,7 @@
                 <ExportAsciiTask po="11" name="Block_2 - Export Visualsoft Nav CRP" logKeyword="NAVxport" output=" ">
                     <NaviEditTask version="1.0">
                         <SqlServer>localhost</SqlServer>
-                        <DatabaseName>600101_OLTA_SAIPEM_UX</DatabaseName>
+                        <DatabaseName>600101_OLTA_SAIPEM_UXO</DatabaseName>
                         <Export type="xyvsoftvev">
                             <BlockId>
                                 2
@@ -222,7 +222,7 @@
                 <ExportAsciiTask po="12" name="Block_2 - Export Visualsoft Nav PORT Coil" logKeyword="NAVxport" output=" ">
                     <NaviEditTask version="1.0">
                         <SqlServer>localhost</SqlServer>
-                        <DatabaseName>600101_OLTA_SAIPEM_UX</DatabaseName>
+                        <DatabaseName>600101_OLTA_SAIPEM_UXO</DatabaseName>
                         <Export type="xyvsoftvev">
                             <BlockId>
                                 2
@@ -253,7 +253,7 @@
                 <ExportAsciiTask po="13" name="Block_2 - Export Visualsoft Nav CENTER Coil" logKeyword="NAVxport" output=" ">
                     <NaviEditTask version="1.0">
                         <SqlServer>localhost</SqlServer>
-                        <DatabaseName>600101_OLTA_SAIPEM_UX</DatabaseName>
+                        <DatabaseName>600101_OLTA_SAIPEM_UXO</DatabaseName>
                         <Export type="xyvsoftvev">
                             <BlockId>
                                 2
@@ -284,7 +284,7 @@
                 <ExportAsciiTask po="14" name="Block_2 - Export Visualsoft Nav STARBOARD Coil" logKeyword="NAVxport" output=" ">
                     <NaviEditTask version="1.0">
                         <SqlServer>localhost</SqlServer>
-                        <DatabaseName>600101_OLTA_SAIPEM_UX</DatabaseName>
+                        <DatabaseName>600101_OLTA_SAIPEM_UXO</DatabaseName>
                         <Export type="xyvsoftvev">
                             <BlockId>
                                 2
@@ -315,7 +315,7 @@
                 <ExportAsciiTask po="15" name="Block_2 - Export PTR" logKeyword="PTRxport">
                     <NaviEditTask version="1.0">
                         <SqlServer>localhost</SqlServer>
-                        <DatabaseName>600101_OLTA_SAIPEM_UX</DatabaseName>
+                        <DatabaseName>600101_OLTA_SAIPEM_UXO</DatabaseName>
                         <Export type="xyp_ptr">
                             <BlockId>
                                 2
@@ -344,7 +344,7 @@
                 <ExportAsciiTask po="11" name="Block_3 - Export Visualsoft Nav CRP" logKeyword="NAVxport" output=" ">
                     <NaviEditTask version="1.0">
                         <SqlServer>localhost</SqlServer>
-                        <DatabaseName>600101_OLTA_SAIPEM_UX</DatabaseName>
+                        <DatabaseName>600101_OLTA_SAIPEM_UXO</DatabaseName>
                         <Export type="xyvsoftvev">
                             <BlockId>
                                 3
@@ -375,7 +375,7 @@
                 <ExportAsciiTask po="12" name="Block_3 - Export Visualsoft Nav PORT Coil" logKeyword="NAVxport" output=" ">
                     <NaviEditTask version="1.0">
                         <SqlServer>localhost</SqlServer>
-                        <DatabaseName>600101_OLTA_SAIPEM_UX</DatabaseName>
+                        <DatabaseName>600101_OLTA_SAIPEM_UXO</DatabaseName>
                         <Export type="xyvsoftvev">
                             <BlockId>
                                 3
@@ -406,7 +406,7 @@
                 <ExportAsciiTask po="13" name="Block_3 - Export Visualsoft Nav CENTER Coil" logKeyword="NAVxport" output=" ">
                     <NaviEditTask version="1.0">
                         <SqlServer>localhost</SqlServer>
-                        <DatabaseName>600101_OLTA_SAIPEM_UX</DatabaseName>
+                        <DatabaseName>600101_OLTA_SAIPEM_UXO</DatabaseName>
                         <Export type="xyvsoftvev">
                             <BlockId>
                                 3
@@ -437,7 +437,7 @@
                 <ExportAsciiTask po="14" name="Block_3 - Export Visualsoft Nav STARBOARD Coil" logKeyword="NAVxport" output=" ">
                     <NaviEditTask version="1.0">
                         <SqlServer>localhost</SqlServer>
-                        <DatabaseName>600101_OLTA_SAIPEM_UX</DatabaseName>
+                        <DatabaseName>600101_OLTA_SAIPEM_UXO</DatabaseName>
                         <Export type="xyvsoftvev">
                             <BlockId>
                                 3
@@ -468,7 +468,7 @@
                 <ExportAsciiTask po="15" name="Block_3 - Export PTR" logKeyword="PTRxport">
                     <NaviEditTask version="1.0">
                         <SqlServer>localhost</SqlServer>
-                        <DatabaseName>600101_OLTA_SAIPEM_UX</DatabaseName>
+                        <DatabaseName>600101_OLTA_SAIPEM_UXO</DatabaseName>
                         <Export type="xyp_ptr">
                             <BlockId>
                                 3
@@ -497,7 +497,7 @@
                 <ExportAsciiTask po="11" name="Block_4 - Export Visualsoft Nav CRP" logKeyword="NAVxport" output=" ">
                     <NaviEditTask version="1.0">
                         <SqlServer>localhost</SqlServer>
-                        <DatabaseName>600101_OLTA_SAIPEM_UX</DatabaseName>
+                        <DatabaseName>600101_OLTA_SAIPEM_UXO</DatabaseName>
                         <Export type="xyvsoftvev">
                             <BlockId>
                                 4
@@ -528,7 +528,7 @@
                 <ExportAsciiTask po="12" name="Block_4 - Export Visualsoft Nav PORT Coil" logKeyword="NAVxport" output=" ">
                     <NaviEditTask version="1.0">
                         <SqlServer>localhost</SqlServer>
-                        <DatabaseName>600101_OLTA_SAIPEM_UX</DatabaseName>
+                        <DatabaseName>600101_OLTA_SAIPEM_UXO</DatabaseName>
                         <Export type="xyvsoftvev">
                             <BlockId>
                                 4
@@ -559,7 +559,7 @@
                 <ExportAsciiTask po="13" name="Block_4 - Export Visualsoft Nav CENTER Coil" logKeyword="NAVxport" output=" ">
                     <NaviEditTask version="1.0">
                         <SqlServer>localhost</SqlServer>
-                        <DatabaseName>600101_OLTA_SAIPEM_UX</DatabaseName>
+                        <DatabaseName>600101_OLTA_SAIPEM_UXO</DatabaseName>
                         <Export type="xyvsoftvev">
                             <BlockId>
                                 4
@@ -590,7 +590,7 @@
                 <ExportAsciiTask po="14" name="Block_4 - Export Visualsoft Nav STARBOARD Coil" logKeyword="NAVxport" output=" ">
                     <NaviEditTask version="1.0">
                         <SqlServer>localhost</SqlServer>
-                        <DatabaseName>600101_OLTA_SAIPEM_UX</DatabaseName>
+                        <DatabaseName>600101_OLTA_SAIPEM_UXO</DatabaseName>
                         <Export type="xyvsoftvev">
                             <BlockId>
                                 4
@@ -621,7 +621,7 @@
                 <ExportAsciiTask po="15" name="Block_4 - Export PTR" logKeyword="PTRxport">
                     <NaviEditTask version="1.0">
                         <SqlServer>localhost</SqlServer>
-                        <DatabaseName>600101_OLTA_SAIPEM_UX</DatabaseName>
+                        <DatabaseName>600101_OLTA_SAIPEM_UXO</DatabaseName>
                         <Export type="xyp_ptr">
                             <BlockId>
                                 4
@@ -650,7 +650,7 @@
                 <ExportAsciiTask po="11" name="Block_5 - Export Visualsoft Nav CRP" logKeyword="NAVxport" output=" ">
                     <NaviEditTask version="1.0">
                         <SqlServer>localhost</SqlServer>
-                        <DatabaseName>600101_OLTA_SAIPEM_UX</DatabaseName>
+                        <DatabaseName>600101_OLTA_SAIPEM_UXO</DatabaseName>
                         <Export type="xyvsoftvev">
                             <BlockId>
                                 5
@@ -681,7 +681,7 @@
                 <ExportAsciiTask po="12" name="Block_5 - Export Visualsoft Nav PORT Coil" logKeyword="NAVxport" output=" ">
                     <NaviEditTask version="1.0">
                         <SqlServer>localhost</SqlServer>
-                        <DatabaseName>600101_OLTA_SAIPEM_UX</DatabaseName>
+                        <DatabaseName>600101_OLTA_SAIPEM_UXO</DatabaseName>
                         <Export type="xyvsoftvev">
                             <BlockId>
                                 5
@@ -712,7 +712,7 @@
                 <ExportAsciiTask po="13" name="Block_5 - Export Visualsoft Nav CENTER Coil" logKeyword="NAVxport" output=" ">
                     <NaviEditTask version="1.0">
                         <SqlServer>localhost</SqlServer>
-                        <DatabaseName>600101_OLTA_SAIPEM_UX</DatabaseName>
+                        <DatabaseName>600101_OLTA_SAIPEM_UXO</DatabaseName>
                         <Export type="xyvsoftvev">
                             <BlockId>
                                 5
@@ -743,7 +743,7 @@
                 <ExportAsciiTask po="14" name="Block_5 - Export Visualsoft Nav STARBOARD Coil" logKeyword="NAVxport" output=" ">
                     <NaviEditTask version="1.0">
                         <SqlServer>localhost</SqlServer>
-                        <DatabaseName>600101_OLTA_SAIPEM_UX</DatabaseName>
+                        <DatabaseName>600101_OLTA_SAIPEM_UXO</DatabaseName>
                         <Export type="xyvsoftvev">
                             <BlockId>
                                 5
@@ -774,7 +774,7 @@
                 <ExportAsciiTask po="15" name="Block_5 - Export PTR" logKeyword="PTRxport">
                     <NaviEditTask version="1.0">
                         <SqlServer>localhost</SqlServer>
-                        <DatabaseName>600101_OLTA_SAIPEM_UX</DatabaseName>
+                        <DatabaseName>600101_OLTA_SAIPEM_UXO</DatabaseName>
                         <Export type="xyp_ptr">
                             <BlockId>
                                 5
