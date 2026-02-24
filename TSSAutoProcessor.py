@@ -38,7 +38,7 @@ def _cleanup_matplotlib():
 atexit.register(_cleanup_matplotlib)
 
 # Name of the script version
-SCRIPT_VERSION = "600090 TSS AutoProcessor v.4"
+SCRIPT_VERSION = "TSS AutoProcessor v.4"
 
 # Maximum time difference in seconds
 MAX_TIME_DIFF_SEC = 0.25
@@ -174,8 +174,9 @@ DVL_COIL_CENTER_SUFFIX = "_Coil_center.nav"
 DVL_COIL_STBD_SUFFIX = "_Coil_stbd.nav"
 DVL_CRP_SUFFIX = "_CRP.nav"
 
-# WFM Export XML template filename for DVL Altitude Fixer
+# WFM Export XML template filenames
 WFM_DEPTH_EXPORT_XML = "WFM_DepthExport.xml"
+WFM_EXPORT_XML = os.path.join('config', 'WFM_Export.xml')
 
 def _get_resource_dir():
     """Return directory where bundled resources live.
@@ -1286,7 +1287,7 @@ def load_settings():
         "boundaries_alt": BOUNDARIES_ALT,
         "sql_db_path": "",
         "z_dvl_offset": "0.0",
-        "sql_server_name": "RS-GOEL-PVE03",
+        "sql_server_name": "localhost",
         "folder_filter": "04_NAVISCAN",
         "wfm_ne_db_name": "",
         "wfm_ne_db_server": "localhost"
@@ -1767,11 +1768,9 @@ def run_wfm_depth_export(block_ids_str, output_folder):
             xml_content = xml_content.replace(target_po6, f'<!-- {target_po6} -->')
         
         # --- INJECT WFM DATABASE SETTINGS ---
-        # Replace SqlServer
-        xml_content = xml_content.replace('<SqlServer>localhost</SqlServer>', f'<SqlServer>{wfm_db_server}</SqlServer>')
+        # Replace SqlServer (use regex to handle any existing server value)
+        xml_content = re.sub(r'<SqlServer>[^<]*</SqlServer>', f'<SqlServer>{wfm_db_server}</SqlServer>', xml_content)
         # Replace DatabaseName (the placeholder in the template)
-        # First, try to find the existing database name pattern and replace it
-        import re
         xml_content = re.sub(r'<DatabaseName>[^<]*</DatabaseName>', f'<DatabaseName>{wfm_db_name}</DatabaseName>', xml_content)
         
         logging.info(f"WFM Database: {wfm_db_name} on server {wfm_db_server}")
@@ -2631,8 +2630,8 @@ def open_sql_settings_dialog():
     ttk.Label(frame, text="SQL Server Name:").grid(row=11, column=0, sticky=tk.W, pady=5)
     server_entry = ttk.Entry(frame, width=40)
     server_entry.grid(row=11, column=1, sticky="ew", padx=5, pady=5)
-    server_entry.insert(0, settings.get('sql_server_name', 'RS-GOEL-PVE03'))
-    ttk.Label(frame, text="(e.g. RS-GOEL-PVE03, localhost, .)", font=("Segoe UI", 8, "italic")).grid(row=12, column=1, sticky=tk.W, padx=5)
+    server_entry.insert(0, settings.get('sql_server_name', 'localhost'))
+    ttk.Label(frame, text="(e.g. localhost, MYSERVER\\SQLEXPRESS, .)", font=("Segoe UI", 8, "italic")).grid(row=12, column=1, sticky=tk.W, padx=5)
     
     # Folder Filter
     ttk.Label(frame, text="Folder Filter:").grid(row=13, column=0, sticky=tk.W, pady=5)
@@ -2691,7 +2690,7 @@ def recalculate_tss_altitude():
         output_folder = folder_entry.get()
         sql_db_path = settings.get('sql_db_path', '')
         z_dvl_offset = settings.get('z_dvl_offset', '0.0')
-        sql_server_name = settings.get('sql_server_name', 'RS-GOEL-PVE03')
+        sql_server_name = settings.get('sql_server_name', 'localhost')
         folder_filter = settings.get('folder_filter', '04_NAVISCAN')
         
         # Validate inputs
@@ -3345,8 +3344,18 @@ def run_export_script():
         messagebox.showerror("Error", "No valid Block IDs found.")
         return
 
+    # Load settings for WFM database configuration
+    settings = load_settings()
+    wfm_db_name = settings.get('wfm_ne_db_name', '')
+    wfm_db_server = settings.get('wfm_ne_db_server', 'localhost')
+    
+    # Validate WFM database settings
+    if not wfm_db_name:
+        messagebox.showerror("Error", "Please configure the WFM NE Database Name in NE Database Settings.")
+        return
+
     # Path to the XML template
-    xml_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config', '600090_WFM_Export.xml')
+    xml_path = os.path.join(SCRIPT_DIR, WFM_EXPORT_XML)
     
     if not os.path.exists(xml_path):
         messagebox.showerror("Error", f"WFM XML template not found at {xml_path}")
@@ -3367,6 +3376,14 @@ def run_export_script():
         target_po6 = '<SetPropertyTask po="6" name="Define output directory" input="{OutputDirectory}" output="OutputDirectory" level="2"/>'
         if target_po6 in xml_content:
              xml_content = xml_content.replace(target_po6, f'<!-- {target_po6} -->')
+
+        # --- INJECT WFM DATABASE SETTINGS ---
+        # Replace SqlServer (use regex to handle any existing server value)
+        xml_content = re.sub(r'<SqlServer>[^<]*</SqlServer>', f'<SqlServer>{wfm_db_server}</SqlServer>', xml_content)
+        # Replace DatabaseName (the placeholder in the template)
+        xml_content = re.sub(r'<DatabaseName>[^<]*</DatabaseName>', f'<DatabaseName>{wfm_db_name}</DatabaseName>', xml_content)
+        
+        logging.info(f"WFM Database: {wfm_db_name} on server {wfm_db_server}")
 
         # --- DYNAMICALLY GENERATE EXPORT TASKS FOR EACH BLOCK ID ---
         
@@ -3449,7 +3466,7 @@ def run_export_script():
             xml_content = xml_content.replace(full_match_string, new_content_block)
 
         # Replace relative log paths with absolute paths
-        logs_dir = os.path.join(os.getcwd(), "LOGS WFM")
+        logs_dir = os.path.join(SCRIPT_DIR, "LOGS_WFM_export")
         temp_dir = os.path.join(logs_dir, "temp")
         if not os.path.exists(logs_dir):
             try:
@@ -3462,7 +3479,7 @@ def run_export_script():
             except Exception as e:
                 logging.warning(f"Could not create temp directory: {e}")
 
-        xml_content = xml_content.replace(r'.\LOGS_WFM_600090_import_export', logs_dir)
+        xml_content = xml_content.replace(r'.\LOGS_WFM_export', logs_dir)
 
         # Save to temp file in the temp subfolder
         temp_xml_path = os.path.join(temp_dir, "temp_wfm_export.xml")

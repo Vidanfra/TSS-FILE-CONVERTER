@@ -1,0 +1,2115 @@
+2026.02.24 - 19.05.36 [SetPropertyTask] INFO () - Set Output Directory Started
+2026.02.24 - 19.05.36 [SetPropertyTask] TIMING () - 0.00
+2026.02.24 - 19.05.36 [SetPropertyTask] INFO () - Set Output Directory Stopped with Success
+2026.02.24 - 19.05.37 [SetPropertyTask] INFO () - CRP ID Started
+2026.02.24 - 19.05.37 [SetPropertyTask] TIMING () - 0.00
+2026.02.24 - 19.05.37 [SetPropertyTask] INFO () - CRP ID Stopped with Success
+2026.02.24 - 19.05.40 [SetPropertyTask] INFO () - PORT ID Started
+2026.02.24 - 19.05.40 [SetPropertyTask] TIMING () - 0.01
+2026.02.24 - 19.05.40 [SetPropertyTask] INFO () - PORT ID Stopped with Success
+2026.02.24 - 19.05.41 [SetPropertyTask] INFO () - CENTER ID Started
+2026.02.24 - 19.05.41 [SetPropertyTask] TIMING () - 0.00
+2026.02.24 - 19.05.41 [SetPropertyTask] INFO () - CENTER ID Stopped with Success
+2026.02.24 - 19.05.42 [SetPropertyTask] INFO () - STBD ID Started
+2026.02.24 - 19.05.42 [SetPropertyTask] TIMING () - 0.00
+2026.02.24 - 19.05.42 [SetPropertyTask] INFO () - STBD ID Stopped with Success
+2026.02.24 - 19.05.42 [SetTitleTask] INFO () - Set WorkFlow Title Started
+2026.02.24 - 19.05.42 [SetTitleTask] TIMING () - 0.00
+2026.02.24 - 19.05.42 [SetTitleTask] INFO () - Set WorkFlow Title Stopped with Success
+2026.02.24 - 19.05.42 [ExportAsciiTask] INFO (NAVxport) - Block_1 - Export Visualsoft Nav CRP Started
+2026.02.24 - 19.05.42 [ExportAsciiTask] DEBUG (NAVxport) - Starting c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-7920ab00-9c20-49b3-a619-e78b4cad8a7d.xml
+2026.02.24 - 19.05.43 [ExportAsciiTask] EXTERNAL (NAVxport) - HDLib.DLL Initializing!
+2026.02.24 - 19.05.43 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0
+2026.02.24 - 19.05.43 [ExportAsciiTask] EXTERNAL (NAVxport) - Opening V6 database '600101_OLTA_SAIPEM_UXO' on server 'localhost'
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.01
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.02
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.03
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.04
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.05
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.06
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.07
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.08
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.09
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.1
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.11
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.12
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.13
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.14
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.15
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.16
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.17
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.18
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.19
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.2
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.21
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.22
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.23
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.24
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.25
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.26
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.27
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.28
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.29
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.3
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.31
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.32
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.33
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.34
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.35
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.36
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.37
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.38
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.39
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.4
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.41
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.42
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.43
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.44
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.45
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.46
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.47
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.48
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.49
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.5
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.51
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.52
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.53
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.54
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.55
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.56
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.57
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.58
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.59
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.6
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.61
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.62
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.63
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.64
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.65
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.66
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.67
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.68
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.69
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.7
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.71
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.72
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.73
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.74
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.75
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.76
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.77
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.78
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.79
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.8
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.81
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.82
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.83
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.84
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.85
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.86
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.87
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.88
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.89
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.9
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.91
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.92
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.93
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.94
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.95
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.96
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.97
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.98
+2026.02.24 - 19.05.44 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.99
+2026.02.24 - 19.05.44 [ExportAsciiTask] DEBUG (NAVxport) - c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-7920ab00-9c20-49b3-a619-e78b4cad8a7d.xml Stopped
+2026.02.24 - 19.05.44 [ExportAsciiTask] TIMING () - 1.82
+2026.02.24 - 19.05.44 [ExportAsciiTask] INFO (NAVxport) - Block_1 - Export Visualsoft Nav CRP Stopped with Success
+2026.02.24 - 19.05.45 [ExportAsciiTask] INFO (NAVxport) - Block_1 - Export Visualsoft Nav PORT Coil Started
+2026.02.24 - 19.05.45 [ExportAsciiTask] DEBUG (NAVxport) - Starting c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-2e211bc6-9db5-4eee-8ea2-7d058ad83165.xml
+2026.02.24 - 19.05.45 [ExportAsciiTask] EXTERNAL (NAVxport) - HDLib.DLL Initializing!
+2026.02.24 - 19.05.45 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0
+2026.02.24 - 19.05.45 [ExportAsciiTask] EXTERNAL (NAVxport) - Opening V6 database '600101_OLTA_SAIPEM_UXO' on server 'localhost'
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.01
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.02
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.03
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.04
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.05
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.06
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.07
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.08
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.09
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.1
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.11
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.12
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.13
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.14
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.15
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.16
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.17
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.18
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.19
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.2
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.21
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.22
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.23
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.24
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.25
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.26
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.27
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.28
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.29
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.3
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.31
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.32
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.33
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.34
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.35
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.36
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.37
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.38
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.39
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.4
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.41
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.42
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.43
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.44
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.45
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.46
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.47
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.48
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.49
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.5
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.51
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.52
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.53
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.54
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.55
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.56
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.57
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.58
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.59
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.6
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.61
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.62
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.63
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.64
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.65
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.66
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.67
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.68
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.69
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.7
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.71
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.72
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.73
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.74
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.75
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.76
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.77
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.78
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.79
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.8
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.81
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.82
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.83
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.84
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.85
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.86
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.87
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.88
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.89
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.9
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.91
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.92
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.93
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.94
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.95
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.96
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.97
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.98
+2026.02.24 - 19.05.46 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.99
+2026.02.24 - 19.05.46 [ExportAsciiTask] DEBUG (NAVxport) - c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-2e211bc6-9db5-4eee-8ea2-7d058ad83165.xml Stopped
+2026.02.24 - 19.05.46 [ExportAsciiTask] TIMING () - 1.45
+2026.02.24 - 19.05.46 [ExportAsciiTask] INFO (NAVxport) - Block_1 - Export Visualsoft Nav PORT Coil Stopped with Success
+2026.02.24 - 19.05.46 [ExportAsciiTask] INFO (NAVxport) - Block_1 - Export Visualsoft Nav CENTER Coil Started
+2026.02.24 - 19.05.46 [ExportAsciiTask] DEBUG (NAVxport) - Starting c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-eb145255-2ba6-4322-9fd5-e63e3714a36f.xml
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - HDLib.DLL Initializing!
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - Opening V6 database '600101_OLTA_SAIPEM_UXO' on server 'localhost'
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.01
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.02
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.03
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.04
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.05
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.06
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.07
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.08
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.09
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.1
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.11
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.12
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.13
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.14
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.15
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.16
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.17
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.18
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.19
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.2
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.21
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.22
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.23
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.24
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.25
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.26
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.27
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.28
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.29
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.3
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.31
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.32
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.33
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.34
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.35
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.36
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.37
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.38
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.39
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.4
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.41
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.42
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.43
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.44
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.45
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.46
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.47
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.48
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.49
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.5
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.51
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.52
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.53
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.54
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.55
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.56
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.57
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.58
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.59
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.6
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.61
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.62
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.63
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.64
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.65
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.66
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.67
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.68
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.69
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.7
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.71
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.72
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.73
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.74
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.75
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.76
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.77
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.78
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.79
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.8
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.81
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.82
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.83
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.84
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.85
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.86
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.87
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.88
+2026.02.24 - 19.05.47 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.89
+2026.02.24 - 19.05.48 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.9
+2026.02.24 - 19.05.48 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.91
+2026.02.24 - 19.05.48 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.92
+2026.02.24 - 19.05.48 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.93
+2026.02.24 - 19.05.48 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.94
+2026.02.24 - 19.05.48 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.95
+2026.02.24 - 19.05.48 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.96
+2026.02.24 - 19.05.48 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.97
+2026.02.24 - 19.05.48 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.98
+2026.02.24 - 19.05.48 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.99
+2026.02.24 - 19.05.48 [ExportAsciiTask] DEBUG (NAVxport) - c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-eb145255-2ba6-4322-9fd5-e63e3714a36f.xml Stopped
+2026.02.24 - 19.05.48 [ExportAsciiTask] TIMING () - 1.34
+2026.02.24 - 19.05.48 [ExportAsciiTask] INFO (NAVxport) - Block_1 - Export Visualsoft Nav CENTER Coil Stopped with Success
+2026.02.24 - 19.05.48 [ExportAsciiTask] INFO (NAVxport) - Block_1 - Export Visualsoft Nav STARBOARD Coil Started
+2026.02.24 - 19.05.48 [ExportAsciiTask] DEBUG (NAVxport) - Starting c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-ac026aee-bc0e-442b-b19a-a6a9d335aa75.xml
+2026.02.24 - 19.05.48 [ExportAsciiTask] EXTERNAL (NAVxport) - HDLib.DLL Initializing!
+2026.02.24 - 19.05.48 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0
+2026.02.24 - 19.05.48 [ExportAsciiTask] EXTERNAL (NAVxport) - Opening V6 database '600101_OLTA_SAIPEM_UXO' on server 'localhost'
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.01
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.02
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.03
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.04
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.05
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.06
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.07
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.08
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.09
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.1
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.11
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.12
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.13
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.14
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.15
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.16
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.17
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.18
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.19
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.2
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.21
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.22
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.23
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.24
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.25
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.26
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.27
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.28
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.29
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.3
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.31
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.32
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.33
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.34
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.35
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.36
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.37
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.38
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.39
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.4
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.41
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.42
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.43
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.44
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.45
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.46
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.47
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.48
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.49
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.5
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.51
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.52
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.53
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.54
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.55
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.56
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.57
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.58
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.59
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.6
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.61
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.62
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.63
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.64
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.65
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.66
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.67
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.68
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.69
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.7
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.71
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.72
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.73
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.74
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.75
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.76
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.77
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.78
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.79
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.8
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.81
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.82
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.83
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.84
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.85
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.86
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.87
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.88
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.89
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.9
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.91
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.92
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.93
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.94
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.95
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.96
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.97
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.98
+2026.02.24 - 19.05.49 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.99
+2026.02.24 - 19.05.49 [ExportAsciiTask] DEBUG (NAVxport) - c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-ac026aee-bc0e-442b-b19a-a6a9d335aa75.xml Stopped
+2026.02.24 - 19.05.49 [ExportAsciiTask] TIMING () - 1.03
+2026.02.24 - 19.05.49 [ExportAsciiTask] INFO (NAVxport) - Block_1 - Export Visualsoft Nav STARBOARD Coil Stopped with Success
+2026.02.24 - 19.05.49 [ExportAsciiTask] INFO (PTRxport) - Block_1 - Export PTR Started
+2026.02.24 - 19.05.49 [ExportAsciiTask] DEBUG (PTRxport) - Starting c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-f84baa50-3b7f-4d6e-a2a0-561bcefcb0a2.xml
+2026.02.24 - 19.05.50 [ExportAsciiTask] EXTERNAL (PTRxport) - HDLib.DLL Initializing!
+2026.02.24 - 19.05.50 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0
+2026.02.24 - 19.05.50 [ExportAsciiTask] EXTERNAL (PTRxport) - Opening V6 database '600101_OLTA_SAIPEM_UXO' on server 'localhost'
+2026.02.24 - 19.05.50 [ExportAsciiTask] EXTERNAL (PTRxport) - No runline found.
+2026.02.24 - 19.05.50 [ExportAsciiTask] ERROR (PTRxport) - No runline found.
+2026.02.24 - 19.05.50 [ExportAsciiTask] EXTERNAL (PTRxport) - Should the export continue with possible invalid KPs?
+2026.02.24 - 19.05.50 [ExportAsciiTask] ERROR (PTRxport) - Should the export continue with possible invalid KPs?
+2026.02.24 - 19.05.50 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0.09
+2026.02.24 - 19.05.50 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0.18
+2026.02.24 - 19.05.50 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0.26
+2026.02.24 - 19.05.50 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0.35
+2026.02.24 - 19.05.50 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0.44
+2026.02.24 - 19.05.50 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0.52
+2026.02.24 - 19.05.50 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0.61
+2026.02.24 - 19.05.50 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0.69
+2026.02.24 - 19.05.50 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0.78
+2026.02.24 - 19.05.50 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0.87
+2026.02.24 - 19.05.50 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0.95
+2026.02.24 - 19.05.50 [ExportAsciiTask] DEBUG (PTRxport) - c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-f84baa50-3b7f-4d6e-a2a0-561bcefcb0a2.xml Stopped
+2026.02.24 - 19.05.50 [ExportAsciiTask] TIMING () - 0.80
+2026.02.24 - 19.05.50 [ExportAsciiTask] INFO (PTRxport) - Block_1 - Export PTR Stopped with Success
+2026.02.24 - 19.05.51 [SetTitleTask] INFO () - Set WorkFlow Title Started
+2026.02.24 - 19.05.51 [SetTitleTask] TIMING () - 0.00
+2026.02.24 - 19.05.51 [SetTitleTask] INFO () - Set WorkFlow Title Stopped with Success
+2026.02.24 - 19.05.51 [ExportAsciiTask] INFO (NAVxport) - Block_2 - Export Visualsoft Nav CRP Started
+2026.02.24 - 19.05.51 [ExportAsciiTask] DEBUG (NAVxport) - Starting c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-15298606-9dd8-4c8b-be9d-24aa03a2329f.xml
+2026.02.24 - 19.05.51 [ExportAsciiTask] EXTERNAL (NAVxport) - HDLib.DLL Initializing!
+2026.02.24 - 19.05.51 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0
+2026.02.24 - 19.05.51 [ExportAsciiTask] EXTERNAL (NAVxport) - Opening V6 database '600101_OLTA_SAIPEM_UXO' on server 'localhost'
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.01
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.02
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.03
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.04
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.05
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.06
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.07
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.08
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.09
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.1
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.11
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.12
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.13
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.14
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.15
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.16
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.17
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.18
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.19
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.2
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.21
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.22
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.23
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.24
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.25
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.26
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.27
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.28
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.29
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.3
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.31
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.32
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.33
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.34
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.35
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.36
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.37
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.38
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.39
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.4
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.41
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.42
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.43
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.44
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.45
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.46
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.47
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.48
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.49
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.5
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.51
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.52
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.53
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.54
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.55
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.56
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.57
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.58
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.59
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.6
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.61
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.62
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.63
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.64
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.65
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.66
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.67
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.68
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.69
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.7
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.71
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.72
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.73
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.74
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.75
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.76
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.77
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.78
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.79
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.8
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.81
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.82
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.83
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.84
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.85
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.86
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.87
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.88
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.89
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.9
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.91
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.92
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.93
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.94
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.95
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.96
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.97
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.98
+2026.02.24 - 19.05.52 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.99
+2026.02.24 - 19.05.52 [ExportAsciiTask] DEBUG (NAVxport) - c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-15298606-9dd8-4c8b-be9d-24aa03a2329f.xml Stopped
+2026.02.24 - 19.05.52 [ExportAsciiTask] TIMING () - 1.05
+2026.02.24 - 19.05.52 [ExportAsciiTask] INFO (NAVxport) - Block_2 - Export Visualsoft Nav CRP Stopped with Success
+2026.02.24 - 19.05.52 [ExportAsciiTask] INFO (NAVxport) - Block_2 - Export Visualsoft Nav PORT Coil Started
+2026.02.24 - 19.05.52 [ExportAsciiTask] DEBUG (NAVxport) - Starting c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-965ec724-5dbd-4a33-ab33-1e9acbbdba95.xml
+2026.02.24 - 19.05.53 [ExportAsciiTask] EXTERNAL (NAVxport) - HDLib.DLL Initializing!
+2026.02.24 - 19.05.53 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0
+2026.02.24 - 19.05.53 [ExportAsciiTask] EXTERNAL (NAVxport) - Opening V6 database '600101_OLTA_SAIPEM_UXO' on server 'localhost'
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.01
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.02
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.03
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.04
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.05
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.06
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.07
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.08
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.09
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.1
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.11
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.12
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.13
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.14
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.15
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.16
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.17
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.18
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.19
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.2
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.21
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.22
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.23
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.24
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.25
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.26
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.27
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.28
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.29
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.3
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.31
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.32
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.33
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.34
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.35
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.36
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.37
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.38
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.39
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.4
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.41
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.42
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.43
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.44
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.45
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.46
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.47
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.48
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.49
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.5
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.51
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.52
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.53
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.54
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.55
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.56
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.57
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.58
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.59
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.6
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.61
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.62
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.63
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.64
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.65
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.66
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.67
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.68
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.69
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.7
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.71
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.72
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.73
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.74
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.75
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.76
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.77
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.78
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.79
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.8
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.81
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.82
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.83
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.84
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.85
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.86
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.87
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.88
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.89
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.9
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.91
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.92
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.93
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.94
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.95
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.96
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.97
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.98
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.99
+2026.02.24 - 19.05.54 [ExportAsciiTask] DEBUG (NAVxport) - c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-965ec724-5dbd-4a33-ab33-1e9acbbdba95.xml Stopped
+2026.02.24 - 19.05.54 [ExportAsciiTask] TIMING () - 1.37
+2026.02.24 - 19.05.54 [ExportAsciiTask] INFO (NAVxport) - Block_2 - Export Visualsoft Nav PORT Coil Stopped with Success
+2026.02.24 - 19.05.54 [ExportAsciiTask] INFO (NAVxport) - Block_2 - Export Visualsoft Nav CENTER Coil Started
+2026.02.24 - 19.05.54 [ExportAsciiTask] DEBUG (NAVxport) - Starting c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-d2acef08-f151-4283-a1d9-59e80eeead27.xml
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - HDLib.DLL Initializing!
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0
+2026.02.24 - 19.05.54 [ExportAsciiTask] EXTERNAL (NAVxport) - Opening V6 database '600101_OLTA_SAIPEM_UXO' on server 'localhost'
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.01
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.02
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.03
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.04
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.05
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.06
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.07
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.08
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.09
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.1
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.11
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.12
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.13
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.14
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.15
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.16
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.17
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.18
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.19
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.2
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.21
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.22
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.23
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.24
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.25
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.26
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.27
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.28
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.29
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.3
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.31
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.32
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.33
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.34
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.35
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.36
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.37
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.38
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.39
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.4
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.41
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.42
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.43
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.44
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.45
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.46
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.47
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.48
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.49
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.5
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.51
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.52
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.53
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.54
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.55
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.56
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.57
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.58
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.59
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.6
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.61
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.62
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.63
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.64
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.65
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.66
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.67
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.68
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.69
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.7
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.71
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.72
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.73
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.74
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.75
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.76
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.77
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.78
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.79
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.8
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.81
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.82
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.83
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.84
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.85
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.86
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.87
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.88
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.89
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.9
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.91
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.92
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.93
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.94
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.95
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.96
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.97
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.98
+2026.02.24 - 19.05.55 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.99
+2026.02.24 - 19.05.55 [ExportAsciiTask] DEBUG (NAVxport) - c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-d2acef08-f151-4283-a1d9-59e80eeead27.xml Stopped
+2026.02.24 - 19.05.55 [ExportAsciiTask] TIMING () - 1.21
+2026.02.24 - 19.05.55 [ExportAsciiTask] INFO (NAVxport) - Block_2 - Export Visualsoft Nav CENTER Coil Stopped with Success
+2026.02.24 - 19.05.56 [ExportAsciiTask] INFO (NAVxport) - Block_2 - Export Visualsoft Nav STARBOARD Coil Started
+2026.02.24 - 19.05.56 [ExportAsciiTask] DEBUG (NAVxport) - Starting c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-25872660-72f6-443f-8137-eb79813d54a0.xml
+2026.02.24 - 19.05.56 [ExportAsciiTask] EXTERNAL (NAVxport) - HDLib.DLL Initializing!
+2026.02.24 - 19.05.56 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0
+2026.02.24 - 19.05.56 [ExportAsciiTask] EXTERNAL (NAVxport) - Opening V6 database '600101_OLTA_SAIPEM_UXO' on server 'localhost'
+2026.02.24 - 19.05.56 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.01
+2026.02.24 - 19.05.56 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.02
+2026.02.24 - 19.05.56 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.03
+2026.02.24 - 19.05.56 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.04
+2026.02.24 - 19.05.56 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.05
+2026.02.24 - 19.05.56 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.06
+2026.02.24 - 19.05.56 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.07
+2026.02.24 - 19.05.56 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.08
+2026.02.24 - 19.05.56 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.09
+2026.02.24 - 19.05.56 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.1
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.11
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.12
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.13
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.14
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.15
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.16
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.17
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.18
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.19
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.2
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.21
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.22
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.23
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.24
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.25
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.26
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.27
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.28
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.29
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.3
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.31
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.32
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.33
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.34
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.35
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.36
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.37
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.38
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.39
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.4
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.41
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.42
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.43
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.44
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.45
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.46
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.47
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.48
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.49
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.5
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.51
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.52
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.53
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.54
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.55
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.56
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.57
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.58
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.59
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.6
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.61
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.62
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.63
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.64
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.65
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.66
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.67
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.68
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.69
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.7
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.71
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.72
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.73
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.74
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.75
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.76
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.77
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.78
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.79
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.8
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.81
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.82
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.83
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.84
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.85
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.86
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.87
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.88
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.89
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.9
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.91
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.92
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.93
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.94
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.95
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.96
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.97
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.98
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.99
+2026.02.24 - 19.05.57 [ExportAsciiTask] DEBUG (NAVxport) - c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-25872660-72f6-443f-8137-eb79813d54a0.xml Stopped
+2026.02.24 - 19.05.57 [ExportAsciiTask] TIMING () - 1.11
+2026.02.24 - 19.05.57 [ExportAsciiTask] INFO (NAVxport) - Block_2 - Export Visualsoft Nav STARBOARD Coil Stopped with Success
+2026.02.24 - 19.05.57 [ExportAsciiTask] INFO (PTRxport) - Block_2 - Export PTR Started
+2026.02.24 - 19.05.57 [ExportAsciiTask] DEBUG (PTRxport) - Starting c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-79d489bf-1ee3-4ffb-bc31-0a78a9556ad0.xml
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (PTRxport) - HDLib.DLL Initializing!
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (PTRxport) - Opening V6 database '600101_OLTA_SAIPEM_UXO' on server 'localhost'
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (PTRxport) - No runline found.
+2026.02.24 - 19.05.57 [ExportAsciiTask] ERROR (PTRxport) - No runline found.
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (PTRxport) - Should the export continue with possible invalid KPs?
+2026.02.24 - 19.05.57 [ExportAsciiTask] ERROR (PTRxport) - Should the export continue with possible invalid KPs?
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0.08
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0.16
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0.24
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0.33
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0.41
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0.49
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0.57
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0.65
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0.73
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0.81
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0.89
+2026.02.24 - 19.05.57 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0.98
+2026.02.24 - 19.05.58 [ExportAsciiTask] DEBUG (PTRxport) - c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-79d489bf-1ee3-4ffb-bc31-0a78a9556ad0.xml Stopped
+2026.02.24 - 19.05.58 [ExportAsciiTask] TIMING () - 0.56
+2026.02.24 - 19.05.58 [ExportAsciiTask] INFO (PTRxport) - Block_2 - Export PTR Stopped with Success
+2026.02.24 - 19.05.58 [SetTitleTask] INFO () - Set WorkFlow Title Started
+2026.02.24 - 19.05.58 [SetTitleTask] TIMING () - 0.01
+2026.02.24 - 19.05.58 [SetTitleTask] INFO () - Set WorkFlow Title Stopped with Success
+2026.02.24 - 19.05.58 [ExportAsciiTask] INFO (NAVxport) - Block_3 - Export Visualsoft Nav CRP Started
+2026.02.24 - 19.05.58 [ExportAsciiTask] DEBUG (NAVxport) - Starting c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-5c20cfb1-b0bf-418f-a26d-4d48ef993a3f.xml
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - HDLib.DLL Initializing!
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - Opening V6 database '600101_OLTA_SAIPEM_UXO' on server 'localhost'
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.01
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.02
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.03
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.04
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.05
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.06
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.08
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.09
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.1
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.11
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.12
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.14
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.15
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.16
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.17
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.18
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.19
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.21
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.22
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.23
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.24
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.25
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.26
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.28
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.29
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.3
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.31
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.32
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.33
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.35
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.36
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.37
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.38
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.39
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.4
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.42
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.43
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.44
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.45
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.46
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.47
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.49
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.5
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.51
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.52
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.53
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.54
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.56
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.57
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.58
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.59
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.6
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.61
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.63
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.64
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.65
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.66
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.67
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.68
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.7
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.71
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.72
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.73
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.74
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.75
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.77
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.78
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.79
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.8
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.81
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.82
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.84
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.85
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.86
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.87
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.88
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.9
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.91
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.92
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.93
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.94
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.95
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.96
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.98
+2026.02.24 - 19.05.59 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.99
+2026.02.24 - 19.05.59 [ExportAsciiTask] DEBUG (NAVxport) - c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-5c20cfb1-b0bf-418f-a26d-4d48ef993a3f.xml Stopped
+2026.02.24 - 19.05.59 [ExportAsciiTask] TIMING () - 0.97
+2026.02.24 - 19.05.59 [ExportAsciiTask] INFO (NAVxport) - Block_3 - Export Visualsoft Nav CRP Stopped with Success
+2026.02.24 - 19.06.00 [ExportAsciiTask] INFO (NAVxport) - Block_3 - Export Visualsoft Nav PORT Coil Started
+2026.02.24 - 19.06.00 [ExportAsciiTask] DEBUG (NAVxport) - Starting c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-c44c71e3-eb4a-4883-8a3d-cfaa00e35b06.xml
+2026.02.24 - 19.06.00 [ExportAsciiTask] EXTERNAL (NAVxport) - HDLib.DLL Initializing!
+2026.02.24 - 19.06.00 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0
+2026.02.24 - 19.06.00 [ExportAsciiTask] EXTERNAL (NAVxport) - Opening V6 database '600101_OLTA_SAIPEM_UXO' on server 'localhost'
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.01
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.02
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.03
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.04
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.05
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.06
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.08
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.09
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.1
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.11
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.12
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.14
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.15
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.16
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.17
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.18
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.19
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.21
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.22
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.23
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.24
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.25
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.26
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.28
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.29
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.3
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.31
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.32
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.33
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.35
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.36
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.37
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.38
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.39
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.4
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.42
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.43
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.44
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.45
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.46
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.47
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.49
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.5
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.51
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.52
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.53
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.54
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.56
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.57
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.58
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.59
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.6
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.61
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.63
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.64
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.65
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.66
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.67
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.68
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.7
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.71
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.72
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.73
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.74
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.75
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.77
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.78
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.79
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.8
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.81
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.82
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.84
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.85
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.86
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.87
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.88
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.9
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.91
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.92
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.93
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.94
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.95
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.96
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.98
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.99
+2026.02.24 - 19.06.01 [ExportAsciiTask] DEBUG (NAVxport) - c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-c44c71e3-eb4a-4883-8a3d-cfaa00e35b06.xml Stopped
+2026.02.24 - 19.06.01 [ExportAsciiTask] TIMING () - 1.16
+2026.02.24 - 19.06.01 [ExportAsciiTask] INFO (NAVxport) - Block_3 - Export Visualsoft Nav PORT Coil Stopped with Success
+2026.02.24 - 19.06.01 [ExportAsciiTask] INFO (NAVxport) - Block_3 - Export Visualsoft Nav CENTER Coil Started
+2026.02.24 - 19.06.01 [ExportAsciiTask] DEBUG (NAVxport) - Starting c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-ae1886a5-1cf9-4bc7-8ffc-ba91b2e28072.xml
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - HDLib.DLL Initializing!
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0
+2026.02.24 - 19.06.01 [ExportAsciiTask] EXTERNAL (NAVxport) - Opening V6 database '600101_OLTA_SAIPEM_UXO' on server 'localhost'
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.01
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.02
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.03
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.04
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.05
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.06
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.08
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.09
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.1
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.11
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.12
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.14
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.15
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.16
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.17
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.18
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.19
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.21
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.22
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.23
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.24
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.25
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.26
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.28
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.29
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.3
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.31
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.32
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.33
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.35
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.36
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.37
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.38
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.39
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.4
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.42
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.43
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.44
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.45
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.46
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.47
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.49
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.5
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.51
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.52
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.53
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.54
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.56
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.57
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.58
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.59
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.6
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.61
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.63
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.64
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.65
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.66
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.67
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.68
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.7
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.71
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.72
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.73
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.74
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.75
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.77
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.78
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.79
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.8
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.81
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.82
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.84
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.85
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.86
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.87
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.88
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.9
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.91
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.92
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.93
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.94
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.95
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.96
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.98
+2026.02.24 - 19.06.02 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.99
+2026.02.24 - 19.06.02 [ExportAsciiTask] DEBUG (NAVxport) - c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-ae1886a5-1cf9-4bc7-8ffc-ba91b2e28072.xml Stopped
+2026.02.24 - 19.06.02 [ExportAsciiTask] TIMING () - 1.16
+2026.02.24 - 19.06.02 [ExportAsciiTask] INFO (NAVxport) - Block_3 - Export Visualsoft Nav CENTER Coil Stopped with Success
+2026.02.24 - 19.06.03 [ExportAsciiTask] INFO (NAVxport) - Block_3 - Export Visualsoft Nav STARBOARD Coil Started
+2026.02.24 - 19.06.03 [ExportAsciiTask] DEBUG (NAVxport) - Starting c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-f884a802-dbef-44d3-9320-0f5414cbe549.xml
+2026.02.24 - 19.06.03 [ExportAsciiTask] EXTERNAL (NAVxport) - HDLib.DLL Initializing!
+2026.02.24 - 19.06.03 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0
+2026.02.24 - 19.06.03 [ExportAsciiTask] EXTERNAL (NAVxport) - Opening V6 database '600101_OLTA_SAIPEM_UXO' on server 'localhost'
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.01
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.02
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.03
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.04
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.05
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.06
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.08
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.09
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.1
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.11
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.12
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.14
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.15
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.16
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.17
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.18
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.19
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.21
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.22
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.23
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.24
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.25
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.26
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.28
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.29
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.3
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.31
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.32
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.33
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.35
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.36
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.37
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.38
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.39
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.4
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.42
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.43
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.44
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.45
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.46
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.47
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.49
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.5
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.51
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.52
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.53
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.54
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.56
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.57
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.58
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.59
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.6
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.61
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.63
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.64
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.65
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.66
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.67
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.68
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.7
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.71
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.72
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.73
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.74
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.75
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.77
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.78
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.79
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.8
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.81
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.82
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.84
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.85
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.86
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.87
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.88
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.9
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.91
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.92
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.93
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.94
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.95
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.96
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.98
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.99
+2026.02.24 - 19.06.04 [ExportAsciiTask] DEBUG (NAVxport) - c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-f884a802-dbef-44d3-9320-0f5414cbe549.xml Stopped
+2026.02.24 - 19.06.04 [ExportAsciiTask] TIMING () - 1.21
+2026.02.24 - 19.06.04 [ExportAsciiTask] INFO (NAVxport) - Block_3 - Export Visualsoft Nav STARBOARD Coil Stopped with Success
+2026.02.24 - 19.06.04 [ExportAsciiTask] INFO (PTRxport) - Block_3 - Export PTR Started
+2026.02.24 - 19.06.04 [ExportAsciiTask] DEBUG (PTRxport) - Starting c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-689bc202-50bd-430c-8489-cac876999821.xml
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (PTRxport) - HDLib.DLL Initializing!
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (PTRxport) - Opening V6 database '600101_OLTA_SAIPEM_UXO' on server 'localhost'
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (PTRxport) - No runline found.
+2026.02.24 - 19.06.04 [ExportAsciiTask] ERROR (PTRxport) - No runline found.
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (PTRxport) - Should the export continue with possible invalid KPs?
+2026.02.24 - 19.06.04 [ExportAsciiTask] ERROR (PTRxport) - Should the export continue with possible invalid KPs?
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0.12
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0.23
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0.35
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0.47
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0.58
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0.7
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0.82
+2026.02.24 - 19.06.04 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0.93
+2026.02.24 - 19.06.05 [ExportAsciiTask] DEBUG (PTRxport) - c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-689bc202-50bd-430c-8489-cac876999821.xml Stopped
+2026.02.24 - 19.06.05 [ExportAsciiTask] TIMING () - 0.56
+2026.02.24 - 19.06.05 [ExportAsciiTask] INFO (PTRxport) - Block_3 - Export PTR Stopped with Success
+2026.02.24 - 19.06.05 [SetTitleTask] INFO () - Set WorkFlow Title Started
+2026.02.24 - 19.06.05 [SetTitleTask] TIMING () - 0.00
+2026.02.24 - 19.06.05 [SetTitleTask] INFO () - Set WorkFlow Title Stopped with Success
+2026.02.24 - 19.06.05 [ExportAsciiTask] INFO (NAVxport) - Block_4 - Export Visualsoft Nav CRP Started
+2026.02.24 - 19.06.05 [ExportAsciiTask] DEBUG (NAVxport) - Starting c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-55bfad1a-8ae0-42c7-beab-9e4f22fb8adf.xml
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - HDLib.DLL Initializing!
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - Opening V6 database '600101_OLTA_SAIPEM_UXO' on server 'localhost'
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.01
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.02
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.03
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.04
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.05
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.07
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.08
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.09
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.1
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.11
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.12
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.14
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.15
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.16
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.17
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.18
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.19
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.21
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.22
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.23
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.24
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.25
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.27
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.28
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.29
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.3
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.31
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.32
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.34
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.35
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.36
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.37
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.38
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.39
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.41
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.42
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.43
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.44
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.45
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.47
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.48
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.49
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.5
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.51
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.52
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.54
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.55
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.56
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.57
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.58
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.59
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.61
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.62
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.63
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.64
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.65
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.66
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.68
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.69
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.7
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.71
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.72
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.73
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.75
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.76
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.77
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.78
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.8
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.81
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.82
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.83
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.84
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.85
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.86
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.88
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.89
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.9
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.91
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.92
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.94
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.95
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.96
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.97
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.98
+2026.02.24 - 19.06.06 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.99
+2026.02.24 - 19.06.06 [ExportAsciiTask] DEBUG (NAVxport) - c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-55bfad1a-8ae0-42c7-beab-9e4f22fb8adf.xml Stopped
+2026.02.24 - 19.06.06 [ExportAsciiTask] TIMING () - 1.05
+2026.02.24 - 19.06.06 [ExportAsciiTask] INFO (NAVxport) - Block_4 - Export Visualsoft Nav CRP Stopped with Success
+2026.02.24 - 19.06.07 [ExportAsciiTask] INFO (NAVxport) - Block_4 - Export Visualsoft Nav PORT Coil Started
+2026.02.24 - 19.06.07 [ExportAsciiTask] DEBUG (NAVxport) - Starting c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-70f3c5ad-f5bc-4830-a20b-bac51adaa00f.xml
+2026.02.24 - 19.06.07 [ExportAsciiTask] EXTERNAL (NAVxport) - HDLib.DLL Initializing!
+2026.02.24 - 19.06.07 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0
+2026.02.24 - 19.06.07 [ExportAsciiTask] EXTERNAL (NAVxport) - Opening V6 database '600101_OLTA_SAIPEM_UXO' on server 'localhost'
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.01
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.02
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.03
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.04
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.05
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.07
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.08
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.09
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.1
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.11
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.12
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.14
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.15
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.16
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.17
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.18
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.19
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.21
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.22
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.23
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.24
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.25
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.27
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.28
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.29
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.3
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.31
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.32
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.34
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.35
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.36
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.37
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.38
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.39
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.41
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.42
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.43
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.44
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.45
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.47
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.48
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.49
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.5
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.51
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.52
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.54
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.55
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.56
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.57
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.58
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.59
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.61
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.62
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.63
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.64
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.65
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.66
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.68
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.69
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.7
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.71
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.72
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.73
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.75
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.76
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.77
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.78
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.8
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.81
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.82
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.83
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.84
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.85
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.86
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.88
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.89
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.9
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.91
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.92
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.94
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.95
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.96
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.97
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.98
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.99
+2026.02.24 - 19.06.08 [ExportAsciiTask] DEBUG (NAVxport) - c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-70f3c5ad-f5bc-4830-a20b-bac51adaa00f.xml Stopped
+2026.02.24 - 19.06.08 [ExportAsciiTask] TIMING () - 1.03
+2026.02.24 - 19.06.08 [ExportAsciiTask] INFO (NAVxport) - Block_4 - Export Visualsoft Nav PORT Coil Stopped with Success
+2026.02.24 - 19.06.08 [ExportAsciiTask] INFO (NAVxport) - Block_4 - Export Visualsoft Nav CENTER Coil Started
+2026.02.24 - 19.06.08 [ExportAsciiTask] DEBUG (NAVxport) - Starting c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-d16d09ad-952f-4921-ba7e-42e071b94f93.xml
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - HDLib.DLL Initializing!
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0
+2026.02.24 - 19.06.08 [ExportAsciiTask] EXTERNAL (NAVxport) - Opening V6 database '600101_OLTA_SAIPEM_UXO' on server 'localhost'
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.01
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.02
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.03
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.04
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.05
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.07
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.08
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.09
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.1
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.11
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.12
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.14
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.15
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.16
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.17
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.18
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.19
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.21
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.22
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.23
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.24
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.25
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.27
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.28
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.29
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.3
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.31
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.32
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.34
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.35
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.36
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.37
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.38
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.39
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.41
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.42
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.43
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.44
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.45
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.47
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.48
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.49
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.5
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.51
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.52
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.54
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.55
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.56
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.57
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.58
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.59
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.61
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.62
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.63
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.64
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.65
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.66
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.68
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.69
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.7
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.71
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.72
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.73
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.75
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.76
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.77
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.78
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.8
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.81
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.82
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.83
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.84
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.85
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.86
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.88
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.89
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.9
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.91
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.92
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.94
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.95
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.96
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.97
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.98
+2026.02.24 - 19.06.09 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.99
+2026.02.24 - 19.06.09 [ExportAsciiTask] DEBUG (NAVxport) - c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-d16d09ad-952f-4921-ba7e-42e071b94f93.xml Stopped
+2026.02.24 - 19.06.09 [ExportAsciiTask] TIMING () - 1.29
+2026.02.24 - 19.06.09 [ExportAsciiTask] INFO (NAVxport) - Block_4 - Export Visualsoft Nav CENTER Coil Stopped with Success
+2026.02.24 - 19.06.10 [ExportAsciiTask] INFO (NAVxport) - Block_4 - Export Visualsoft Nav STARBOARD Coil Started
+2026.02.24 - 19.06.10 [ExportAsciiTask] DEBUG (NAVxport) - Starting c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-245f7c15-de6a-4986-98b7-65bb1598883a.xml
+2026.02.24 - 19.06.10 [ExportAsciiTask] EXTERNAL (NAVxport) - HDLib.DLL Initializing!
+2026.02.24 - 19.06.10 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0
+2026.02.24 - 19.06.10 [ExportAsciiTask] EXTERNAL (NAVxport) - Opening V6 database '600101_OLTA_SAIPEM_UXO' on server 'localhost'
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.01
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.02
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.03
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.04
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.05
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.07
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.08
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.09
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.1
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.11
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.12
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.14
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.15
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.16
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.17
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.18
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.19
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.21
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.22
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.23
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.24
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.25
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.27
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.28
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.29
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.3
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.31
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.32
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.34
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.35
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.36
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.37
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.38
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.39
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.41
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.42
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.43
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.44
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.45
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.47
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.48
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.49
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.5
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.51
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.52
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.54
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.55
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.56
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.57
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.58
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.59
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.61
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.62
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.63
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.64
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.65
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.66
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.68
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.69
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.7
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.71
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.72
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.73
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.75
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.76
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.77
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.78
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.8
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.81
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.82
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.83
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.84
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.85
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.86
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.88
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.89
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.9
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.91
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.92
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.94
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.95
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.96
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.97
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.98
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.99
+2026.02.24 - 19.06.11 [ExportAsciiTask] DEBUG (NAVxport) - c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-245f7c15-de6a-4986-98b7-65bb1598883a.xml Stopped
+2026.02.24 - 19.06.11 [ExportAsciiTask] TIMING () - 1.15
+2026.02.24 - 19.06.11 [ExportAsciiTask] INFO (NAVxport) - Block_4 - Export Visualsoft Nav STARBOARD Coil Stopped with Success
+2026.02.24 - 19.06.11 [ExportAsciiTask] INFO (PTRxport) - Block_4 - Export PTR Started
+2026.02.24 - 19.06.11 [ExportAsciiTask] DEBUG (PTRxport) - Starting c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-b5c7da3a-4be6-48c5-bccf-8bcabb928acf.xml
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (PTRxport) - HDLib.DLL Initializing!
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (PTRxport) - Opening V6 database '600101_OLTA_SAIPEM_UXO' on server 'localhost'
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (PTRxport) - No runline found.
+2026.02.24 - 19.06.11 [ExportAsciiTask] ERROR (PTRxport) - No runline found.
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (PTRxport) - Should the export continue with possible invalid KPs?
+2026.02.24 - 19.06.11 [ExportAsciiTask] ERROR (PTRxport) - Should the export continue with possible invalid KPs?
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0.12
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0.24
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0.36
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0.47
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0.59
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0.71
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0.83
+2026.02.24 - 19.06.11 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0.94
+2026.02.24 - 19.06.12 [ExportAsciiTask] DEBUG (PTRxport) - c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-b5c7da3a-4be6-48c5-bccf-8bcabb928acf.xml Stopped
+2026.02.24 - 19.06.12 [ExportAsciiTask] TIMING () - 0.54
+2026.02.24 - 19.06.12 [ExportAsciiTask] INFO (PTRxport) - Block_4 - Export PTR Stopped with Success
+2026.02.24 - 19.06.12 [SetTitleTask] INFO () - Set WorkFlow Title Started
+2026.02.24 - 19.06.12 [SetTitleTask] TIMING () - 0.00
+2026.02.24 - 19.06.12 [SetTitleTask] INFO () - Set WorkFlow Title Stopped with Success
+2026.02.24 - 19.06.12 [ExportAsciiTask] INFO (NAVxport) - Block_5 - Export Visualsoft Nav CRP Started
+2026.02.24 - 19.06.12 [ExportAsciiTask] DEBUG (NAVxport) - Starting c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-b67fe155-fa2b-4bda-8ad1-703b952c2bbc.xml
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - HDLib.DLL Initializing!
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - Opening V6 database '600101_OLTA_SAIPEM_UXO' on server 'localhost'
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.01
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.02
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.03
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.04
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.06
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.07
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.08
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.09
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.11
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.12
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.13
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.15
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.16
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.17
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.18
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.2
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.21
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.22
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.23
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.25
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.26
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.27
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.28
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.3
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.31
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.32
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.33
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.34
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.36
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.37
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.38
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.39
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.41
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.42
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.43
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.45
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.46
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.47
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.48
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.5
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.51
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.52
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.53
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.55
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.56
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.57
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.58
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.6
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.61
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.62
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.63
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.65
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.66
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.67
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.68
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.7
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.71
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.72
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.73
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.75
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.76
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.77
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.78
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.8
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.81
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.82
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.84
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.85
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.86
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.87
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.89
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.9
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.91
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.92
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.93
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.95
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.96
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.97
+2026.02.24 - 19.06.13 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.98
+2026.02.24 - 19.06.13 [ExportAsciiTask] DEBUG (NAVxport) - c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-b67fe155-fa2b-4bda-8ad1-703b952c2bbc.xml Stopped
+2026.02.24 - 19.06.13 [ExportAsciiTask] TIMING () - 0.93
+2026.02.24 - 19.06.13 [ExportAsciiTask] INFO (NAVxport) - Block_5 - Export Visualsoft Nav CRP Stopped with Success
+2026.02.24 - 19.06.14 [ExportAsciiTask] INFO (NAVxport) - Block_5 - Export Visualsoft Nav PORT Coil Started
+2026.02.24 - 19.06.14 [ExportAsciiTask] DEBUG (NAVxport) - Starting c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-56095e35-6118-43d3-9d66-234e8f91a9d7.xml
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - HDLib.DLL Initializing!
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - Opening V6 database '600101_OLTA_SAIPEM_UXO' on server 'localhost'
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.01
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.02
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.03
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.04
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.06
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.07
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.08
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.09
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.11
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.12
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.13
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.15
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.16
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.17
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.18
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.2
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.21
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.22
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.23
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.25
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.26
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.27
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.28
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.3
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.31
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.32
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.33
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.34
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.36
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.37
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.38
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.39
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.41
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.42
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.43
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.45
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.46
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.47
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.48
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.5
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.51
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.52
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.53
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.55
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.56
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.57
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.58
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.6
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.61
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.62
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.63
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.65
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.66
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.67
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.68
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.7
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.71
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.72
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.73
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.75
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.76
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.77
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.78
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.8
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.81
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.82
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.84
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.85
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.86
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.87
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.89
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.9
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.91
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.92
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.93
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.95
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.96
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.97
+2026.02.24 - 19.06.14 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.98
+2026.02.24 - 19.06.14 [ExportAsciiTask] DEBUG (NAVxport) - c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-56095e35-6118-43d3-9d66-234e8f91a9d7.xml Stopped
+2026.02.24 - 19.06.14 [ExportAsciiTask] TIMING () - 0.75
+2026.02.24 - 19.06.14 [ExportAsciiTask] INFO (NAVxport) - Block_5 - Export Visualsoft Nav PORT Coil Stopped with Success
+2026.02.24 - 19.06.15 [ExportAsciiTask] INFO (NAVxport) - Block_5 - Export Visualsoft Nav CENTER Coil Started
+2026.02.24 - 19.06.15 [ExportAsciiTask] DEBUG (NAVxport) - Starting c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-acfc683b-7c49-458e-a7be-7ddfee160a0b.xml
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - HDLib.DLL Initializing!
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - Opening V6 database '600101_OLTA_SAIPEM_UXO' on server 'localhost'
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.01
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.02
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.03
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.04
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.06
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.07
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.08
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.09
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.11
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.12
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.13
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.15
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.16
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.17
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.18
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.2
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.21
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.22
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.23
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.25
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.26
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.27
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.28
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.3
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.31
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.32
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.33
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.34
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.36
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.37
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.38
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.39
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.41
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.42
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.43
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.45
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.46
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.47
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.48
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.5
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.51
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.52
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.53
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.55
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.56
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.57
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.58
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.6
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.61
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.62
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.63
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.65
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.66
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.67
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.68
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.7
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.71
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.72
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.73
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.75
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.76
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.77
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.78
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.8
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.81
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.82
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.84
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.85
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.86
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.87
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.89
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.9
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.91
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.92
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.93
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.95
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.96
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.97
+2026.02.24 - 19.06.15 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.98
+2026.02.24 - 19.06.15 [ExportAsciiTask] DEBUG (NAVxport) - c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-acfc683b-7c49-458e-a7be-7ddfee160a0b.xml Stopped
+2026.02.24 - 19.06.15 [ExportAsciiTask] TIMING () - 0.73
+2026.02.24 - 19.06.15 [ExportAsciiTask] INFO (NAVxport) - Block_5 - Export Visualsoft Nav CENTER Coil Stopped with Success
+2026.02.24 - 19.06.16 [ExportAsciiTask] INFO (NAVxport) - Block_5 - Export Visualsoft Nav STARBOARD Coil Started
+2026.02.24 - 19.06.16 [ExportAsciiTask] DEBUG (NAVxport) - Starting c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-fcf598cb-a2b5-4327-8ce1-02d145ae211d.xml
+2026.02.24 - 19.06.16 [ExportAsciiTask] EXTERNAL (NAVxport) - HDLib.DLL Initializing!
+2026.02.24 - 19.06.16 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0
+2026.02.24 - 19.06.16 [ExportAsciiTask] EXTERNAL (NAVxport) - Opening V6 database '600101_OLTA_SAIPEM_UXO' on server 'localhost'
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.01
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.02
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.03
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.04
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.06
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.07
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.08
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.09
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.11
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.12
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.13
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.15
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.16
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.17
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.18
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.2
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.21
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.22
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.23
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.25
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.26
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.27
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.28
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.3
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.31
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.32
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.33
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.34
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.36
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.37
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.38
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.39
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.41
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.42
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.43
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.45
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.46
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.47
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.48
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.5
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.51
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.52
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.53
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.55
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.56
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.57
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.58
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.6
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.61
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.62
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.63
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.65
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.66
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.67
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.68
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.7
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.71
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.72
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.73
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.75
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.76
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.77
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.78
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.8
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.81
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.82
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.84
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.85
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.86
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.87
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.89
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.9
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.91
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.92
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.93
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.95
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.96
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.97
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0.98
+2026.02.24 - 19.06.17 [ExportAsciiTask] DEBUG (NAVxport) - c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-fcf598cb-a2b5-4327-8ce1-02d145ae211d.xml Stopped
+2026.02.24 - 19.06.17 [ExportAsciiTask] TIMING () - 1.34
+2026.02.24 - 19.06.17 [ExportAsciiTask] INFO (NAVxport) - Block_5 - Export Visualsoft Nav STARBOARD Coil Stopped with Success
+2026.02.24 - 19.06.17 [ExportAsciiTask] INFO (PTRxport) - Block_5 - Export PTR Started
+2026.02.24 - 19.06.17 [ExportAsciiTask] DEBUG (PTRxport) - Starting c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-a26613f4-0a40-487d-ad03-f6fcd4a85564.xml
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (PTRxport) - HDLib.DLL Initializing!
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (PTRxport) - Opening V6 database '600101_OLTA_SAIPEM_UXO' on server 'localhost'
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (PTRxport) - No runline found.
+2026.02.24 - 19.06.17 [ExportAsciiTask] ERROR (PTRxport) - No runline found.
+2026.02.24 - 19.06.17 [ExportAsciiTask] EXTERNAL (PTRxport) - Should the export continue with possible invalid KPs?
+2026.02.24 - 19.06.17 [ExportAsciiTask] ERROR (PTRxport) - Should the export continue with possible invalid KPs?
+2026.02.24 - 19.06.18 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0.01
+2026.02.24 - 19.06.18 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0.13
+2026.02.24 - 19.06.18 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0.26
+2026.02.24 - 19.06.18 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0.38
+2026.02.24 - 19.06.18 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0.51
+2026.02.24 - 19.06.18 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0.63
+2026.02.24 - 19.06.18 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0.76
+2026.02.24 - 19.06.18 [ExportAsciiTask] EXTERNAL (PTRxport) - progress:0.88
+2026.02.24 - 19.06.18 [ExportAsciiTask] DEBUG (PTRxport) - c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-a26613f4-0a40-487d-ad03-f6fcd4a85564.xml Stopped
+2026.02.24 - 19.06.18 [ExportAsciiTask] TIMING () - 0.55
+2026.02.24 - 19.06.18 [ExportAsciiTask] INFO (PTRxport) - Block_5 - Export PTR Stopped with Success
+2026.02.24 - 19.07.03 [SetPropertyTask] INFO () - Set Output Directory Started
+2026.02.24 - 19.07.03 [SetPropertyTask] TIMING () - 0.01
+2026.02.24 - 19.07.03 [SetPropertyTask] INFO () - Set Output Directory Stopped with Success
+2026.02.24 - 19.07.03 [SetPropertyTask] INFO () - CRP ID Started
+2026.02.24 - 19.07.03 [SetPropertyTask] TIMING () - 0.01
+2026.02.24 - 19.07.03 [SetPropertyTask] INFO () - CRP ID Stopped with Success
+2026.02.24 - 19.07.04 [SetPropertyTask] INFO () - PORT ID Started
+2026.02.24 - 19.07.04 [SetPropertyTask] TIMING () - 0.01
+2026.02.24 - 19.07.04 [SetPropertyTask] INFO () - PORT ID Stopped with Success
+2026.02.24 - 19.07.04 [SetPropertyTask] INFO () - CENTER ID Started
+2026.02.24 - 19.07.04 [SetPropertyTask] TIMING () - 0.00
+2026.02.24 - 19.07.04 [SetPropertyTask] INFO () - CENTER ID Stopped with Success
+2026.02.24 - 19.07.04 [SetPropertyTask] INFO () - STBD ID Started
+2026.02.24 - 19.07.04 [SetPropertyTask] TIMING () - 0.00
+2026.02.24 - 19.07.04 [SetPropertyTask] INFO () - STBD ID Stopped with Success
+2026.02.24 - 19.07.05 [SetTitleTask] INFO () - Set WorkFlow Title Started
+2026.02.24 - 19.07.05 [SetTitleTask] TIMING () - 0.00
+2026.02.24 - 19.07.05 [SetTitleTask] INFO () - Set WorkFlow Title Stopped with Success
+2026.02.24 - 19.07.05 [ExportAsciiTask] INFO (NAVxport) - Block_1 - Export Visualsoft Nav CRP Started
+2026.02.24 - 19.07.05 [ExportAsciiTask] DEBUG (NAVxport) - Starting c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-6ec982a0-7a75-4939-b5a2-9a6b99c245d6.xml
+2026.02.24 - 19.07.05 [ExportAsciiTask] EXTERNAL (NAVxport) - HDLib.DLL Initializing!
+2026.02.24 - 19.07.05 [ExportAsciiTask] EXTERNAL (NAVxport) - progress:0
+2026.02.24 - 19.07.05 [ExportAsciiTask] EXTERNAL (NAVxport) - Opening V6 database '600101_OLTA_SAIPEM_UX' on server 'localhost'
+2026.02.24 - 19.07.05 [ExportAsciiTask] EXTERNAL (NAVxport) - Could not open connection to database '600101_OLTA_SAIPEM_UX' on server 'localhost'
+2026.02.24 - 19.07.05 [ExportAsciiTask] EXTERNAL (NAVxport) - Cannot open database "600101_OLTA_SAIPEM_UX" requested by the login. The login failed.
+2026.02.24 - 19.07.05 [ExportAsciiTask] EXTERNAL (NAVxport) - Login failed for user 'RS-OLTA-PROC01\Administrator'.
+2026.02.24 - 19.07.05 [ExportAsciiTask] EXTERNAL (NAVxport) - Connection string: Driver={ODBC Driver 17 for SQL Server};Trusted_Connection=Yes;MARS_Connection=Yes;Server=tcp:localhost;Database=600101_OLTA_SAIPEM_UX;
+2026.02.24 - 19.07.05 [ExportAsciiTask] DEBUG (NAVxport) - c:\EIVA\NaviEdit\bin\Ascii XYZ Exporter.exe /xml C:\Users\Administrator\AppData\Local\Temp\wfm-6ec982a0-7a75-4939-b5a2-9a6b99c245d6.xml Stopped
+2026.02.24 - 19.07.05 [ExportAsciiTask] TIMING () - 0.00
+2026.02.24 - 19.07.05 [ExportAsciiTask] INFO (NAVxport) - Block_1 - Export Visualsoft Nav CRP Stopped with Error

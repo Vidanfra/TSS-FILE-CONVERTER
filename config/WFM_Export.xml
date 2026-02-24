@@ -12,7 +12,7 @@
 	<GroupTask name="Export PTR and VisualSoft Nav">
 
         <SqlServer>localhost</SqlServer>
-        <DatabaseName>600101_OLTA_SAIPEM_UXO</DatabaseName>
+        <DatabaseName>PLACEHOLDER_DB_NAME</DatabaseName>
 
         <GroupTask po="1" name="Data selection and setup">
             <!-- Job Name/Path is passed from Python via {NEPath} -->
