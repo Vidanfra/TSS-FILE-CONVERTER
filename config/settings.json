@@ -1,13 +1,13 @@
 {
-    "folder_path": "P:/SAI_600101/04_PROC_DATA/01_OLTA/14_PYTHON/TSS-FILE-CONVERTER/TEST DATA/83_B14_034_MAG/As_Found/5m",
-    "ne_path": "1-5,8,10",
+    "folder_path": "P:/SAI_600101/04_PROC_DATA/01_OLTA/18_SID_OR_LINE_BASED_DATA/Test script",
+    "ne_path": "1",
     "tss1_col": "10",
     "tss2_col": "11",
     "tss3_col": "12",
-    "output_file": "test.txt",
-    "coil_port_suffix": "_Coil_1.csv",
-    "coil_center_suffix": "_Coil_2.csv",
-    "coil_stbd_suffix": "_Coil_3.csv",
+    "output_file": "M-PLCS-01082_AL.txt",
+    "coil_port_suffix": "_Coil_port.csv",
+    "coil_center_suffix": "_Coil_center.csv",
+    "coil_stbd_suffix": "_Coil_stbd.csv",
     "crp_suffix": "_CRP.csv",
     "cell_size": "0.5",
     "use_crp": true,
@@ -19,9 +19,9 @@
         "lime",
         "yellow",
         "orange",
-        "red",
+        "#ff80c0",
         "purple",
-        "pink"
+        "#ff0000"
     ],
     "boundaries_tss": [
         -500.0,
@@ -42,9 +42,9 @@
         "#00ff00",
         "#ffff00",
         "#ff8040",
-        "#ff0000",
-        "#ff80ff",
-        "#ff00ff"
+        "#ff80c0",
+        "#9b0a64",
+        "#cd0532"
     ],
     "boundaries_alt": [
         -0.5,

@@ -1181,6 +1181,12 @@ def processFiles(folder_path, tss1_col, tss2_col, tss3_col, output_file, silent=
         if not os.path.isdir(folder_path):
             raise ValueError("Invalid folder path.")
         
+        if not output_file:
+            raise ValueError("Output file name cannot be empty.")
+        
+        # Verify the output filename
+        output_file = output_file.strip()
+        
         # Extract the data from the PTR and Navigation files in the selected folder
         coil1_df, coil2_df, coil3_df, crp_df = extractData(folder_path, tss1_col, tss2_col, tss3_col, use_crp)
         
@@ -2332,6 +2338,12 @@ def create_heatmaps_action():
         output_file = output_entry.get()
         use_crp = use_crp_var.get()
         validate_inputs(folder_path, tss1_col, tss2_col, tss3_col, output_file)
+        
+        if not output_file:
+            raise ValueError("Output file name cannot be empty.")
+        
+        # Verify the output filename
+        output_file = output_file.strip()
         
         # Run processFiles silently to get the dataframe
         merged_df = processFiles(folder_path, tss1_col, tss2_col, tss3_col, output_file, silent=True, use_crp=use_crp)
