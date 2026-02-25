@@ -1,7 +1,7 @@
-# **TSS AutoProcessor v4**
+# **TSS AutoProcessor v5**
 
 ## **Overview**
-TSS AutoProcessor v4 is a Python-based tool for processing and analyzing **electromagnetic survey data** from **Teledyne Pipetarcker TSS440 and Visualsoft Navigation CSV files** exported from **EIVA NaviEdit**. It extracts, merges, and analyzes **navigation and electromagnetic data** from UXO detection surveys, allowing users to:
+TSS AutoProcessor v5 is a Python-based tool for processing and analyzing **electromagnetic survey data** from **Teledyne Pipetarcker TSS440 and Visualsoft Navigation CSV files** exported from **EIVA NaviEdit**. It extracts, merges, and analyzes **navigation and electromagnetic data** from UXO detection surveys, allowing users to:
 - Export from NaviEdit the pipetracker and navigation data.
 - Process raw **PTR files** and navigation data.
 - Generate **heatmaps** and **quality control plots of TSS, Altitude and Depth**.
@@ -29,7 +29,7 @@ pip install pandas matplotlib numpy tk scipy rasterio pyodbc
 ### **1. Run the Script**
 Run the script from the command line or a Python environment:
 ```bash
-python 600090_TSSAutoProcessor.py
+python TSSAutoProcessor.py
 ```
 Alternatively, double-click the `TSSAutoProcessor.exe` file to launch the script.
 
@@ -55,22 +55,58 @@ Alternatively, double-click the `TSSAutoProcessor.exe` file to launch the script
 ### **5. WFM Export & Auto-Clicker**
 The tool includes an automated workflow for exporting data from **EIVA Workflow Manager (WFM)**.
 - **Enable Auto-clicker**: Check this box to automatically accept "Export settings" dialogs in WFM.
-- **NE Database Settings**: Configure the connection to the NaviEdit SQL database to fetch block IDs and altitude data directly.
+- **NE Database Settings**: Configure the connection to the NaviEdit SQL database to fetch block IDs directly.
 - **Run WFM Export**: Initiates the export process for selected blocks. The auto-clicker will handle the repetitive confirmation dialogs, allowing for unattended batch processing.
 
 ### **6. Settings & Configuration**
+- **Define User Offsets in NE**
+  - Before starting the TSSAutoProcessor setup, introduce the User Offsets in NaviEdit. 
+  - It is important to respect the sequence Coil_port > Coil_center > Coil_stbd > CRP to get the correct ID numbers: 
+    - Coil_port -> ID = 1
+    - Coil_center -> ID = 2 
+    - Coil_stbd -> ID = 3 
+    - CRP -> ID = 4 
+    
+    
+  ![alt text](_README_images/user_offsets.png)
 - **NE Database Settings**:
-  - Connect to the local or remote SQL Server instance containing NaviEdit data.
-  - Select the database and filter for specific run folders (e.g., `04_NAVISCAN`).
-  - Define the **Z DVL Offset** to correct altitude measurements.
+  - Connect to the local NaviEdit database.
   
   ![alt text](_README_images/ne_settings.png)
+
+- **Check Correct Coil Convention**:
+  - Check the correct position of the coils. The TSS 440 has a menu in the TSS DeepView software to define the Coil number (1,2,3) for Port, Center and Starboard. 
+  - These numbers determine the column position for each coil in the .ptr export file.
+  - It doesn't really matter what coil number convention you use, but it should match with the Online settings. The used by default order is: Coil 1 = STARBOARD, Coil 2 = CENTER, Coil 3 =PORT. 
+  - If Online changes the coil number convention in the TSS software, then you have to swap the coil columns  (Coil 1 = 12, Coil 3 = 10). 
+  - To assure that the coils are not swapped, you must perform a Coil position test on deck
+  - By default the coils numbers convention are:
+    - TSS DeepView: **[Coil 1 = Starboard, Coil 2 = Central, Coil 3 = Port]**
+    - NaviEdit Offsets: **[Coil 1 = Port, Coil 2 = Central, Coil 3 = Starboard]**
+
+  ![alt text](_README_images/coils_numbers.png)
+
+- **Check the File Suffixes**:
+  - These are the suffixes that the script will export and look for to read the data.
+  - It is not necessary to be changed.
+
+  ![alt text](_README_images/files_suffixes.png)
 
 - **Color Heatmap Settings**:
   - Customize the color palette and value boundaries for TSS and Altitude heatmaps.
   - Adjust the **Cell Size** for grid interpolation.
-  
+
   ![alt text](_README_images/heatmap_settings.png)
+- **Define the Heatmap Cell Size**:
+  - Define the Cell Size (m) of each TSS value point depending on the sensor. 
+  - Standard value for TSS 440 is 0.5m
+
+- **Enable Auto-clicker during the WFM Export**:
+  - Auto-clicker allows to the script to accept automatically the pop up messages from WFM without human intervention. 
+  - If it is necessary to click manually any setting message, you can untick the Auto-clicker to do it manually. 
+- **Include CRP navigation exports**:
+  - Include ROV CRP exports the navigation files and displays its data in the plots
+  - It takes a bit of extra time in the WFM export process, but it is recommended to leave it enabled fro redundancy and comparison.
 
 ---
 

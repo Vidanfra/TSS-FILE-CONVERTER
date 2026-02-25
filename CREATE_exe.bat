@@ -17,7 +17,6 @@ echo.
 pyinstaller --noconsole --onefile --clean ^
  --name "TSSAutoProcessor" ^
  --add-data "config;config" ^
- --add-data "WFM_DepthExport.xml;." ^
  --hidden-import rasterio.sample ^
  --hidden-import rasterio.vrt ^
  --hidden-import rasterio._features ^
@@ -25,7 +24,7 @@ pyinstaller --noconsole --onefile --clean ^
  --exclude-module PyQt5 --exclude-module PyQt6 --exclude-module PySide2 --exclude-module PySide6 ^
  --exclude-module notebook --exclude-module share ^
  --exclude-module IPython --exclude-module jupyter --exclude-module hooks --exclude-module test ^
- 600090_TSSAutoProcessor.py
+ TSSAutoProcessor.py
 
 echo.
 echo Build process completed!

@@ -1,6 +1,8 @@
 # Ignore build and dist folders
 build/
 #dist/
+*.exe
+
 
 # Ignore PyInstaller output
 *.spec
